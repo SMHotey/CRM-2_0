@@ -3,6 +3,8 @@ from .models import Order, OrderItem
 from .forms import UploadFileForm
 from openpyxl import load_workbook
 import re
+from django.contrib.auth.decorators import login_required
+
 
 def upload_order(request):
     if request.method == 'POST':
@@ -11,6 +13,8 @@ def upload_order(request):
             uploaded_file = request.FILES['file']
 
             order = Order.objects.create()
+
+            order_number = order.internal_order_number
 
             wb = load_workbook(uploaded_file)
             sheet = wb.active
@@ -23,7 +27,6 @@ def upload_order(request):
             max_row, cur_column = 9, 15
             line = []
             order = []
-
 
             def get_value(row, column):
                 return sheet.cell(row=row, column=column).value
@@ -40,6 +43,7 @@ def upload_order(request):
                     line.append(get_value(row, column))
 
                 if get_value(row, 1):
+
                     order.append(Position(*line))
                 else:
                     add_glass = (get_value(row, 7), get_value(row, 8))
@@ -100,5 +104,17 @@ def orders_list(request):
     return render(request, 'orders_list.html', {'orders': orders})
 
 
+@login_required
+def add_order(request):
+    if request.method == 'POST':
+        external_order_number = request.POST.get('external_order_number')
 
+        if external_order_number:
+            new_order = Order(
+                external_order_number=external_order_number,
+                user=request.user  # Присваиваем текущего пользователя
+            )
+            new_order.save()
+            return redirect('success_url')  # Замените на URL успешного завершения
 
+    return render(request, 'add_order.html')  # Замените на ваш шаблон

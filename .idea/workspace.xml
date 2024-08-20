@@ -5,29 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/Journal_4_0.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Journal_4_0/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Journal_4_0/asgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Journal_4_0/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Journal_4_0/wsgi.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/apps.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/add_order.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/tests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/manage.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,17 +23,29 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "SMHotey"
+  }
 }]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/SMHotey/Journal_4_0.git",
+    "accountId": "59a21d8b-2e06-4d40-9cbf-dcacb02f3457"
+  }
+}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="2ks3sTbw5J7k3oc7L5t7yAIiq18" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -62,6 +60,8 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
     "git-widget-placeholder": "master",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -114,6 +114,7 @@
       <option name="presentableId" value="Default" />
       <updated>1724058663486</updated>
       <workItem from="1724058671435" duration="17560000" />
+      <workItem from="1724135424558" duration="26510000" />
     </task>
     <servers />
   </component>
