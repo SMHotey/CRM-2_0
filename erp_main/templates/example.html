@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вращающийся куб</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            perspective: 800px;
+        }
+
+        .cube {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 5s infinite linear;
+            transition: transform 0.3s ease;
+        }
+
+        .cube div {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 0, 0, 0.8);
+            border: 1px solid #000;
+        }
+
+        .front  { transform: translateZ(50px); }
+        .back   { transform: rotateY(180deg) translateZ(50px); }
+        .right  { transform: rotateY(90deg) translateZ(50px); }
+        .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .top    { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        @keyframes rotate {
+            from { transform: rotateX(0) rotateY(0); }
+            to { transform: rotateX(360deg) rotateY(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="cube" id="cube">
+    <div class="front"></div>
+    <div class="back"></div>
+    <div class="right"></div>
+    <div class="left"></div>
+    <div class="top"></div>
+    <div class="bottom"></div>
+</div>
+
+<script>
+    const cube = document.getElementById('cube');
+    let scale = 1;
+
+    cube.addEventListener('mouseenter', () => {
+        cube.style.animationPlayState = 'paused';
+    });
+
+    cube.addEventListener('mouseleave', () => {
+        cube.style.animationPlayState = 'running';
+    });
+
+    window.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        if (event.deltaY < 0) {
+            scale += 0.1; // Увеличение размера при прокрутке вверх
+        } else {
+            scale = Math.max(0.1, scale - 0.1); // Уменьшение размера при прокрутке вниз
+        }
+        cube.style.transform = `scale(${scale}) rotateX(0) rotateY(0)`;
+    }, { passive: false });
+</script>
+
+</body>
+</html>

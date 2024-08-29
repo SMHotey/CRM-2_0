@@ -5,12 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0002_rename_comment_orderitem_p_comment_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0003_remove_order_firm_plate_remove_order_mounting_plates_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/example.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/views_3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Journal_4_0/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
@@ -19,6 +26,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -31,18 +41,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "SMHotey"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;SMHotey&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/SMHotey/Journal_4_0.git",
-    "accountId": "59a21d8b-2e06-4d40-9cbf-dcacb02f3457"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/SMHotey/Journal_4_0.git&quot;,
+    &quot;accountId&quot;: &quot;59a21d8b-2e06-4d40-9cbf-dcacb02f3457&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -58,6 +68,7 @@
   "keyToString": {
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.Journal_4_0.executor": "Run",
     "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -79,6 +90,7 @@
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="Journal_4_0.settings" />
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="" />
@@ -115,6 +127,13 @@
       <updated>1724058663486</updated>
       <workItem from="1724058671435" duration="17560000" />
       <workItem from="1724135424558" duration="26510000" />
+      <workItem from="1724222075900" duration="19453000" />
+      <workItem from="1724308340299" duration="11663000" />
+      <workItem from="1724398751120" duration="12181000" />
+      <workItem from="1724656508962" duration="22003000" />
+      <workItem from="1724745229800" duration="10585000" />
+      <workItem from="1724826310727" duration="21179000" />
+      <workItem from="1724914413250" duration="16397000" />
     </task>
     <servers />
   </component>

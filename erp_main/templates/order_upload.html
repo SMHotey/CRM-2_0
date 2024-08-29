@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма заказа</title>
+</head>
+<body>
+    <h1>Создание заказа</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div>
+            <label for="{{ form.internal_order_number.id_for_label }}">Внутренний номер заказа:</label>
+            {{ form.internal_order_number }}
+            {% if form.internal_order_number.errors %}
+                <div class="error">{{ form.internal_order_number.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.order_file.id_for_label }}">Прикрепить файл заказа:</label>
+            {{ form.order_file }}
+            {% if form.order_file.errors %}
+                <div class="error">{{ form.order_file.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div>
+            <label for="{{ form.firm_plate.id_for_label }}">Фирменный шильд:</label>
+            {{ form.firm_plate }}
+        </div>
+
+        <div>
+            <label for="{{ form.mounting_plates.id_for_label }}">Монтажные пластины (в формате JSON):</label>
+            <textarea id="{{ form.mounting_plates.id_for_label }}" name="mounting_plates">{{ form.mounting_plates.value }}</textarea>
+            {% if form.mounting_plates.errors %}
+                <div class="error">{{ form.mounting_plates.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit">Создать заказ</button>
+    </form>
+</body>
+</html>

@@ -1,120 +1,118 @@
 from django.shortcuts import render
-from .models import Order, OrderItem
-from .forms import UploadFileForm
-from openpyxl import load_workbook
+from .forms import OrderForm
+from .models import OrderItem, Order  # Убедитесь, что вы импортировали модель
+from openpyxl import load_workbook  # Проверьте, что библиотека установлена
 import re
-from django.contrib.auth.decorators import login_required
 
 
-def upload_order(request):
+def index(request):
+    return render(request, 'index.html')
+
+
+def order_upload(request):
     if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
+        form = OrderForm(request.POST, request.FILES)
         if form.is_valid():
-            uploaded_file = request.FILES['file']
-
+            uploaded_file = request.FILES['order_file']  # Проверьте, что вы используете правильное имя поля
             order = Order.objects.create()
 
-            order_number = order.internal_order_number
 
+            # Логика проверки правильности загруженного файла
             wb = load_workbook(uploaded_file)
             sheet = wb.active
-
-            doors_nk, doors_2nk, hatches_nk = 0, 0, 0
-            doors_sk, doors_2sk, hatches_sk, gates = 0, 0, 0, 0
-            vent = 0
-            glass_order = {}
-
-            max_row, cur_column = 9, 15
-            line = []
-            order = []
+            max_row = 0
+            cur_row, cur_column = 9, 15
+            position = []
 
             def get_value(row, column):
                 return sheet.cell(row=row, column=column).value
 
-            # Определяем размер таблицы с данными
-            while get_value(max_row, cur_column) != 'шт.':
-                max_row += 1
+            while get_value(cur_row, cur_column) != 'шт.':
+                cur_row += 1
+            max_row = cur_row
 
-            # Читаем файл с заявкой
             seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
             for row in range(8, max_row):
-                line.clear()
-                for column in seq:
-                    line.append(get_value(row, column))
-
-                if get_value(row, 1):
-
-                    order.append(Position(*line))
+                line = []
+                if get_value(row, 1):  # Если у текущей строки есть номер позиции
+                    for column in seq:
+                        line.append(get_value(row, column))
                 else:
-                    add_glass = (get_value(row, 7), get_value(row, 8))
-                    order[-1].glasses += add_glass
+                    line.append(get_value(row, 7))
+                    line.append(get_value(row, 8))
+                position.append(line)
 
-            for i in range(0, len(order)):
-                quantity = order[i].quantity
-                name = order[i].name
-                if re.search('дверь', name.lower()):
-                    if re.search('-м', name.lower()):
-                        if order[i].active_length:
-                            doors_2nk += quantity
-                        else:
-                            doors_nk += quantity
-                    elif order[i].active_length:
-                        doors_2sk += quantity
-                    else:
-                        doors_sk += quantity
+            kind_mapping = {
+                'дверь': 'door',
+                'люк': 'hatch',
+                'ворота': 'gate',
+                'калитка': 'door',
+                'фрамуга': 'transom'
+            }
+            type_mapping = {
+                'ei-60': 'ei-60',
+                'eis-60': 'eis-60',
+                'eiws-60': 'eiws-60',
+                'тех': 'tech',
+                'ревиз': 'revision'
+            }
 
-                if re.search('ворота', name.lower()):
-                    gates += quantity
-                if re.search('люк', name.lower()):
-                    if re.search('-м', name.lower()):
-                        hatches_nk += quantity
-                    else:
-                        hatches_sk += quantity
+            for i in range(0, len(position)):
+                n_num = position[i][0]
+                name = position[i][1]
+                print(n_num, name)
+                n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+                n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+                n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
-                if order[i].glasses[0]:
-                    for glass in range(0, len(order[i].glasses), 2):
-                        key = (order[i].glasses[glass], order[i].glasses[glass + 1])
-                        glass_order[str(key)] = glass_order.get(str(key), 0) + order[i].quantity
+                n_width, n_height = position[i][2], position[i][3]
+                n_active_trim = position[i][4]
+                n_open = position[i][5]
+                n_platband = position[i][6]
+                n_furniture = position[i][7]
+                n_door_closer = position[i][8]
+                n_step = position[i][9]
+                n_ral = position[i][10]
+                n_quantity = position[i][11]
+                n_comment = position[i][12]
+                glass = position[i][13:]
 
-                if re.search('фрамуга', name.lower()):
-                    vent += quantity
+                n_glass = []
+                if glass:
+                    n_glass = list(zip(glass[::2], glass[1::2]))
 
-            order = Order(
-                doors_nk=doors_nk,
-                doors_sk=doors_sk,
-                doors_2nk=doors_2nk,
-                doors_2sk=doors_2sk,
-                hatches_nk=hatches_nk,
-                hatches_sk=hatches_sk,
-                gates=gates,
-                glass_order=glass_order,
-                vent=vent,
-                total_glasses=sum(glass_order.values()),
+                new_item = OrderItem(
+                    order=order,
+                    position_num=n_num,
+                    p_kind=n_kind,
+                    p_type=n_type,
+                    p_construction=n_construction,
+                    p_width=n_width,
+                    p_height=n_height,
+                    p_active_trim=n_active_trim,
+                    p_open=n_open,
+                    p_platband=n_platband,
+                    p_furniture=n_furniture,
+                    p_door_closer=n_door_closer,
+                    p_step=n_step,
+                    p_ral=n_ral,
+                    p_quantity=n_quantity,
+                    p_comment=n_comment,
+                    p_glass=n_glass,
+                    status='in_query'
+                )
+                new_item.save()
+                print(new_item)
 
-            )
-            order.save()
-            return render(request, 'success.html')
+            form = OrderForm()  # Сброс формы после успешной загрузки
+            return render(request, 'order_upload.html', {'form': form})
 
-    form = UploadFileForm()
-    return render(request, 'upload.html', {'form': form})
+    else:
+        form = OrderForm()
 
-
-def orders_list(request):
-    orders = Order.objects.all()
-    return render(request, 'orders_list.html', {'orders': orders})
+    return render(request, 'order_upload.html', {'form': form})
 
 
-@login_required
-def add_order(request):
-    if request.method == 'POST':
-        external_order_number = request.POST.get('external_order_number')
 
-        if external_order_number:
-            new_order = Order(
-                external_order_number=external_order_number,
-                user=request.user  # Присваиваем текущего пользователя
-            )
-            new_order.save()
-            return redirect('success_url')  # Замените на URL успешного завершения
 
-    return render(request, 'add_order.html')  # Замените на ваш шаблон
+
