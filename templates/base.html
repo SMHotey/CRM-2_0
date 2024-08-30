@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-item {
+            position: relative;
+        }
+        .nav-link {
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+        .nav-link:hover {
+            background-color: #1164b4; /* Цвет при наведении */
+            color: white; /* Цвет текста при наведении */
+        }
+        .dropdown-menu {
+            display: none;
+        }
+        .nav-item:hover .dropdown-menu {
+            display: block;
+        }
+        .header {
+            text-align: center;
+            margin: 0; /* Убираем отступы */
+            background-color: #5ab6df;
+            color: white;
+            padding: 20px;
+            font-size: 42px; /* Увеличен шрифт до 42 */
+            position: relative;
+            height: 80px; /* Установите фиксированную высоту для блока */
+            width: 100%; /* Растягиваем на всю ширину */
+            left: 0; /* Обнуляем смещение */
+            right: 0; /* Обнуляем смещение */
+        }
+        .header-title {
+            transition: opacity 0.5s;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Центрирование по вертикали и горизонтали */
+        }
+        .header-title-hidden {
+            opacity: 0;
+        }
+        .header-title-new {
+            font-size: 36px;
+            opacity: 0;
+            position: absolute;
+            top: 50%; /* Центрирование по вертикали */
+            left: 50%;
+            transform: translate(-50%, -50%); /* Центрирование по горизонтали */
+            transition: opacity 0.5s;
+        }
+        .sidebar {
+            width: 120px; /* Установите ширину бокового меню */
+            padding-top: 20px; /* Отступ сверху для выравнивания */
+        }
+        .main-content {
+            flex-grow: 1; /* Заставит основную часть растягиваться */
+        }
+        table {
+            border-collapse: collapse; /* Убирает двойные границы */
+            width: 100%; /* Ширина таблицы 100% */
+        }
+        th, td {
+            border: 1px solid #dee2e6; /* Видимые границы */
+            padding: 8px; /* Отступы ячеек */
+            text-align: left; /* Выравнивание текста по левой стороне */
+        }
+        tbody tr:hover {
+            background-color: #f5f5f5; /* Цвет фона строки при наведении */
+        }
+        .card-body {
+            text-align: center; /* Выравнивание текста по центру в блоках */
+        }
+    </style>
+    <title>CRM Система</title>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="header" onmouseover="showNewTitle()" onmouseout="hideNewTitle()">
+        <div class="header-title" id="originalTitle">Завод металлических дверей</div>
+        <div class="header-title-new" id="newTitle">Двери Металл-М</div>
+    </div>
+    <div class="row">
+        <!-- Левая панель (уменьшенная в два раза) -->
+        <nav class="col-md-1 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column text-center">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'order_upload' %}">
+                            Заказы
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'organization_add' %}">
+                            Организации
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            Менеджеры
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            Статистика
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            Расчеты
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Прайс общий</a>
+                            <a class="dropdown-item" href="#">Прайсы клиентов</a>
+                            <a class="dropdown-item" href="#">Создать КП</a>
+                            <a class="dropdown-item" href="{% url 'invoice_add' %}">Выставить счет</a>
+                            <a class="dropdown-item" href="#">Удалить</a>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            Отгрузки
+                        </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Цех №1</a>
+                            <a class="dropdown-item" href="#">Цех №3</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="col-md-11 main-content px-4">
+            <!-- Новый блок над тремя блоками -->
+            <div class="row my-3">
+                <div class="col-md-12">
+                    <div class="card mb-3">
+                        <div class="card-header">Новый Блок</div>
+                        <div class="card-body">
+                            <h5 class="card-title"></h5> <!-- Оставляем пустым -->
+                            <p class="card-text"></p> <!-- Оставляем пустым -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row my-3">
+                <div class="col-md-4">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-header">Готовность на сегодня</div>
+                        <div class="card-body">
+                            <h5 class="card-title"></h5> <!-- Оставляем пустым -->
+                            <p class="card-text"></p> <!-- Оставляем пустым -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-header">Готовность на завтра</div>
+                        <div class="card-body">
+                            <h5 class="card-title"></h5> <!-- Оставляем пустым -->
+                            <p class="card-text"></p> <!-- Оставляем пустым -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-danger mb-3">
+                        <div class="card-header">Отгрузки на сегодня</div>
+                        <div class="card-body">
+                            <h5 class="card-title"></h5> <!-- Оставляем пустым -->
+                            <p class="card-text"></p> <!-- Оставляем пустым -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+         
+            
+        </main>
+    </div>
+</div>
+{% block content %}
+{% endblock %}
+<script>
+    function showNewTitle() {
+        document.getElementById("originalTitle").classList.add("header-title-hidden");
+        document.getElementById("newTitle").style.opacity = 1;
+    }
+
+    function hideNewTitle() {
+        document.getElementById("originalTitle").classList.remove("header-title-hidden");
+        document.getElementById("newTitle").style.opacity = 0;
+    }
+
+    // Создание 10 пустых строк в таблице
+    const tableBody = document.getElementById('tableBody');
+    for (let i = 0; i < 10; i++) {
+        let row = tableBody.insertRow();
+        for (let j = 0; j < 15; j++) {
+            let cell = row.insertCell();
+            cell.textContent = ''; // Оставляем ячейки пустыми
+        }
+    }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -10,11 +10,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Загрузка данных для счета</title>
-
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">  <!-- Подключите ваш файл CSS если необходимо -->
 </head>
 <body>
     <div class="container">
-        <h1>Добавить заказ</h1>
+        <h1>Добавить счет</h1>
 
         <form method="POST" novalidate>
             {% csrf_token %}

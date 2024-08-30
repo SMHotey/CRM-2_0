@@ -1,8 +1,9 @@
-from django.shortcuts import render
-from .forms import OrderForm
+from django.shortcuts import render, redirect
+from .forms import OrderForm, OrganizationForm, InvoiceForm
 from .models import OrderItem, Order  # Убедитесь, что вы импортировали модель
 from openpyxl import load_workbook  # Проверьте, что библиотека установлена
 import re
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -16,9 +17,13 @@ def order_upload(request):
             uploaded_file = request.FILES['order_file']  # Проверьте, что вы используете правильное имя поля
             order = Order.objects.create()
 
-
             # Логика проверки правильности загруженного файла
-            wb = load_workbook(uploaded_file)
+            try:
+                wb = load_workbook(uploaded_file)
+            except Exception as e:
+                form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
+                return render(request, 'order_upload.html', {'form': form})
+
             sheet = wb.active
             max_row = 0
             cur_row, cur_column = 9, 15
@@ -75,11 +80,9 @@ def order_upload(request):
                 n_ral = position[i][10]
                 n_quantity = position[i][11]
                 n_comment = position[i][12]
-                glass = position[i][13:]
 
-                n_glass = []
-                if glass:
-                    n_glass = list(zip(glass[::2], glass[1::2]))
+                glass = position[i][13:]
+                n_glass = list(zip(glass[::2], glass[1::2])) if glass else []
 
                 new_item = OrderItem(
                     order=order,
@@ -112,6 +115,33 @@ def order_upload(request):
 
     return render(request, 'order_upload.html', {'form': form})
 
+
+@login_required
+def organization_add(request):
+    user = request.user
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Перенаправьте на нужную страницу после сохранения
+    else:
+        form = OrganizationForm()
+
+    return render(request, 'organization_add.html', {'form': form, 'user': user})
+
+
+@login_required
+def invoice_add(request):
+    user = request.user
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Перенаправьте на нужную страницу после сохранения
+    else:
+        form = InvoiceForm()
+
+    return render(request, 'invoice_add.html', {'form': form, 'user': user})
 
 
 
