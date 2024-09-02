@@ -9,7 +9,7 @@ from django.utils.timezone import now
 class Organization(models.Model):
     name = models.CharField(max_length=100)
     inn = models.CharField(max_length=15)
-    last_order_date = models.DateField()
+    last_order_date = models.DateField(null=True, blank=True)
     # здесь данные для формирования договора
 
     user = models.ManyToManyField(User, related_name='organizations')
@@ -49,12 +49,12 @@ def order_file_upload_to(instance, filename):
 
 class Order(models.Model):
     order_id = models.BigAutoField(primary_key=True)  # Внешний номер заказа
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     internal_order_number = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to=order_file_upload_to, blank=True, null=True)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, blank=True, null=True, on_delete=models.CASCADE)
 
 
 

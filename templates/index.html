@@ -1,31 +1,54 @@
 {% extends 'base.html' %}
+
 {% block content %}
-            <!-- Основная таблица -->
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Столбец 1</th>
-                            <th>Столбец 2</th>
-                            <th>Столбец 3</th>
-                            <th>Столбец 4</th>
-                            <th>Столбец 5</th>
-                            <th>Столбец 6</th>
-                            <th>Столбец 7</th>
-                            <th>Столбец 8</th>
-                            <th>Столбец 9</th>
-                            <th>Столбец 10</th>
-                            <th>Столбец 11</th>
-                            <th>Столбец 12</th>
-                            <th>Столбец 13</th>
-                            <th>Столбец 14</th>
-                            <th>Столбец 15</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- Пустые строки добавляются сюда с помощью JavaScript -->
-                    </tbody>
-                </table>
-            </div>
+<table border="1" style="border-collapse: collapse; width: 90%; margin: 0 25px 0 auto">
+  <thead>
+    <tr>
+      <th rowspan="2" style="padding: 25px; text-align: center; vertical-align: middle;">Организация</th>
+      <th rowspan="2" style="padding: 4px; text-align: center; vertical-align: middle;">№ заказа</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Счет</th>
+      <th colspan="3" style="padding: 8px; text-align: center; vertical-align: middle;">Новый конструктив</th>
+      <th colspan="3" style="padding: 8px; text-align: center; vertical-align: middle;">Старый конструктив</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Фрамуга</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">В &lt; 3 м</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">В &gt; 3 м</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Ъ</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">В очередь</th>
+      <th rowspan="2" style="padding: 15px; text-align: center; vertical-align: middle;">Менеджер</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Готовность</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Комментарии</th>
+    </tr>
+    <tr>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">1</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">2</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">Л</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">1</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">2</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">Л</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+    </tr>
+  </tbody>
+</table>
+
 {% endblock %}
 
