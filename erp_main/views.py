@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect
-from .forms import OrderForm, OrganizationForm, InvoiceForm
-from .models import OrderItem, Order  # Убедитесь, что вы импортировали модель
+from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm
+from .models import OrderItem, Order, Organization  # Убедитесь, что вы импортировали модель
 from openpyxl import load_workbook  # Проверьте, что библиотека установлена
 import re
 from django.contrib.auth.decorators import login_required
@@ -10,12 +11,13 @@ def index(request):
     return render(request, 'index.html')
 
 
+@login_required(login_url='login')
 def order_upload(request):
     if request.method == 'POST':
-        form = OrderForm(request.POST, request.FILES)
+        form = OrderForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             uploaded_file = request.FILES['order_file']  # Проверьте, что вы используете правильное имя поля
-            order = Order.objects.create()
+            order = form.save()
 
             # Логика проверки правильности загруженного файла
             try:
@@ -102,13 +104,14 @@ def order_upload(request):
                     p_quantity=n_quantity,
                     p_comment=n_comment,
                     p_glass=n_glass,
-                    status='in_query'
+                    p_invoice=invoice,
+
                 )
                 new_item.save()
                 print(new_item)
 
-            form = OrderForm()  # Сброс формы после успешной загрузки
-            return render(request, 'order_upload.html', {'form': form})
+#            form = OrderForm()  # Сброс формы после успешной загрузки
+            return redirect('index')
 
     else:
         form = OrderForm()
@@ -116,33 +119,55 @@ def order_upload(request):
     return render(request, 'order_upload.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='login')
 def organization_add(request):
-    user = request.user
     if request.method == 'POST':
         form = OrganizationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('index')  # Перенаправьте на нужную страницу после сохранения
+            return redirect('organization_list')  # Перенаправьте на нужную страницу после сохранения
     else:
         form = OrganizationForm()
 
-    return render(request, 'organization_add.html', {'form': form, 'user': user})
+    return render(request, 'organization_add.html', {'form': form})
 
 
-@login_required
+@login_required(login_url='login')
 def invoice_add(request):
-    user = request.user
     if request.method == 'POST':
         form = InvoiceForm(request.POST)
+        user = request.user
         if form.is_valid():
             form.save()
             return redirect('index')  # Перенаправьте на нужную страницу после сохранения
     else:
         form = InvoiceForm()
 
-    return render(request, 'invoice_add.html', {'form': form, 'user': user})
+    return render(request, 'invoice_add.html', {'form': form})
 
+
+@login_required
+def organization_list(request):
+    user = request.user
+    if user.is_superuser:  # Если пользователь является администратором
+        organizations = Organization.objects.all().prefetch_related('order_set')  # Заранее загружаем связанные заказы
+    else:
+        organizations = Organization.objects.filter(user=user)  # Предполагаем, что у вас есть поле 'manager' в модели Organization
+
+    return render(request, 'organization_list.html', {'organizations': organizations, 'is_admin': user.is_superuser})
+
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Аккаунт для {username} был создан!')
+            return redirect('login')  # замените 'login' на имя вашего URL входа
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
 
 
 

@@ -4,12 +4,24 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="30-08-24">
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0004_order_invoice_order_organization_order_user_and_more.py" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="02-09-24">
+      <change afterPath="$PROJECT_DIR$/erp_main/login.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organization_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/registration/password_reset_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/registration/register.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_rename_comment_orderitem_p_comment_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0003_remove_order_firm_plate_remove_order_mounting_plates_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0004_order_invoice_order_organization_order_user_and_more.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/registration/login.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +83,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\templates\registration" />
+      <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\templates" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="Journal_4_0" type="Python.DjangoServer" factoryName="Django server">
       <module name="Journal_4_0" />
@@ -124,7 +142,8 @@
       <workItem from="1724826310727" duration="21179000" />
       <workItem from="1724914413250" duration="17314000" />
       <workItem from="1725000903931" duration="17313000" />
-      <workItem from="1725267541975" duration="10934000" />
+      <workItem from="1725267541975" duration="12018000" />
+      <workItem from="1725343790511" duration="20814000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -142,7 +161,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725023808634</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="02-09-24">
+      <option name="closed" value="true" />
+      <created>1725284110440</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1725284110440</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -152,6 +179,7 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="29-08-24" />
     <MESSAGE value="30-08-24" />
-    <option name="LAST_COMMIT_MESSAGE" value="30-08-24" />
+    <MESSAGE value="02-09-24" />
+    <option name="LAST_COMMIT_MESSAGE" value="02-09-24" />
   </component>
 </project>

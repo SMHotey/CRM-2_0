@@ -1,6 +1,13 @@
 from django import forms
+from django.contrib.auth.models import User
 
 from erp_main.models import Organization, Invoice, Order
+
+
+class UserCreationForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password', 'password')
 
 
 class OrderForm(forms.ModelForm):
@@ -14,11 +21,12 @@ class OrderForm(forms.ModelForm):
         self.fields['organization'].label = 'Организация'
         self.fields['order_file'].label = 'Файл заказа'
         self.fields['invoice'].label = 'Счет'
-
+        print(Organization.objects.filter(user=user))
         if user:
             self.fields['organization'].queryset = Organization.objects.filter(user=user)  # Фильтруем организации
         else:
-            self.fields['organization'].queryset = Organization.objects.none()  # Если пользователя нет, устанавливаем пустой queryset
+            self.fields[
+                'organization'].queryset = Organization.objects.none()  # Если пользователя нет, устанавливаем пустой queryset
 
 
 class OrganizationForm(forms.ModelForm):
@@ -36,10 +44,10 @@ class OrganizationForm(forms.ModelForm):
 
 
 class InvoiceForm(forms.ModelForm):
-
     class Meta:
         model = Invoice
-        fields = ['number', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'legal_entity']
+        fields = ['number', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'legal_entity',
+                  'organization']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

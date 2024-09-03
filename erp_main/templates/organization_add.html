@@ -17,6 +17,7 @@
         <form method="POST" novalidate>
             {% csrf_token %}
             {{ user.username }}
+
             {{ form.as_p }}  <!-- Рендеринг полей формы -->
 
             <button type="submit">Сохранить</button>
