@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table border="1" style="border-collapse: collapse; width: 90%; margin: 0 25px 0 auto">
+  <thead>
+    <tr>
+      <th rowspan="2" style="padding: 25px; text-align: center; vertical-align: middle;">Организация</th>
+      <th rowspan="2" style="padding: 4px; text-align: center; vertical-align: middle;">№ заказа</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Счет</th>
+      <th colspan="3" style="padding: 8px; text-align: center; vertical-align: middle;">Новый конструктив</th>
+      <th colspan="3" style="padding: 8px; text-align: center; vertical-align: middle;">Старый конструктив</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Фрамуга</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">В &lt; 3 м</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">В &gt; 3 м</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Ъ</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">В очередь</th>
+      <th rowspan="2" style="padding: 15px; text-align: center; vertical-align: middle;">Менеджер</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Готовность</th>
+      <th rowspan="2" style="padding: 8px; text-align: center; vertical-align: middle;">Комментарии</th>
+    </tr>
+    <tr>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">1</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">2</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">Л</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">1</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">2</th>
+      <th style="padding: 6px; text-align: center; vertical-align: middle;">Л</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;">орг</td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;">№</td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+      <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+    </tr>
+
+  {% for order in orders %}
+      <tr>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.invoice.organization }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.id }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.invoice.number }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.doors_1_nk }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.doors_2_nk }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.hatch_nk }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.doors_1_sk }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.doors_2_sk }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.hatch_sk }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+
+      </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
+

@@ -2,6 +2,7 @@ import os
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from django.utils import timezone
 from django.utils.timezone import now
 
@@ -10,17 +11,13 @@ class Organization(models.Model):
     name = models.CharField(max_length=100)
     inn = models.CharField(max_length=15)
     last_order_date = models.DateField(null=True, blank=True)
-        # здесь данные для формирования договора
-
-    user = models.ForeignKey(User, related_name='organization', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name_plural = 'Организации'
-
-
 
 
 class Invoice(models.Model):
@@ -42,21 +39,62 @@ class Invoice(models.Model):
 
 
 
-def order_file_upload_to(instance, filename):
-        # Создает уникальный путь для каждого загружаемого файла
-    return os.path.join('uploads', f"{now().strftime('%Y%m%d_%H%M%S')}_{filename}")
+#def order_file_upload_to(instance, filename):
+#        # Создает уникальный путь для каждого загружаемого файла
+#    return os.path.join('uploads', f"{now().strftime('%Y%m%d_%H%M%S')}_{filename}")
 
 
 class Order(models.Model):
-    order_id = models.BigAutoField(primary_key=True)  # Внешний номер заказа
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
     internal_order_number = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    order_file = models.FileField(upload_to=order_file_upload_to)
+    order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
+    @property
+    def doors_1_nk(self):
+        return self.items.filter(
+            p_kind='door',
+            p_construction='NK',
+            p_active_trim=None
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
+    @property
+    def doors_2_nk(self):
+        return self.items.filter(
+            p_kind='door',
+            p_construction='NK',
+            p_active_trim=not None
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def hatch_nk(self):
+        return self.items.filter(
+            p_kind='hatch',
+            p_construction='NK',
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def doors_1_sk(self):
+        return self.items.filter(
+            p_kind='door',
+            p_construction='SK',
+            p_active_trim=None
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def doors_2_sk(self):
+        return self.items.filter(
+            p_kind='door',
+            p_construction='SK',
+            p_active_trim=not None
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def hatch_sk(self):
+        return self.items.filter(
+            p_kind='hatch',
+            p_construction='SK',
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
         if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
@@ -104,7 +142,7 @@ class OrderItem(models.Model):
     p_width = models.DecimalField(max_digits=10, decimal_places=0)
     p_height = models.DecimalField(max_digits=10, decimal_places=0)
     p_open = models.CharField(max_length=2, blank=True, null=True) # открывание
-    p_active_trim = models.DecimalField(max_digits=10, decimal_places=0, blank=True, null=True) # активная створка
+    p_active_trim = models.CharField(max_length=5, blank=True, null=True) # активная створка
     p_furniture = models.CharField(max_length=100, blank=True, null=True) # словарь: код - количество по замку, ручке и ц/м
     p_ral = models.CharField(max_length=100, blank=True, null=True) # расписать по элементам (возможные вариации, опции цвета)
     p_platband = models.CharField(max_length=100, blank=True, null=True) # наличники: размер с каждой стороны
@@ -118,9 +156,6 @@ class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     status = models.CharField(max_length=15, default='in_query')
     position_num = models.CharField(max_length=5)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     nameplate_range = models.CharField(max_length=100, blank=True, null=True)  # номерной диапзон шильдов для позиции
     p_quantity = models.IntegerField(default=1)
     p_comment = models.CharField(max_length=255, blank=True, null=True)

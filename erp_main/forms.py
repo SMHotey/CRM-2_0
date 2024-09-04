@@ -13,20 +13,16 @@ class UserCreationForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['organization', 'order_file', 'invoice']  # Укажите, какие поля вы хотите отобразить
+        fields = ['order_file', 'invoice']
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)  # Получаем пользователя из kwargs
+    def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['organization'].label = 'Организация'
         self.fields['order_file'].label = 'Файл заказа'
         self.fields['invoice'].label = 'Счет'
-        print(Organization.objects.filter(user=user))
-        if user:
-            self.fields['organization'].queryset = Organization.objects.filter(user=user)  # Фильтруем организации
+        if not user.is_superuser:
+            self.fields['invoice'].queryset = Invoice.objects.filter(user=user)
         else:
-            self.fields[
-                'organization'].queryset = Organization.objects.none()  # Если пользователя нет, устанавливаем пустой queryset
+            self.fields['invoice'].queryset = Invoice.objects.all()
 
 
 class OrganizationForm(forms.ModelForm):
@@ -49,7 +45,7 @@ class InvoiceForm(forms.ModelForm):
         fields = ['number', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'legal_entity',
                   'organization']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['number'].label = 'Номер'
         self.fields['amount'].label = 'Сумма'
@@ -57,6 +53,12 @@ class InvoiceForm(forms.ModelForm):
         self.fields['shipping_amount'].label = 'Стоимость доставки'
         self.fields['montage_amount'].label = 'Стоимость монтажа'
         self.fields['legal_entity'].label = 'Юридическое лицо'
+        self.fields['organization'].label = 'Организация'
+        if not user.is_superuser:
+            self.fields['organization'].queryset = Organization.objects.filter(user=user)
+
+        else:
+            self.fields['organization'].queryset = Organization.objects.all()
 
     def __str__(self):
-        return self.number
+        return self.number if self.number else "Без номера"

@@ -18,7 +18,7 @@
             <tr>
                 <td>{{ org.name }}</td>
                 <td>{{ org.user.username }}</td>
-                <td>{% if org.order_set.exists %}{{ org.order_set.latest.get_created_at|date:"d-m-Y" }}{% else %}Нет заказов{% endif %}</td>
+
             </tr>
             {% endfor %}
         </tbody>

@@ -4,24 +4,35 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="02-09-24">
-      <change afterPath="$PROJECT_DIR$/erp_main/login.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/organization_list.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/registration/password_reset_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/registration/register.html" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="03-09-24">
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0002_alter_orderitem_p_active_trim.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templatetags/my_filters.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_9ui2iqj.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Монтажсервис_-ЭНКО_счет_282.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_03-07-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24.06.24_-_ЖК_-_15_Эклипт.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Маэстро_ГП-3.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-2.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-2_nj82Bd7.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-2_t32XbI7.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Journal_4_0.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Journal_4_0.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_rename_comment_orderitem_p_comment_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0003_remove_order_firm_plate_remove_order_mounting_plates_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0004_order_invoice_order_organization_order_user_and_more.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/registration/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,24 +76,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Django Server.Journal_4_0.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.Journal_4_0.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
+    "git-widget-placeholder": "master",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\templates\registration" />
@@ -143,7 +155,9 @@
       <workItem from="1724914413250" duration="17314000" />
       <workItem from="1725000903931" duration="17313000" />
       <workItem from="1725267541975" duration="12018000" />
-      <workItem from="1725343790511" duration="20814000" />
+      <workItem from="1725343790511" duration="20834000" />
+      <workItem from="1725431832328" duration="6706000" />
+      <workItem from="1725439834187" duration="17849000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -169,7 +183,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725284110440</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="03-09-24">
+      <option name="closed" value="true" />
+      <created>1725374660303</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1725374660303</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -180,6 +202,7 @@
     <MESSAGE value="29-08-24" />
     <MESSAGE value="30-08-24" />
     <MESSAGE value="02-09-24" />
-    <option name="LAST_COMMIT_MESSAGE" value="02-09-24" />
+    <MESSAGE value="03-09-24" />
+    <option name="LAST_COMMIT_MESSAGE" value="03-09-24" />
   </component>
 </project>

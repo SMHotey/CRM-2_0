@@ -14,9 +14,9 @@ def index(request):
 @login_required(login_url='login')
 def order_upload(request):
     if request.method == 'POST':
-        form = OrderForm(request.POST, request.FILES, user=request.user)
+        form = OrderForm(user=request.user, data=request.POST, files=request.FILES)
         if form.is_valid():
-            uploaded_file = request.FILES['order_file']  # Проверьте, что вы используете правильное имя поля
+            uploaded_file = form.cleaned_data['order_file']  # Проверьте, что вы используете правильное имя поля
             order = form.save()
 
             # Логика проверки правильности загруженного файла
@@ -31,8 +31,8 @@ def order_upload(request):
             cur_row, cur_column = 9, 15
             position = []
 
-            def get_value(row, column):
-                return sheet.cell(row=row, column=column).value
+            def get_value(r, c):
+                return sheet.cell(row=r, column=c).value
 
             while get_value(cur_row, cur_column) != 'шт.':
                 cur_row += 1
@@ -73,7 +73,7 @@ def order_upload(request):
                 n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
                 n_width, n_height = position[i][2], position[i][3]
-                n_active_trim = position[i][4]
+                n_active_trim = str(position[i][4])
                 n_open = position[i][5]
                 n_platband = position[i][6]
                 n_furniture = position[i][7]
@@ -104,17 +104,16 @@ def order_upload(request):
                     p_quantity=n_quantity,
                     p_comment=n_comment,
                     p_glass=n_glass,
-                    p_invoice=invoice,
 
                 )
                 new_item.save()
-                print(new_item)
+
 
 #            form = OrderForm()  # Сброс формы после успешной загрузки
-            return redirect('index')
+            return redirect('orders_list')
 
     else:
-        form = OrderForm()
+        form = OrderForm(user=request.user)
 
     return render(request, 'order_upload.html', {'form': form})
 
@@ -124,7 +123,10 @@ def organization_add(request):
     if request.method == 'POST':
         form = OrganizationForm(request.POST)
         if form.is_valid():
-            form.save()
+            organization = form.save(commit=False)
+            organization.user = request.user  # Добавьте текущего пользователя в объект
+            organization.save()
+
             return redirect('organization_list')  # Перенаправьте на нужную страницу после сохранения
     else:
         form = OrganizationForm()
@@ -135,13 +137,12 @@ def organization_add(request):
 @login_required(login_url='login')
 def invoice_add(request):
     if request.method == 'POST':
-        form = InvoiceForm(request.POST)
-        user = request.user
+        form = InvoiceForm(user=request.user, data=request.POST)
         if form.is_valid():
             form.save()
             return redirect('index')  # Перенаправьте на нужную страницу после сохранения
     else:
-        form = InvoiceForm()
+        form = InvoiceForm(user=request.user)
 
     return render(request, 'invoice_add.html', {'form': form})
 
@@ -150,9 +151,9 @@ def invoice_add(request):
 def organization_list(request):
     user = request.user
     if user.is_superuser:  # Если пользователь является администратором
-        organizations = Organization.objects.all().prefetch_related('order_set')  # Заранее загружаем связанные заказы
+        organizations = Organization.objects.all()  # Заранее загружаем связанные заказы
     else:
-        organizations = Organization.objects.filter(user=user)  # Предполагаем, что у вас есть поле 'manager' в модели Organization
+        organizations = Organization.objects.filter(user=user)
 
     return render(request, 'organization_list.html', {'organizations': organizations, 'is_admin': user.is_superuser})
 
@@ -170,4 +171,6 @@ def register(request):
     return render(request, 'registration/register.html', {'form': form})
 
 
+def orders_list(request):
+    return render(request, 'orders_list.html',{'orders': Order.objects.all()})
 

@@ -14,7 +14,7 @@
 <body>
     <div class="container">
 
-        <form method="POST" novalidate>
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ user.username }}
 
