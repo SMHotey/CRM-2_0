@@ -13,6 +13,7 @@ def index(request):
 
 @login_required(login_url='login')
 def order_upload(request):
+    global line
     if request.method == 'POST':
         form = OrderForm(user=request.user, data=request.POST, files=request.FILES)
         if form.is_valid():
@@ -29,7 +30,7 @@ def order_upload(request):
             sheet = wb.active
             max_row = 0
             cur_row, cur_column = 9, 15
-            position = []
+            position, line = [], []
 
             def get_value(r, c):
                 return sheet.cell(row=r, column=c).value
@@ -39,15 +40,25 @@ def order_upload(request):
             max_row = cur_row
 
             seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
+            row = 8
             for row in range(8, max_row):
-                line = []
-                if get_value(row, 1):  # Если у текущей строки есть номер позиции
+                if get_value(row, 2):  # Если у текущей строки есть номер позиции
+                    print(max_row)
+                    if 8 < row < max_row:
+                        print(line, '  ', row)
+                        position.append(line)
+                    line = []
                     for column in seq:
+                        print(row, column)
                         line.append(get_value(row, column))
                 else:
                     line.append(get_value(row, 7))
                     line.append(get_value(row, 8))
-                position.append(line)
+                if row == max_row-1:
+                    print(line, ' end ', row)
+                    position.append(line)
+
+
 
             kind_mapping = {
                 'дверь': 'door',
@@ -73,7 +84,7 @@ def order_upload(request):
                 n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
                 n_width, n_height = position[i][2], position[i][3]
-                n_active_trim = str(position[i][4])
+                n_active_trim = position[i][4]
                 n_open = position[i][5]
                 n_platband = position[i][6]
                 n_furniture = position[i][7]

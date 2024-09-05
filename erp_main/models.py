@@ -2,7 +2,7 @@ import os
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django.utils.timezone import now
 
@@ -55,7 +55,7 @@ class Order(models.Model):
         return self.items.filter(
             p_kind='door',
             p_construction='NK',
-            p_active_trim=None
+            p_active_trim=None,
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
@@ -63,7 +63,7 @@ class Order(models.Model):
         return self.items.filter(
             p_kind='door',
             p_construction='NK',
-            p_active_trim=not None
+            p_active_trim__isnull=False,
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
@@ -78,7 +78,7 @@ class Order(models.Model):
         return self.items.filter(
             p_kind='door',
             p_construction='SK',
-            p_active_trim=None
+            p_active_trim=None,
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
@@ -86,7 +86,7 @@ class Order(models.Model):
         return self.items.filter(
             p_kind='door',
             p_construction='SK',
-            p_active_trim=not None
+            p_active_trim__isnull=False,
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
@@ -94,6 +94,26 @@ class Order(models.Model):
         return self.items.filter(
             p_kind='hatch',
             p_construction='SK',
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def transom(self):
+        return self.items.filter(
+            p_kind='transom',
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def gate(self):
+        return self.items.filter(
+            p_kind='gate',
+            p_width__lt=3000,
+            p_height__lt=3000,
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def gate_3000(self):
+        return self.items.filter(
+            Q(p_kind='gate') & (Q(p_width__gte=3000) | Q(p_height__gte=3000)),
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
