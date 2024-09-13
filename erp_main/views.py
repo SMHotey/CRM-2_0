@@ -1,10 +1,12 @@
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm
-from .models import OrderItem, Order, Organization  # Убедитесь, что вы импортировали модель
+from .models import OrderItem, Order, Organization, Invoice  # Убедитесь, что вы импортировали модель
 from openpyxl import load_workbook  # Проверьте, что библиотека установлена
 import re
 from django.contrib.auth.decorators import login_required
+from collections import Counter
+from django.views import View
 
 
 def index(request):
@@ -54,11 +56,9 @@ def order_upload(request):
                 else:
                     line.append(get_value(row, 7))
                     line.append(get_value(row, 8))
-                if row == max_row-1:
+                if row == max_row - 1:
                     print(line, ' end ', row)
                     position.append(line)
-
-
 
             kind_mapping = {
                 'дверь': 'door',
@@ -79,8 +79,10 @@ def order_upload(request):
                 n_num = position[i][0]
                 name = position[i][1]
                 print(n_num, name)
-                n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
-                n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+                n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)),
+                              None)
+                n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)),
+                              None)
                 n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
                 n_width, n_height = position[i][2], position[i][3]
@@ -95,7 +97,8 @@ def order_upload(request):
                 n_comment = position[i][12]
 
                 glass = position[i][13:]
-                n_glass = list(zip(glass[::2], glass[1::2])) if glass else []
+                n_glass = sum(dict(Counter((list(zip(glass[::2], glass[1::2])) if glass else []))).values())
+
 
                 new_item = OrderItem(
                     order=order,
@@ -119,8 +122,7 @@ def order_upload(request):
                 )
                 new_item.save()
 
-
-#            form = OrderForm()  # Сброс формы после успешной загрузки
+            #            form = OrderForm()  # Сброс формы после успешной загрузки
             return redirect('orders_list')
 
     else:
@@ -183,5 +185,19 @@ def register(request):
 
 
 def orders_list(request):
-    return render(request, 'orders_list.html',{'orders': Order.objects.all()})
+    return render(request, 'orders_list.html', {'orders': Order.objects.all()})
 
+
+def order_detail(request, id):
+    order = get_object_or_404(Order, id=id)
+    return render(request, 'order_detail.html', {'order': order})
+
+
+def organization_detail(request, id):
+    organization = get_object_or_404(Organization, id=id)
+    return render(request, 'organization_detail.html', {'organization': organization})
+
+
+def invoice_detail(request, id):
+    invoice = get_object_or_404(Invoice, id=id)
+    return render(request, 'invoice_detail.html', {'invoice': invoice})

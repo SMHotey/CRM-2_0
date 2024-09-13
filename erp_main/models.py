@@ -116,6 +116,14 @@ class Order(models.Model):
             Q(p_kind='gate') & (Q(p_width__gte=3000) | Q(p_height__gte=3000)),
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
+    @property
+    def glass(self):
+        return self.items.filter((~Q(p_glass__in=[(None, None)]))).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def quantity(self):
+        return self.items.filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
+
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
         if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
             self.internal_order_number = self.generate_internal_order_number()

@@ -4,35 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="начинает работать">
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_2WvsS8w.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_5UZmBHG.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_EVQf5V6.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_LJ9OebN.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_SGsuFRe.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_YgeUuH5.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_dEXqOmm.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_gMLqZcx.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_lwaSzun.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_qdPCXpF.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_sLRQaRh.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_BbdNWwM.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_eDMUujn.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_g0c5Qu4.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_XJ9eiyz.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_voc0pYh.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_ГП_1718_остаток.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_ГП_1718_остаток_sgrdLv8.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_ГП_17_18.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-1.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт..xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт_omyWczx..xlsx" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="начинает работать уже лучше">
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organization_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_xw2txuN.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-02-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-02-24_zpd78am.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_2AfxK2F.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_LEXuXVX.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_23-01-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_18-03-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_466.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-1_imfHma5.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-2_UECxpiV.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт_MiFEw05..xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_alter_orderitem_p_active_trim.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0002_alter_orderitem_p_active_trim.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -98,6 +89,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\static\erp_main\images" />
       <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\templates\registration" />
       <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\templates" />
     </key>
@@ -159,7 +151,12 @@
       <workItem from="1725343790511" duration="20834000" />
       <workItem from="1725431832328" duration="6706000" />
       <workItem from="1725439834187" duration="18184000" />
-      <workItem from="1725516479470" duration="23108000" />
+      <workItem from="1725516479470" duration="23462000" />
+      <workItem from="1725606520799" duration="5940000" />
+      <workItem from="1725869216581" duration="4224000" />
+      <workItem from="1725955105708" duration="683000" />
+      <workItem from="1726124146060" duration="6332000" />
+      <workItem from="1726217858864" duration="15393000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -201,7 +198,15 @@
       <option name="project" value="LOCAL" />
       <updated>1725460258953</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="начинает работать уже лучше">
+      <option name="closed" value="true" />
+      <created>1725546152572</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1725546152573</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -214,6 +219,7 @@
     <MESSAGE value="02-09-24" />
     <MESSAGE value="03-09-24" />
     <MESSAGE value="начинает работать" />
-    <option name="LAST_COMMIT_MESSAGE" value="начинает работать" />
+    <MESSAGE value="начинает работать уже лучше" />
+    <option name="LAST_COMMIT_MESSAGE" value="начинает работать уже лучше" />
   </component>
 </project>
