@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
+from .views import invoices_list
 
 urlpatterns = [
     path('upload/', views.order_upload, name='order_upload'),
@@ -13,6 +14,7 @@ urlpatterns = [
     path('order/<int:id>/', views.order_detail, name='order_detail'),
     path('organization/<int:id>/', views.organization_detail, name='organization_detail'),
     path('invoice/<int:id>/', views.invoice_detail, name='invoice_detail'),
+    path('invoices_list/', views.invoices_list, name='invoices_list'),
     path('organization_list/', views.organization_list, name='organization_list'),
     path('index/', views.index, name='index'),
     path('password_reset/',

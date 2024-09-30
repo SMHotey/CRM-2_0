@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    Детальная информация по счету №{{ invoice.number }}{{ invoice.legal_entity }}
+    Детальная информация по счету №{{ invoice.number }} {{ invoice.get_legal_entity_display }} <br>
+    Организация: {{ invoice.organization }}
 {% endblock %}

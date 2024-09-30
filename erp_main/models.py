@@ -38,7 +38,6 @@ class Invoice(models.Model):
     legal_entity = models.CharField(max_length=50, choices=ENTITY_CHOICE)
 
 
-
 #def order_file_upload_to(instance, filename):
 #        # Создает уникальный путь для каждого загружаемого файла
 #    return os.path.join('uploads', f"{now().strftime('%Y%m%d_%H%M%S')}_{filename}")

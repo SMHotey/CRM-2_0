@@ -89,18 +89,24 @@
     <div class="row">
         <!-- Левая панель (уменьшенная в два раза) -->
         <nav class="col-md-1 d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
-                <ul class="nav flex-column text-center">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'order_upload' %}">
-                            Заказы
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'organization_add' %}">
-                            Организации
-                        </a>
-                    </li>
+    <div class="sidebar-sticky">
+        <ul class="nav flex-column text-center">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Заказы</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a>
+                    <a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a>
+                    <a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a>
+                    <a class="dropdown-item" href="#">Умный поиск</a>
+                </div>
+            <li class="nav-item">
+                <a class="nav-link" href="">Организации</a>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Все организации</a>
+                    <a class="dropdown-item" href="#">Мои организации</a>
+                    <a class="dropdown-item" href="{% url 'organization_add' %}">Добавить</a>
+                </div>
+            </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">
                             Менеджеры
@@ -120,7 +126,7 @@
                             <a class="dropdown-item" href="#">Прайсы клиентов</a>
                             <a class="dropdown-item" href="#">Создать КП</a>
                             <a class="dropdown-item" href="{% url 'invoice_add' %}">Выставить счет</a>
-                            <a class="dropdown-item" href="#">Удалить</a>
+                            <a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a>
                         </div>
                     </li>
                     <li class="nav-item">

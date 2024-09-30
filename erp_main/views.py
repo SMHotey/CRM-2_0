@@ -185,7 +185,12 @@ def register(request):
 
 
 def orders_list(request):
-    return render(request, 'orders_list.html', {'orders': Order.objects.all()})
+    if request.user.is_staff:
+        return render(request, 'orders_list.html', {'orders': Order.objects.all()})
+    else:
+        return render(request, 'orders_list.html', {'orders': Order.objects.filter(user=request.user)()})
+
+
 
 
 def order_detail(request, id):
@@ -201,3 +206,8 @@ def organization_detail(request, id):
 def invoice_detail(request, id):
     invoice = get_object_or_404(Invoice, id=id)
     return render(request, 'invoice_detail.html', {'invoice': invoice})
+
+def invoices_list(request):
+    invoices = Invoice.objects.all()
+    return render(request,'invoices_list.html', {'invoices': invoices})
+
