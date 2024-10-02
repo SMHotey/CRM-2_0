@@ -1,47 +1,54 @@
 {% extends 'base.html' %}
-{% load static %}
-
-<!DOCTYPE html>
-
-<html lang="ru">
 
 {% block content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузка данных организации</title>
-</head>
-<body>
-    <div class="container">
+<div class="container my-4">
+    <h1 id="form-title" class="mb-4 text-center">Добавить организацию</h1>
+    <form method="post" id="organization-form" class="d-flex flex-column align-items-center">
+        {% csrf_token %}
 
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ user.username }}
+        <div class="mb-4 text-center">
+            <label class="form-check-inline">
+                <input type="radio" class="form-check-input" name="type" value="organization" checked onchange="toggleFields()"> Юридическое лицо
+            </label>
+            <label class="form-check-inline">
+                <input type="radio" class="form-check-input" name="type" value="individual" onchange="toggleFields()"> Физическое лицо
+            </label>
+        </div>
 
-            {{ form.as_p }}  <!-- Рендеринг полей формы -->
-
-            <button type="submit">Сохранить</button>
-        </form>
-
-        {% if form.non_field_errors %}
-            <div class="error">
-                <strong>Ошибки:</strong>
-                <ul>
-                    {% for error in form.non_field_errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
+        <div id="organization-fields" class="mb-4 text-center">
+            <div class="mb-3">
+                <label for="{{ form.inn.id_for_label }}" class="form-label">{{ form.inn.label }}</label>
+                <input type="text" class="form-control custom-width" name="{{ form.inn.name }}" value="{{ form.inn.value|default_if_none:'' }}" required>
             </div>
-        {% endif %}
+            <div class="mb-3">
+                <label for="name" class="form-label">Наименование</label>
+                <input type="text" class="form-control custom-width" name="name" required>
+            </div>
+        </div>
 
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="error">
-                    <strong>{{ field.label }}:</strong> {{ error }}
-                </div>
-            {% endfor %}
-        {% endfor %}
-    </div>
-</body>
+        <div id="individual-fields" style="display:none;" class="mb-4 text-center">
+            <div class="mb-3">
+                <label for="first_name" class="form-label">Имя</label>
+                <input type="text" class="form-control custom-width" name="first_name" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Телефон</label>
+                <input type="text" class="form-control custom-width" name="phone" required>
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+    </form>
+
+    <script>
+    function toggleFields() {
+        const isIndividual = document.querySelector('input[name="type"]:checked').value === 'individual';
+        document.getElementById('organization-fields').style.display = isIndividual ? 'none' : 'block';
+        document.getElementById('individual-fields').style.display = isIndividual ? 'block' : 'none';
+        document.getElementById('form-title').innerText = isIndividual ? 'Добавить физическое лицо' : 'Добавить организацию';
+    }
+    </script>
+</div>
 {% endblock %}
-</html>

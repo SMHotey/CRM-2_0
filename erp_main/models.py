@@ -26,7 +26,8 @@ class Invoice(models.Model):
         ('PI', 'Палани Инжиниринг'),
         ('PD', 'Палани Дистрибуция'),
         ('GP', 'Глобал Палани'),
-        ('DMM', 'Двери металл-М')
+        ('DMM', 'Двери металл-М'),
+        ('FL', 'Прочее')
     )
     number = models.CharField(max_length=5)
     organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)

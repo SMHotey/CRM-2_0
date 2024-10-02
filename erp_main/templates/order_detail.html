@@ -1,5 +1,59 @@
 {% extends 'base.html' %}
-
 {% block content %}
-    Детальная информация по заказу {{ order.id }}
+<div class="container my-4">
+    <h1>Детали заказа: {{ order.internal_order_number }}</h1>
+    <div class="card">
+        <div class="card-header">
+            Информация о заказе <br>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Дата создания: {{ order.created_at }}</h5>
+            <p class="card-text">Файл заказа: <a href="{{ order.order_file.url }}">Скачать</a></p>
+            <h5>Связанные счета</h5>
+            <ul>
+                {% if order.invoice %}
+                    <li>Счет №: {{ order.invoice.number }}</li>
+                    <li>Организация: {{ order.invoice.organization.name }}</li>
+                    <li>Дата: {{ order.invoice.date }}</li>
+                    <li>Сумма: {{ order.invoice.amount }} руб.</li>
+                    <li>Оплаченная сумма: {{ order.invoice.payed_amount }} руб.</li>
+                {% else %}
+                    <li>Отсутствуют связанные счета.</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            Содержимое заказа
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Ширина</th>
+                        <th>Высота</th>
+                        <th>Количество</th>
+                        <th>Комментарий</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>{{ item.p_kind }}</td>
+                        <td>{{ item.p_type }}</td>
+                        <td>{{ item.p_width }}</td>
+                        <td>{{ item.p_height }}</td>
+                        <td>{{ item.p_quantity }}</td>
+                        <td>{{ item.p_comment }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

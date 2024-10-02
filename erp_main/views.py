@@ -191,8 +191,6 @@ def orders_list(request):
         return render(request, 'orders_list.html', {'orders': Order.objects.filter(user=request.user)()})
 
 
-
-
 def order_detail(request, id):
     order = get_object_or_404(Order, id=id)
     return render(request, 'order_detail.html', {'order': order})
