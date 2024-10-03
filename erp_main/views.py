@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm
+from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm
 from .models import OrderItem, Order, Organization, Invoice  # Убедитесь, что вы импортировали модель
 from openpyxl import load_workbook  # Проверьте, что библиотека установлена
 import re
@@ -191,8 +191,15 @@ def orders_list(request):
         return render(request, 'orders_list.html', {'orders': Order.objects.filter(user=request.user)()})
 
 
-def order_detail(request, id):
-    order = get_object_or_404(Order, id=id)
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        form = OrderFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            order.order_file = form.cleaned_data['order_file']  # Замените файл заказа
+            order.save()
+            return redirect('order_detail', {'order': order})
+
     return render(request, 'order_detail.html', {'order': order})
 
 

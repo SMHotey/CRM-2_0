@@ -87,40 +87,34 @@
         <div class="header-title-new" id="newTitle">Двери Металл-М</div>
     </div>
     <div class="row">
-        <!-- Левая панель (уменьшенная в два раза) -->
         <nav class="col-md-1 d-none d-md-block bg-light sidebar">
-    <div class="sidebar-sticky">
-        <ul class="nav flex-column text-center">
-            <li class="nav-item">
-                <a class="nav-link active" href="#">Заказы</a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a>
-                    <a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a>
-                    <a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a>
-                    <a class="dropdown-item" href="#">Умный поиск</a>
-                </div>
-            <li class="nav-item">
-                <a class="nav-link" href="">Организации</a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">Все организации</a>
-                    <a class="dropdown-item" href="#">Мои организации</a>
-                    <a class="dropdown-item" href="{% url 'organization_add' %}">Добавить</a>
-                </div>
-            </li>
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column text-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Менеджеры
-                        </a>
+                        <a class="nav-link active" href="#">Заказы</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a>
+                            <a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a>
+                            <a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a>
+                            <a class="dropdown-item" href="#">Умный поиск</a>
+                        </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Статистика
-                        </a>
+                        <a class="nav-link" href="">Организации</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="#">Все организации</a>
+                            <a class="dropdown-item" href="#">Мои организации</a>
+                            <a class="dropdown-item" href="{% url 'organization_add' %}">Добавить</a>
+                        </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Расчеты
-                        </a>
+                        <a class="nav-link" href="#">Менеджеры</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Статистика</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Расчеты</a>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="#">Прайс общий</a>
                             <a class="dropdown-item" href="#">Прайсы клиентов</a>
@@ -130,9 +124,7 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            Отгрузки
-                        </a>
+                        <a class="nav-link" href="#">Отгрузки</a>
                         <div class="dropdown-menu">
                             <a class="dropdown-item" href="#">Цех №1</a>
                             <a class="dropdown-item" href="#">Цех №3</a>
@@ -185,14 +177,16 @@
                     </div>
                 </div>
             </div>
-
-         
-            
         </main>
     </div>
 </div>
+
 {% block content %}
 {% endblock %}
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
     function showNewTitle() {
         document.getElementById("originalTitle").classList.add("header-title-hidden");
@@ -203,20 +197,6 @@
         document.getElementById("originalTitle").classList.remove("header-title-hidden");
         document.getElementById("newTitle").style.opacity = 0;
     }
-
-    // Создание 10 пустых строк в таблице
-    const tableBody = document.getElementById('tableBody');
-    for (let i = 0; i < 10; i++) {
-        let row = tableBody.insertRow();
-        for (let j = 0; j < 15; j++) {
-            let cell = row.insertCell();
-            cell.textContent = ''; // Оставляем ячейки пустыми
-        }
-    }
 </script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -62,3 +62,7 @@ class InvoiceForm(forms.ModelForm):
 
     def __str__(self):
         return self.number if self.number else "Без номера"
+
+
+class OrderFileForm(forms.Form):
+    order_file = forms.FileField()
