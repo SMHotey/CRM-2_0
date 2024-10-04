@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -24,16 +25,18 @@
         }
         .sidebar {
             width: auto; /* Изменена ширина sidebar */
-            min-width: 120px; /* Минимальная ширина для предотвращения сжатия */
+            min-width: 200px; /* Минимальная ширина для предотвращения сжатия */
             padding-top: 20px; /* Отступ сверху для выравнивания */
             position: fixed; /* Зафиксировать меню */
             height: 100%; /* Высота в 100% */
             overflow-y: auto; /* Прокрутка внутри меню */
             white-space: nowrap; /* Запретить перенос текста */
+            background-color: #f8f9fa !important;
+            
         }
         .main-content {
             margin-left: 0; /* Убираем отступ слева для основного контента */
-            margin-left: 140px; /* Измените значение для соответствия ширине меню */
+            margin-left: 180px; /* Измените значение для соответствия ширине меню */
             flex-grow: 1; /* Заставит основную часть растягиваться */
         }
         table {
@@ -45,12 +48,36 @@
             padding: 8px; /* Отступы ячеек */
             text-align: left; /* Выравнивание текста по левой стороне */
         }
+        tr:nth-child(odd) {
+            background-color: #f9f9f9; /* Светлый цвет для нечетных строк */
+        }
+        tr:nth-child(even) {
+            background-color: #ffffff; /* Белый цвет для четных строк */
+        }
         tbody tr:hover {
-            background-color: #f5f5f5; /* Цвет фона строки при наведении */
+            background-color: #e6e6fa; /* Цвет фона строки при наведении */
         }
         .card-body {
             text-align: center; /* Выравнивание текста по центру в блоках */
+            background-color: white;
         }
+        #first-block .card-header {
+            background-color: #37b1de; /* Цвет фона шапки карточки */
+            color: white; /* Цвет текста в шапке карточки */
+        }
+        #first-block{
+            width: 1690px;
+            height: 150px;
+            margin-left: 10px;
+            border: 1px solid #37b1de;
+            
+        }
+        #second-block{
+            width: 530px;
+            height: 100px;
+            margin-left: 10px;
+        }
+        
     </style>
     <title>CRM Система</title>
 </head>
@@ -59,6 +86,12 @@
 <div class="container-fluid">
     <div class="row">
         <nav class="col-md-1 d-none d-md-block bg-light sidebar">
+            <div style="text-align: center;">
+                <a href="{% url 'index' %}">
+                    <img src="{% static 'erp_main/images/logo.png' %}" style="width: 120px; height: auto;">
+                </a>
+            </div>
+            <br>
             <div class="sidebar-sticky">
                 <ul class="nav flex-column text-center">
                     <li class="nav-item">
@@ -106,11 +139,10 @@
         </nav>
 
         <main role="main" class="col-md-11 main-content px-4">
-            <!-- Новый блок над тремя блоками -->
             <div class="row my-3">
                 <div class="col-md-12">
-                    <div class="card mb-3">
-                        <div class="card-header">Новый Блок</div>
+                    <div class="card mb-3" id="first-block">
+                        <div class="card-header">Информация</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5> <!-- Оставляем пустым -->
                             <p class="card-text"></p> <!-- Оставляем пустым -->
@@ -121,7 +153,7 @@
 
             <div class="row my-3">
                 <div class="col-md-4">
-                    <div class="card text-white bg-primary mb-3">
+                    <div class="card text-white bg-primary mb-3" id="second-block">
                         <div class="card-header">Готовность на сегодня</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5> <!-- Оставляем пустым -->
@@ -130,7 +162,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card text-white bg-success mb-3">
+                    <div class="card text-white bg-success mb-3" id="second-block">
                         <div class="card-header">Готовность на завтра</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5> <!-- Оставляем пустым -->
@@ -139,7 +171,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card text-white bg-danger mb-3">
+                    <div class="card text-white bg-danger mb-3" id="second-block">
                         <div class="card-header">Отгрузки на сегодня</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5> <!-- Оставляем пустым -->
