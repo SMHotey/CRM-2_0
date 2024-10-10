@@ -10,7 +10,7 @@ from django.utils.timezone import now
 class Organization(models.Model):
     name = models.CharField(max_length=100)
     inn = models.CharField(max_length=15)
-    last_order_date = models.DateField(null=True, blank=True)
+    create_at = models.DateField(auto_now_add=True)
     user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -18,6 +18,8 @@ class Organization(models.Model):
 
     class Meta:
         verbose_name_plural = 'Организации'
+
+
 
 
 class Invoice(models.Model):
@@ -32,11 +34,14 @@ class Invoice(models.Model):
     number = models.CharField(max_length=5)
     organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payed_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    shipping_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    montage_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.IntegerField(default=0)
+    payed_amount = models.IntegerField(default=0)
+    shipping_amount = models.IntegerField(default=0)
+    montage_amount = models.IntegerField(default=0)
     legal_entity = models.CharField(max_length=50, choices=ENTITY_CHOICE)
+
+    def __str__(self):
+        return f'Счет № {self.number}'
 
 
 #def order_file_upload_to(instance, filename):
@@ -49,6 +54,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
+
 
     @property
     def doors_1_nk(self):
@@ -118,7 +124,7 @@ class Order(models.Model):
 
     @property
     def glass(self):
-        return self.items.filter((~Q(p_glass__in=[(None, None)]))).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self.items.filter(Q(p_glass__isnull=False) & ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def quantity(self):
@@ -143,12 +149,12 @@ class OrderChangeHistory(models.Model):
 
 class OrderItem(models.Model):
     KIND_CHOICE = (
-        ('door', 'дверь'),
-        ('gate', 'ворота'),
-        ('hatch', 'люк'),
-        ('transom', 'фрамуга'),
-        ('dobor', 'добор'),
-        ('others', 'прочее')
+        ('door', 'Дверь'),
+        ('gate', 'Ворота'),
+        ('hatch', 'Люк'),
+        ('transom', 'Фрамуга'),
+        ('dobor', 'Добор'),
+        ('others', 'Прочее')
     )
     TYPE_CHOICE = (
         ('tech', 'тех.'),
@@ -190,6 +196,12 @@ class OrderItem(models.Model):
     firm_plate = models.BooleanField(default=True)  # фирменный шильд
     mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True)  # монтажные уши: размер, кол-во
 
+    @property
+    def glass(self):
+        if self.p_glass != '{}':
+            return self.p_glass.translate(str.maketrans("", "", "{}()")).replace(",", "х") + "<br>"
+        else:
+            return f'глухая'
 
 
 

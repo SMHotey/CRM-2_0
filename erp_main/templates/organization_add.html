@@ -18,22 +18,22 @@
         <div id="organization-fields" class="mb-4 text-center">
             <div class="mb-3">
                 <label for="{{ form.inn.id_for_label }}" class="form-label">{{ form.inn.label }}</label>
-                <input type="text" class="form-control custom-width" name="{{ form.inn.name }}" value="{{ form.inn.value|default_if_none:'' }}" required>
+                <input type="text" class="form-control custom-width" name="{{ form.inn.name }}" value="{{ form.inn.value|default_if_none:'' }}">
             </div>
             <div class="mb-3">
                 <label for="name" class="form-label">Наименование</label>
-                <input type="text" class="form-control custom-width" name="name" required>
+                <input type="text" class="form-control custom-width" name="name">
             </div>
         </div>
 
         <div id="individual-fields" style="display:none;" class="mb-4 text-center">
             <div class="mb-3">
                 <label for="first_name" class="form-label">Имя</label>
-                <input type="text" class="form-control custom-width" name="first_name" required>
+                <input type="text" class="form-control custom-width" name="first_name">
             </div>
             <div class="mb-3">
                 <label for="phone" class="form-label">Телефон</label>
-                <input type="text" class="form-control custom-width" name="phone" required>
+                <input type="text" class="form-control custom-width" name="phone">
             </div>
         </div>
 

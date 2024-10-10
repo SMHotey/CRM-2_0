@@ -1,23 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Список Организаций</h1>
 
 {% if is_admin %}
-    <h2>Полный список организаций</h2>
     <table class="table table-striped table-hover">
         <thead class="thead-dark">
             <tr>
-                <th>Название организации</th>
-                <th>Менеджер</th>
-                <th>Дата последнего заказа</th>
+                <th  style="padding: 4px; text-align: center; vertical-align: middle;">Название организации</th>
+                <th  style="padding: 4px; text-align: center; vertical-align: middle;">Менеджер</th>
+                <th  style="padding: 4px; text-align: center; vertical-align: middle;">Дата последнего заказа</th>
             </tr>
         </thead>
         <tbody>
             {% for org in organizations %}
             <tr>
                 <td>{{ org.name }}</td>
-                <td>{{ org.user.username }}</td>
+                <td style="padding: 4px; text-align: center; vertical-align: middle;">{{ org.user.first_name }} {{ org.user.last_name }}</td>
+                <td style="padding: 4px; text-align: center; vertical-align: middle;">Здесь будет дата</td>
 
             </tr>
             {% endfor %}

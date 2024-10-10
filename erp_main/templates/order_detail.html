@@ -41,26 +41,36 @@
         </div>
         <div id="orderItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
             <div class="card-body">
-                <table class="table table-bordered table-striped">
+                <table class="border-collapse: collapse;">
                     <thead>
                         <tr>
-                            <th>Название</th>
-                            <th>Тип</th>
-                            <th>Ширина</th>
-                            <th>Высота</th>
-                            <th>Количество</th>
-                            <th>Комментарий</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">№</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Наименование</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Тип</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Ширина</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Высота</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Откр.</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Стекло</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Кол-во</th>
+                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Комментарий</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in order.items.all %}
                         <tr>
-                            <td>{{ item.p_kind }}</td>
-                            <td>{{ item.p_type }}</td>
-                            <td>{{ item.p_width }}</td>
-                            <td>{{ item.p_height }}</td>
-                            <td>{{ item.p_quantity }}</td>
-                            <td>{{ item.p_comment }}</td>
+                            <td style="padding: 4px; text-align: center; vertical-align: middle;">{{ item.position_num }}</td>
+                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.get_p_kind_display }}</td>
+                            <td style="padding: 4px; text-align: center; vertical-align: middle; white-space: nowrap;">{{ item.get_p_type_display }}</td>
+                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
+                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
+                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
+                            <td style="padding: 8px; text-align: center; vertical-align: middle; ">
+                                {{ item.glass | safe}}
+                            </td>
+                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_quantity }}</td>
+                            {% if item.p_comment %}
+                                <td style="padding: 8px; text-align: left; vertical-align: middle;">{{ item.p_comment }}</td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>

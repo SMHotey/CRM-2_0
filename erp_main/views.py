@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm
 from .models import OrderItem, Order, Organization, Invoice  # Убедитесь, что вы импортировали модель
@@ -45,19 +46,15 @@ def order_upload(request):
             row = 8
             for row in range(8, max_row):
                 if get_value(row, 2):  # Если у текущей строки есть номер позиции
-                    print(max_row)
                     if 8 < row < max_row:
-                        print(line, '  ', row)
                         position.append(line)
                     line = []
                     for column in seq:
-                        print(row, column)
                         line.append(get_value(row, column))
                 else:
                     line.append(get_value(row, 7))
                     line.append(get_value(row, 8))
                 if row == max_row - 1:
-                    print(line, ' end ', row)
                     position.append(line)
 
             kind_mapping = {
@@ -78,7 +75,6 @@ def order_upload(request):
             for i in range(0, len(position)):
                 n_num = position[i][0]
                 name = position[i][1]
-                print(n_num, name)
                 n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)),
                               None)
                 n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)),
@@ -97,8 +93,12 @@ def order_upload(request):
                 n_comment = position[i][12]
 
                 glass = position[i][13:]
-                n_glass = sum(dict(Counter((list(zip(glass[::2], glass[1::2])) if glass else []))).values())
-
+                counted_glass = dict(Counter(list(zip(glass[::2], glass[1::2]))))
+                if (None, None) in counted_glass:
+                    del counted_glass[(None, None)]
+                print(counted_glass)
+                if counted_glass:
+                    n_glass = sum(counted_glass.values())
 
                 new_item = OrderItem(
                     order=order,
@@ -117,7 +117,7 @@ def order_upload(request):
                     p_ral=n_ral,
                     p_quantity=n_quantity,
                     p_comment=n_comment,
-                    p_glass=n_glass,
+                    p_glass=counted_glass,
 
                 )
                 new_item.save()
@@ -153,7 +153,12 @@ def invoice_add(request):
         form = InvoiceForm(user=request.user, data=request.POST)
         if form.is_valid():
             form.save()
-            return redirect('index')  # Перенаправьте на нужную страницу после сохранения
+            return JsonResponse({'success': True})
+
+        # Если форма не валидна, возвращаем ошибки в формате JSON
+        error_messages = form.errors.as_json()
+        return JsonResponse({'success': False, 'error': error_messages}, status=400)
+
     else:
         form = InvoiceForm(user=request.user)
 
@@ -212,7 +217,7 @@ def invoice_detail(request, id):
     invoice = get_object_or_404(Invoice, id=id)
     return render(request, 'invoice_detail.html', {'invoice': invoice})
 
+
 def invoices_list(request):
     invoices = Invoice.objects.all()
-    return render(request,'invoices_list.html', {'invoices': invoices})
-
+    return render(request, 'invoices_list.html', {'invoices': invoices})

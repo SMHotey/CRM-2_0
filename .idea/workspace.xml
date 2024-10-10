@@ -5,11 +5,47 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="процесс идет">
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0003_alter_invoice_legal_entity_alter_orderitem_p_kind.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0004_rename_last_order_date_organization_create_at_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/static/style.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_9Nrk8nk.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_GBNTD6k.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_OQCKU3w.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_PDDysnV.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_VDSz3wd.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_tpFMWB7.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_295_импост.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_295_импост_08Of2vE.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_295_импост_BJGDrFb.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_295_импост_hzZxqoP.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Монтажсервис_-ЭНКО_счет_282_6zp3ZIM.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_-_09-04-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_03-07-24_qIktT8N.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_WHUTNQa.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_wLSXrUg.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_NLJKFIl.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_acGcN5g.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_edxJELP.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_kBO6uG4.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_quRdWl7.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_sPHa5ku.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-1_2JlmiQw.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-1_J6Vq89k.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-1_c2YsdEj.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/add_order.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,10 +60,16 @@
       <list>
         <option value="Python Script" />
         <option value="HTML File" />
+        <option value="CSS File" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -64,8 +106,9 @@
     "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "second",
     "last_opened_file_path": "C:/Users/User01/PycharmProjects/Journal_4_0",
+    "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -185,7 +228,11 @@
       <workItem from="1727787482482" duration="849000" />
       <workItem from="1727856642429" duration="14019000" />
       <workItem from="1727942780456" duration="16452000" />
-      <workItem from="1728023909804" duration="16877000" />
+      <workItem from="1728023909804" duration="17244000" />
+      <workItem from="1728285291750" duration="16332000" />
+      <workItem from="1728368934479" duration="18471000" />
+      <workItem from="1728455616500" duration="10670000" />
+      <workItem from="1728542347633" duration="17918000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -275,7 +322,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727966226887</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="процесс идет">
+      <option name="closed" value="true" />
+      <created>1728048464362</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1728048464363</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -293,6 +348,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="процесс идет" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1728024089989" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1728565304298" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>
