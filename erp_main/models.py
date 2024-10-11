@@ -19,6 +19,15 @@ class Organization(models.Model):
     class Meta:
         verbose_name_plural = 'Организации'
 
+    @property
+    def last_order(self):
+        return (
+            Order.objects.filter(invoice__organization=self.id)
+            .order_by('-created_at')
+            .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
+        )
+
+
 
 
 

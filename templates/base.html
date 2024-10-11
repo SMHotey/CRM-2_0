@@ -14,27 +14,34 @@
             border-radius: 5px;
         }
         .nav-link:hover {
-            background-color: #1164b4; /* Цвет при наведении */
-            color: white; /* Цвет текста при наведении */
+            background-color: #1164b4;
+            color: white;
         }
         .dropdown-menu {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
         }
-        .nav-item:hover .dropdown-menu {
-            display: block;
+        .dropdown-item:hover {
+            background-color: #e6e6fa; /* Замените на желаемый цвет при наведении */
+            color: red; /* Замените на желаемый цвет текста при наведении */
+        }
+
+        .nav-item.show .dropdown-menu {
+            max-height: 200px;
         }
         .sidebar {
-            width: 200px; /* Фиксированная ширина для сайта */
+            width: 200px;
             padding-top: 20px;
-            position: fixed; /* Зафиксировать меню */
-            height: 100%; /* Высота в 100% */
-            overflow-y: auto; /* Прокрутка внутри меню */
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
             background-color: #f8f9fa !important;
         }
         .main-content {
-            margin-left: 220px; /* Устанавливаем отступ для основного контента */
-            padding: 20px; /* Отступ для контента */
-            flex-grow: 1; /* Заставит основную часть растягиваться */
+            margin-left: 220px;
+            padding: 20px;
+            flex-grow: 1;
         }
         table {
             border-collapse: collapse; 
@@ -78,7 +85,6 @@
             <br>
             <div class="sidebar-sticky">
                 <ul class="nav flex-column text-center">
-                    {% comment %} Navigation Items {% endcomment %}
                     <li class="nav-item">
                         <a class="nav-link active" href="#">Заказы</a>
                         <div class="dropdown-menu">
@@ -89,9 +95,9 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Организации</a>
+                        <a class="nav-link" href="#">Организации</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Все организации</a>
+                            <a class="dropdown-item" href="{% url 'organization_list' %}">Все организации</a>
                             <a class="dropdown-item" href="#">Мои организации</a>
                             <a class="dropdown-item" href="{% url 'organization_add' %}">Добавить</a>
                         </div>
@@ -122,7 +128,7 @@
                 </ul>
             </div>
         </nav>
-        
+
         <main role="main" class="col-md-10 main-content">
             <div class="row my-3">
                 <div class="col-md-12">
@@ -171,21 +177,26 @@
     </div>
 </div>
 
-
-
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-    function showNewTitle() {
-        document.getElementById("originalTitle").classList.add("header-title-hidden");
-        document.getElementById("newTitle").style.opacity = 1;
-    }
+    $(document).ready(function() {
+        $('.nav-link').click(function() {
+            const $dropdown = $(this).next('.dropdown-menu');
+            $dropdown.parent().toggleClass('show');
+            $dropdown.slideToggle(300);
+        });
 
-    function hideNewTitle() {
-        document.getElementById("originalTitle").classList.remove("header-title-hidden");
-        document.getElementById("newTitle").style.opacity = 0;
-    }
+        // Скрываем меню при уходе курсора
+        $('.nav-item').mouseleave(function() {
+            const $dropdown = $(this).find('.dropdown-menu');
+            if ($dropdown.is(':visible')) {
+                $dropdown.slideUp(300);
+                $(this).removeClass('show');
+            }
+        });
+    });
 </script>
 </body>
 </html>

@@ -14,9 +14,11 @@
         <tbody>
             {% for org in organizations %}
             <tr>
-                <td>{{ org.name }}</td>
+                <td style="padding: 8px; text-align: left; vertical-align: middle;">
+                    <a href="{% url 'organization_detail' org.id %}">{{ org.name }}</a>
+                </td>
                 <td style="padding: 4px; text-align: center; vertical-align: middle;">{{ org.user.first_name }} {{ org.user.last_name }}</td>
-                <td style="padding: 4px; text-align: center; vertical-align: middle;">Здесь будет дата</td>
+                <td style="padding: 4px; text-align: center; vertical-align: middle;">{{org.last_order}}</td>
 
             </tr>
             {% endfor %}
