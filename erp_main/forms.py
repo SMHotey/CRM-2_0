@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 
 from erp_main.models import Organization, Invoice, Order
 
@@ -25,18 +27,42 @@ class OrderForm(forms.ModelForm):
             self.fields['invoice'].queryset = Invoice.objects.all()
 
 
+# forms.py
 class OrganizationForm(forms.ModelForm):
+
     class Meta:
         model = Organization
-        fields = ['name', 'inn']
+        fields = ['name', 'inn', 'phone_number', 'name_fl']
+
+    # Изменение по умолчанию для полей
+    name_fl = forms.CharField(max_length=15, required=False)
+    phone_number = forms.CharField(max_length=15, required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name'].label = 'Название'
         self.fields['inn'].label = 'ИНН'
+        self.fields['name'].label = 'Наименование'
+        self.fields['name_fl'].label = 'Имя, фамилия'
+        self.fields['phone_number'].label = 'Номер телефона'
 
-    def __str__(self):
-        return self.name
+    def clean(self):
+        cleaned_data = super().clean()
+        # Условная логика для валидации
+        type_ = self.data.get('type')  # Получаем тип из POST данных
+
+        if type_ == 'organization':
+            if not cleaned_data.get('inn'):
+                self.add_error('inn', 'ИНН обязательно для юридического лица.')
+            if not cleaned_data.get('name'):
+                self.add_error('name', 'Наименование обязательно для юридического лица.')
+
+        elif type_ == 'individual':
+            if not cleaned_data.get('name_fl'):
+                self.add_error('name_fl', 'Имя обязательно для физического лица.')
+            if not cleaned_data.get('phone_number'):
+                self.add_error('phone_number', 'Номер телефона обязателен для физического лица.')
+
+        return cleaned_data
 
 
 class InvoiceForm(forms.ModelForm):

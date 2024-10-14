@@ -15,7 +15,12 @@
             {% for org in organizations %}
             <tr>
                 <td style="padding: 8px; text-align: left; vertical-align: middle;">
-                    <a href="{% url 'organization_detail' org.id %}">{{ org.name }}</a>
+                    <a href="{% url 'organization_detail' org.id %}">
+                        {% if org.name %}
+                            {{ org.name }}
+                        {% else %}
+                            {{ org.name_fl }} ({{ org.phone_number }})
+                        {% endif %} </a>
                 </td>
                 <td style="padding: 4px; text-align: center; vertical-align: middle;">{{ org.user.first_name }} {{ org.user.last_name }}</td>
                 <td style="padding: 4px; text-align: center; vertical-align: middle;">{{org.last_order}}</td>

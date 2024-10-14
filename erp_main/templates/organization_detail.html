@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    Детальная информация по организации {{ organization.name }}
+    Детальная информация по
+        {% if organization.name %}
+            организации: {{ organization.name }}
+        {% else %}
+            физическому лицу: {{ organization.name_fl }} ({{ organization.phone_number }})
+        {% endif %}
 {% endblock %}

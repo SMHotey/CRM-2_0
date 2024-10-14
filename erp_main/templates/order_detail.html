@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
 <div class="container my-4">
@@ -25,8 +26,8 @@
                     <li class="list-group-item">Счет №: <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a></li>
                     <li class="list-group-item">Организация: <a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></li>
                     <li class="list-group-item">Дата: {{ order.invoice.date }}</li>
-                    <li class="list-group-item">Сумма: {{ order.invoice.amount }} руб.</li>
-                    <li class="list-group-item">Оплаченная сумма: {{ order.invoice.payed_amount }} руб.</li>
+                    <li class="list-group-item">Сумма: {{ order.invoice.amount|intcomma }} р.</li>
+                    <li class="list-group-item">Оплаченная сумма: {{ order.invoice.payed_amount|intcomma }} р.</li>
                 {% else %}
                     <li class="list-group-item">Отсутствуют связанные счета.</li>
                 {% endif %}

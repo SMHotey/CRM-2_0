@@ -1,4 +1,8 @@
 import os
+import re
+
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -7,13 +11,21 @@ from django.utils import timezone
 from django.utils.timezone import now
 
 
+def validate_numeric_only(value):
+    if not re.match(r'^\d{6,}$', value) and value is not None:
+        raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
+
+
 class Organization(models.Model):
-    name = models.CharField(max_length=100)
-    inn = models.CharField(max_length=15)
-    create_at = models.DateField(auto_now_add=True)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    inn = models.CharField(max_length=15, blank=True, null=True)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    name_fl = models.CharField(max_length=15, blank=True, null=True)
     user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
 
     def __str__(self):
+        if self.name_fl:
+            return f'{self.name_fl} ({self.phone_number})'
         return self.name
 
     class Meta:
@@ -26,10 +38,6 @@ class Organization(models.Model):
             .order_by('-created_at')
             .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
         )
-
-
-
-
 
 class Invoice(models.Model):
     ENTITY_CHOICE = (

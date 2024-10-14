@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
     <b>Детальная информация по счету №{{ invoice.number }} от {{ invoice.date }}</b> <br><br>
     <b>Юридическое лицо:</b> <i>{{ invoice.get_legal_entity_display }}</i> <br>
     <b>Организация:</b> <i>{{ invoice.organization }}</i> <br>
     <b>Менеджер:</b> <i>{{ invoice.organization.user.first_name }} {{ invoice.organization.user.last_name }} </i> <br>
-    <b>Сумма счета:</b> <i>{{ invoice.amount }}</i> <br>
-    <b>Оплачено:</b> <i>{{ invoice.payed_amount }}</i> <br>
+    <b>Сумма счета:</b> <i>{{ invoice.amount|intcomma }} р.</i> <br>
+    <b>Оплачено:</b> <i>{{ invoice.payed_amount|intcomma }} р.</i> <br>
     {% if invoice.shipping_amount > 0 %}
-       <b> Включено за доставку:</b> <i>{{ invoice.shipping_amount }}</i> <br>
+       <b> Включено за доставку:</b> <i>{{ invoice.shipping_amount|intcomma }} р.</i> <br>
     {% endif %}
     {% if invoice.montage_amount > 0 %}
-       <b> Включено за монтаж:</b> <i>{{ invoice.montage_amount }}</i> <br>
+       <b> Включено за монтаж:</b> <i>{{ invoice.montage_amount|intcomma }} р.</i> <br>
     {% endif %}
 {% endblock %}

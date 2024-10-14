@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from collections import Counter
 from django.views import View
 
-
+@login_required(login_url='login')
 def index(request):
     return render(request, 'index.html')
 
@@ -96,7 +96,6 @@ def order_upload(request):
                 counted_glass = dict(Counter(list(zip(glass[::2], glass[1::2]))))
                 if (None, None) in counted_glass:
                     del counted_glass[(None, None)]
-                print(counted_glass)
                 if counted_glass:
                     n_glass = sum(counted_glass.values())
 
@@ -135,17 +134,35 @@ def order_upload(request):
 def organization_add(request):
     if request.method == 'POST':
         form = OrganizationForm(request.POST)
-        if form.is_valid():
-            organization = form.save(commit=False)
-            organization.user = request.user  # Добавьте текущего пользователя в объект
-            organization.save()
 
-            return redirect('organization_list')  # Перенаправьте на нужную страницу после сохранения
+        # Получаем тип из POST данных
+        type_ = request.POST.get('type')
+        print(type_, form.errors)
+
+        if form.is_valid():
+            organization = form.save(commit=False)  # Создаём объект, но не сохраняем пока в БД
+            print(organization)
+
+            if type_ == 'organization':
+                organization.inn = form.cleaned_data.get('inn')
+                organization.name = form.cleaned_data.get('name')
+                organization.phone_number = None
+                organization.name_fl = None
+
+            elif type_ == 'individual':
+                organization.name_fl = form.cleaned_data.get('name_fl')
+                organization.phone_number = form.cleaned_data.get('phone_number')
+                organization.inn = None
+                organization.name = None
+
+            organization.user = request.user  # Если нужно сохранить пользователя, который добавляет
+            organization.save()
+            return redirect('organization_list')  # Обновите на именованный URL или представление
+
     else:
         form = OrganizationForm()
 
     return render(request, 'organization_add.html', {'form': form})
-
 
 @login_required(login_url='login')
 def invoice_add(request):
