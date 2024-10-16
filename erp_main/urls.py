@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth.views import LogoutView
 from django.urls import path
 
 from . import views
@@ -12,7 +13,8 @@ urlpatterns = [
     path('orders_list/', views.orders_list, name='orders_list'),
     path('organization/add/', views.organization_add, name='organization_add'),
     path('invoice/add/', views.invoice_add, name='invoice_add'),
-    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('login/', auth_views.LoginView.as_view(next_page='index'), name='login'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('organization/<int:id>/', views.organization_detail, name='organization_detail'),
     path('invoice/<int:id>/', views.invoice_detail, name='invoice_detail'),

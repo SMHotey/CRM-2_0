@@ -3,13 +3,13 @@
 {% load my_filters %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5" style="width: 30%;">
     <h2 class="mb-4">Загрузка заказа</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-group">
             {{ form.order_file.label_tag }}
-            {{ form.order_file|add_class:"form-control" }}  <!-- Поле файла -->
+            {{ form.order_file }}  <!-- Поле файла -->
             {% if form.order_file.errors %}
                 <div class="text-danger">
                     {{ form.order_file.errors }}
@@ -18,15 +18,122 @@
         </div>
         <div class="form-group">
             {{ form.invoice.label_tag }}
-            {{ form.invoice|add_class:"form-control" }}  <!-- Поле счета -->
+            {{ form.invoice }}  <!-- Поле счета -->
+            <button type="button" class="custom-button" data-toggle="modal" data-target="#newInvoiceModal">Новый счет</button>
             {% if form.invoice.errors %}
                 <div class="text-danger">
                     {{ form.invoice.errors }}
                 </div>
             {% endif %}
         </div>
+
+        <!-- Новые поля для ввода -->
+        <div class="form-group">
+            <label for="id_readiness">Готовность</label>
+            <input type="text" class="form-control numeric-input" id="id_readiness" name="readiness" value="1" required placeholder="Введите готовность">
+        </div>
+        <div class="form-group">
+            <label for="id_comment">Комментарий</label>
+            <textarea class="form-control" id="id_comment" name="comment" rows="3" placeholder="Введите комментарий"></textarea>
+        </div>
+
         <button type="submit" class="btn btn-primary">Загрузить</button>
     </form>
 </div>
-{% endblock %}
 
+<!-- Модальное окно для добавления нового счета -->
+<div class="modal fade" id="newInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="newInvoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newInvoiceModalLabel">Добавить новый счет</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="newInvoiceForm" method="post" action="{% url 'invoice_add' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="id_number">Номер</label>
+                        <input type="text" class="form-control" id="id_number" name="number" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_amount">Сумма</label>
+                        <input type="text" class="form-control numeric-input" id="id_amount" name="amount" required placeholder="Введите сумму">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_payed_amount">Оплачено</label>
+                        <input type="text" class="form-control numeric-input" id="id_payed_amount" name="payed_amount" value="0" placeholder="Введите оплачено">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_shipping_amount">Стоимость доставки</label>
+                        <input type="text" class="form-control numeric-input" id="id_shipping_amount" name="shipping_amount" value="0" placeholder="Введите стоимость доставки">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_montage_amount">Стоимость монтажа</label>
+                        <input type="text" class="form-control numeric-input" id="id_montage_amount" name="montage_amount" value="0" placeholder="Введите стоимость монтажа">
+                    </div>
+                    <div class="form-group">
+                        <label for="id_legal_entity">Юридическое лицо</label>
+                        <select class="form-control" id="id_legal_entity" name="legal_entity" required>
+                            <option value="" disabled selected>Выберите юридическое лицо</option>
+                            <option value="P">Палани</option>
+                            <option value="PI">Палани Инжиниринг</option>
+                            <option value="PD">Палани Дистрибуция</option>
+                            <option value="GP">Глобал Палани</option>
+                            <option value="DMM">Двери металл-М</option>
+                            <option value="FL">Прочее</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_organization">Организация</label>
+                        <select class="form-control" id="id_organization" name="organization" required>
+                            <option value="" disabled selected>Выберите организацию</option>
+                            {% for organization in organizations %}
+                                <option value="{{ organization.id }}">{{ organization.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="modal-error-messages" class="text-danger" style="display: none;"></div> <!-- Для отображения ошибок -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить счет</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Скрипт для обработки AJAX запроса и числовой валидации -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    // Валидация для полей ввода числовых значений
+    $(document).on('input', '.numeric-input', function() {
+        this.value = this.value.replace(/[^0-9]/g, ''); // Удалить все символы, кроме цифр
+    });
+
+    // Обработка отправки формы с помощью AJAX
+    $(document).on('submit', '#newInvoiceForm', function(event) {
+        event.preventDefault(); // предотвращаем отправку формы
+        const formData = $(this).serialize(); // собираем данные формы
+
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'), // URL для отправки данных формы
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    location.reload(); // Обновите страницу после успешного добавления
+                }
+            },
+            error: function(xhr) {
+                // Обработка ошибок
+                const errors = xhr.responseJSON.error;
+                $('#modal-error-messages').html(errors).show(); // Выводим ошибки в модальном окне
+            }
+        });
+    });
+</script>
+{% endblock %}

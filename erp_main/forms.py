@@ -15,12 +15,15 @@ class UserCreationForm(forms.ModelForm):
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['order_file', 'invoice']
+        fields = ['order_file', 'invoice', 'readiness', 'comment']
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['order_file'].label = 'Файл заказа'
         self.fields['invoice'].label = 'Счет'
+        self.fields['readiness'].label = 'Дата готовности'
+        self.fields['comment'].label = 'Комментарий'
+
         if not user.is_superuser:
             self.fields['invoice'].queryset = Invoice.objects.filter(user=user)
         else:

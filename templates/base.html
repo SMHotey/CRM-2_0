@@ -7,8 +7,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+         .alert-info {
+            background: none; /* Убирает заливку */
+            padding-top: 0;  /* Убирает верхний отступ */
+            padding-bottom: 0; /* Убирает нижний отступ */
+            border: none;
+        }
+         .custom-button {
+            background-color: #4CAF50; /* Зеленый фон */
+            color: white; /* Белый текст */
+            padding: 1px 12px; /* Отступы */
+            text-align: center; /* Выравнивание текста */
+            text-decoration: none; /* Без подчеркивания */
+            display: inline; /* Отображение как блочный элемент */
+            font-size: 16px; /* Размер шрифта */
+            margin: 4px 2px; /* Отступы вокруг кнопки */
+            cursor: pointer; /* Курсор в виде указателя */
+            border: none; /* Без рамки */
+            border-radius: 25px; /* Скругление углов */
+            transition: background-color 0.8s; /* Плавный переход для фона */
+        }
+        .custom-button:hover {
+            background-color: #45a049; /* Темнее зеленый при наведении */
+        }    
         .nav-item {
             position: relative;
+            list-style: none;
         }
         .nav-link {
             transition: background-color 0.3s;
@@ -22,6 +46,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-in-out;
+            background-color: #37b1de;
         }
         .dropdown-item:hover {
             background-color: #e6e6fa; /* Замените на желаемый цвет при наведении */
@@ -131,8 +156,32 @@
         </nav>
 
         <main role="main" class="col-md-10 main-content">
-            <div class="row my-3">
+            <div class="row my-1">
                 <div class="col-md-12">
+                    <!-- Контейнер-строка разбитый на 2 столбца -->
+                    <div class="row mb-0">
+                        <div class="col-md-10 text-center" style="visibility: hidden;">
+                            <div class="alert alert-info" role="alert">
+                                <strong> ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ </strong>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-center" style="background: none;">
+                            <div class="alert alert-info" role="alert">
+                                {% if user.is_authenticated %}
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">{{ user.first_name }} {{ user.last_name }}</a>
+                                        <div class="dropdown-menu">
+                                            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                                                {% csrf_token %}
+                                                <a href="javascript:void(0);" onclick="this.closest('form').submit();" class="dropdown-item">Выйти</a>
+                                            </form>
+                                            <a class="dropdown-item" href="#">Профиль</a>
+                                        </div>
+                                    </li>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                     <div class="card mb-3 text-white" id="first-block">
                         <div class="card-header">Информация</div>
                         <div class="card-body">

@@ -9,13 +9,15 @@ from django.contrib.auth.decorators import login_required
 from collections import Counter
 from django.views import View
 
-@login_required(login_url='login')
 def index(request):
-    return render(request, 'index.html')
+    if request.user.is_authenticated:
+        return render(request, 'index.html')
+    return render(request, 'registration/login.html')
 
 
 @login_required(login_url='login')
 def order_upload(request):
+    organizations = Organization.objects.all()
     global line
     if request.method == 'POST':
         form = OrderForm(user=request.user, data=request.POST, files=request.FILES)
@@ -117,6 +119,9 @@ def order_upload(request):
                     p_quantity=n_quantity,
                     p_comment=n_comment,
                     p_glass=counted_glass,
+                    readiness=order.readiness,
+                    comment=order.comment,
+
 
                 )
                 new_item.save()
@@ -127,7 +132,10 @@ def order_upload(request):
     else:
         form = OrderForm(user=request.user)
 
-    return render(request, 'order_upload.html', {'form': form})
+    return render(request, 'order_upload.html', {'form': form, 'organizations': organizations})
+
+def change_order(request):
+    pass
 
 
 @login_required(login_url='login')
@@ -170,6 +178,7 @@ def invoice_add(request):
         form = InvoiceForm(user=request.user, data=request.POST)
         if form.is_valid():
             form.save()
+            # При успешном сохранении возвращаем JSON ответ
             return JsonResponse({'success': True})
 
         # Если форма не валидна, возвращаем ошибки в формате JSON
@@ -206,6 +215,7 @@ def register(request):
     return render(request, 'registration/register.html', {'form': form})
 
 
+@login_required(login_url='login')
 def orders_list(request):
     if request.user.is_staff:
         return render(request, 'orders_list.html', {'orders': Order.objects.all()})
@@ -213,6 +223,7 @@ def orders_list(request):
         return render(request, 'orders_list.html', {'orders': Order.objects.filter(user=request.user)()})
 
 
+@login_required(login_url='login')
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     if request.method == 'POST':
@@ -225,16 +236,19 @@ def order_detail(request, order_id):
     return render(request, 'order_detail.html', {'order': order})
 
 
+@login_required(login_url='login')
 def organization_detail(request, id):
     organization = get_object_or_404(Organization, id=id)
     return render(request, 'organization_detail.html', {'organization': organization})
 
 
+@login_required(login_url='login')
 def invoice_detail(request, id):
     invoice = get_object_or_404(Invoice, id=id)
     return render(request, 'invoice_detail.html', {'invoice': invoice})
 
 
+@login_required(login_url='login')
 def invoices_list(request):
     invoices = Invoice.objects.all()
     return render(request, 'invoices_list.html', {'invoices': invoices})

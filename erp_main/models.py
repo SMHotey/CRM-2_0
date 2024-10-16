@@ -71,7 +71,8 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
-
+    readiness = models.IntegerField(default=1,)
+    comment = models.TextField(blank=True, null=True)
 
     @property
     def doors_1_nk(self):
