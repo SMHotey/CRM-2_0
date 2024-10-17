@@ -48,7 +48,7 @@ class Invoice(models.Model):
         ('DMM', 'Двери металл-М'),
         ('FL', 'Прочее')
     )
-    number = models.CharField(max_length=5)
+    number = models.CharField(max_length=5, blank=True, null=True)
     organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
     amount = models.IntegerField(default=0)
@@ -71,7 +71,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
-    readiness = models.IntegerField(default=1,)
+    due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
 
     @property

@@ -13,23 +13,22 @@ class UserCreationForm(forms.ModelForm):
 
 
 class OrderForm(forms.ModelForm):
+    due_date = forms.DateField(required=False, widget=forms.HiddenInput())  # Поле для даты готовности
+
     class Meta:
         model = Order
-        fields = ['order_file', 'invoice', 'readiness', 'comment']
+        fields = ['order_file', 'invoice', 'due_date', 'comment']  # Убедитесь, что у вас в полях есть 'due_date'
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['order_file'].label = 'Файл заказа'
         self.fields['invoice'].label = 'Счет'
-        self.fields['readiness'].label = 'Дата готовности'
         self.fields['comment'].label = 'Комментарий'
 
         if not user.is_superuser:
             self.fields['invoice'].queryset = Invoice.objects.filter(user=user)
         else:
             self.fields['invoice'].queryset = Invoice.objects.all()
-
-
 # forms.py
 class OrganizationForm(forms.ModelForm):
 

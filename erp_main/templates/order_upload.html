@@ -29,11 +29,19 @@
 
         <!-- Новые поля для ввода -->
         <div class="form-group">
-            <label for="id_readiness">Готовность</label>
-            <input type="text" class="form-control numeric-input" id="id_readiness" name="readiness" value="1" required placeholder="Введите готовность">
+            <label for="id_readiness"><b>Согласованный срок изготовления</b></label><br>
+            <input type="radio" name="kind_of_date" value="working" checked onchange="calculateDate()"> рабочие дни
+            <input type="radio" name="kind_of_date" value="calendar" onchange="calculateDate()"> календарные дни<br>
+
+            <input type="number" class="form-control numeric-input" id="id_readiness" name="readiness" value="1" style="width: 60%" required placeholder="Введите готовность" oninput="calculateDate()">
+            <input type="hidden" id="dueDateInput" name="due_date"> <!-- Скрытое поле для даты готовности -->
+            <div>
+                <strong>Планируемая дата готовности:</strong> <span id="dueDate"></span>
+            </div>
         </div>
+
         <div class="form-group">
-            <label for="id_comment">Комментарий</label>
+            <label for="id_comment"><b>Комментарий</b></label>
             <textarea class="form-control" id="id_comment" name="comment" rows="3" placeholder="Введите комментарий"></textarea>
         </div>
 
@@ -135,5 +143,35 @@
             }
         });
     });
+</script>
+<script>
+    function calculateDate() {
+        const readinessInput = document.getElementById('id_readiness').value;
+        const kindOfDate = document.querySelector('input[name="kind_of_date"]:checked').value;
+        const workDays = kindOfDate === 'working';
+        const startDate = new Date();
+
+        let daysToAdd = parseInt(readinessInput) || 0;
+        let resultDate = new Date(startDate);
+
+        if (workDays) {
+            let addedDays = 0;
+            while (addedDays < daysToAdd) {
+                resultDate.setDate(resultDate.getDate() + 1);
+                if (resultDate.getDay() !== 0 && resultDate.getDay() !== 6) {
+                    addedDays++;
+                }
+            }
+        } else {
+            resultDate.setDate(resultDate.getDate() + daysToAdd);
+        }
+
+        const dueDateFormatted = resultDate.toLocaleDateString();
+        document.getElementById('dueDate').textContent = dueDateFormatted;
+        document.getElementById('dueDateInput').value = resultDate.toISOString().split('T')[0]; // Сохраните дату в формате 'YYYY-MM-DD'
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', calculateDate);
 </script>
 {% endblock %}

@@ -1,13 +1,13 @@
-from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm
-from .models import OrderItem, Order, Organization, Invoice  # Убедитесь, что вы импортировали модель
-from openpyxl import load_workbook  # Проверьте, что библиотека установлена
-import re
-from django.contrib.auth.decorators import login_required
+from datetime import datetime
 from collections import Counter
-from django.views import View
+import re
+from openpyxl import load_workbook
+from .models import Order, OrderItem, Organization, Invoice  # Убедитесь, что ваши импорты корректны
+from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm
+
 
 def index(request):
     if request.user.is_authenticated:
@@ -15,23 +15,37 @@ def index(request):
     return render(request, 'registration/login.html')
 
 
+
 @login_required(login_url='login')
 def order_upload(request):
     organizations = Organization.objects.all()
     global line
+
     if request.method == 'POST':
         form = OrderForm(user=request.user, data=request.POST, files=request.FILES)
         if form.is_valid():
-            uploaded_file = form.cleaned_data['order_file']  # Проверьте, что вы используете правильное имя поля
-            order = form.save()
+            uploaded_file = form.cleaned_data.get('order_file')  # Корректно получаем загруженный файл
+            if not uploaded_file:
+                form.add_error('order_file', 'Пожалуйста, загрузите файл.')  # Добавляем ошибку, если файл не загружен
+                return render(request, 'order_upload.html', {'form': form, 'organizations': organizations})
+
+
+            order = form.save(commit=False)
+
+            # Сохраните дату готовности, если она была предоставлена
+            due_date = request.POST.get('due_date')  # Получаем дату готовности
+            if due_date:
+                order.due_date = datetime.strptime(due_date, '%Y-%m-%d')
+            order.save()  # Сохраняем заказ
 
             # Логика проверки правильности загруженного файла
             try:
                 wb = load_workbook(uploaded_file)
             except Exception as e:
                 form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
-                return render(request, 'order_upload.html', {'form': form})
+                return render(request, 'order_upload.html', {'form': form, 'organizations': organizations})
 
+            # Обработка загруженного файла
             sheet = wb.active
             max_row = 0
             cur_row, cur_column = 9, 15
@@ -45,7 +59,6 @@ def order_upload(request):
             max_row = cur_row
 
             seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
-            row = 8
             for row in range(8, max_row):
                 if get_value(row, 2):  # Если у текущей строки есть номер позиции
                     if 8 < row < max_row:
@@ -74,13 +87,11 @@ def order_upload(request):
                 'ревиз': 'revision'
             }
 
-            for i in range(0, len(position)):
+            for i in range(len(position)):
                 n_num = position[i][0]
                 name = position[i][1]
-                n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)),
-                              None)
-                n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)),
-                              None)
+                n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+                n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
                 n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
                 n_width, n_height = position[i][2], position[i][3]
@@ -98,8 +109,7 @@ def order_upload(request):
                 counted_glass = dict(Counter(list(zip(glass[::2], glass[1::2]))))
                 if (None, None) in counted_glass:
                     del counted_glass[(None, None)]
-                if counted_glass:
-                    n_glass = sum(counted_glass.values())
+                n_glass = sum(counted_glass.values()) if counted_glass else 0
 
                 new_item = OrderItem(
                     order=order,
@@ -119,23 +129,20 @@ def order_upload(request):
                     p_quantity=n_quantity,
                     p_comment=n_comment,
                     p_glass=counted_glass,
-                    readiness=order.readiness,
-                    comment=order.comment,
-
-
                 )
                 new_item.save()
 
-            #            form = OrderForm()  # Сброс формы после успешной загрузки
-            return redirect('orders_list')
+            return redirect('orders_list')  # Перенаправление после успешной загрузки
 
     else:
         form = OrderForm(user=request.user)
 
     return render(request, 'order_upload.html', {'form': form, 'organizations': organizations})
 
+
 def change_order(request):
     pass
+
 
 
 @login_required(login_url='login')
@@ -145,11 +152,9 @@ def organization_add(request):
 
         # Получаем тип из POST данных
         type_ = request.POST.get('type')
-        print(type_, form.errors)
 
         if form.is_valid():
             organization = form.save(commit=False)  # Создаём объект, но не сохраняем пока в БД
-            print(organization)
 
             if type_ == 'organization':
                 organization.inn = form.cleaned_data.get('inn')
@@ -208,7 +213,6 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Аккаунт для {username} был создан!')
             return redirect('login')  # замените 'login' на имя вашего URL входа
     else:
         form = UserCreationForm()

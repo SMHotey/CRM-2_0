@@ -3,79 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вращающийся куб</title>
+    <title>Меню для предприятия по производству дверей</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            perspective: 800px;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
         }
-
-        .cube {
-            width: 100px;
-            height: 100px;
+        .menu {
+            background-color: #c12c2c;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            width: 200px;
+        }
+        .menu-item {
+            padding: 10px;
+            cursor: pointer;
             position: relative;
-            transform-style: preserve-3d;
-            animation: rotate 5s infinite linear;
-            transition: transform 0.3s ease;
         }
-
-        .cube div {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 0, 0, 0.8);
-            border: 1px solid #000;
+        .submenu {
+            display: none;
+            background-color: #a21a1a;
+            border-left: 3px solid #ffcc00;
+            padding: 5px 15px;
         }
-
-        .front  { transform: translateZ(50px); }
-        .back   { transform: rotateY(180deg) translateZ(50px); }
-        .right  { transform: rotateY(90deg) translateZ(50px); }
-        .left   { transform: rotateY(-90deg) translateZ(50px); }
-        .top    { transform: rotateX(90deg) translateZ(50px); }
-        .bottom { transform: rotateX(-90deg) translateZ(50px); }
-
-        @keyframes rotate {
-            from { transform: rotateX(0) rotateY(0); }
-            to { transform: rotateX(360deg) rotateY(360deg); }
+        .menu-item:hover {
+            background-color: #b51212;
+        }
+        .menu-item.active {
+            background-color: #ffcc00;
+            color: #000;
+        }
+        .icon {
+            margin-left: 5px;
         }
     </style>
 </head>
 <body>
 
-<div class="cube" id="cube">
-    <div class="front"></div>
-    <div class="back"></div>
-    <div class="right"></div>
-    <div class="left"></div>
-    <div class="top"></div>
-    <div class="bottom"></div>
+<div class="menu">
+    <div class="menu-item">Продукция
+        <span class="icon">▼</span>
+        <div class="submenu">
+            <div class="menu-item">Противопожарные двери</div>
+            <div class="menu-item">Аксессуары</div>
+            <div class="menu-item">Услуги по установке</div>
+        </div>
+    </div>
+    <div class="menu-item">О компании</div>
+    <div class="menu-item">Контакты</div>
 </div>
 
 <script>
-    const cube = document.getElementById('cube');
-    let scale = 1;
+    const menuItems = document.querySelectorAll('.menu-item');
 
-    cube.addEventListener('mouseenter', () => {
-        cube.style.animationPlayState = 'paused';
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Закрываем другие подменю
+            menuItems.forEach(i => {
+                const submenu = i.querySelector('.submenu');
+                if (i !== item && submenu) {
+                    i.classList.remove('active');
+                    submenu.style.display = 'none';
+                }
+            });
+
+            // Переключаем текущее подменю
+            const submenu = this.querySelector('.submenu');
+            if (submenu) {
+                const isActive = this.classList.toggle('active');
+                submenu.style.display = isActive ? 'block' : 'none';
+            }
+        });
     });
-
-    cube.addEventListener('mouseleave', () => {
-        cube.style.animationPlayState = 'running';
-    });
-
-    window.addEventListener('wheel', (event) => {
-        event.preventDefault();
-        if (event.deltaY < 0) {
-            scale += 0.1; // Увеличение размера при прокрутке вверх
-        } else {
-            scale = Math.max(0.1, scale - 0.1); // Уменьшение размера при прокрутке вниз
-        }
-        cube.style.transform = `scale(${scale}) rotateX(0) rotateY(0)`;
-    }, { passive: false });
 </script>
 
 </body>

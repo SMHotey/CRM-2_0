@@ -56,7 +56,7 @@
           <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.created_at|date:"d.m.Y" }}</td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.invoice.organization.user.last_name }} {{ order.invoice.organization.user.first_name }}</td>
-          <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.due_date|date:"d.m.Y"  }}</td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
 
       </tr>

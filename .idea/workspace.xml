@@ -4,22 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="добавлена и настроена опция создания организации или физ. лица через одну модель">
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0009_order_comment_order_readiness.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_263.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_112_wtgS5iZ.xlsx" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="добавлено модальное окно в шаблон добавления заказ, посредством которого можно создать новый счет. В base.html добавлено отображение имени текущего пользователя в виде меню для входа в профиль и выхода из него.">
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0010_alter_order_comment_alter_order_readiness.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0011_remove_order_readiness_order_due_date.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_06-12.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_06-12_NGO2HaN.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_06-12_NqSQq72.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_27-06-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_30.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_30_id97Yef.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_357.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_357_F6jpKjh.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Гамма_Плюс_793.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/static/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/static/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/example.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/example.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/registration/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/registration/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/registration/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/registration/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -216,7 +220,8 @@
       <workItem from="1728627065216" duration="18562000" />
       <workItem from="1728887359801" duration="24837000" />
       <workItem from="1728976339625" duration="20584000" />
-      <workItem from="1729059101758" duration="21311000" />
+      <workItem from="1729059101758" duration="23597000" />
+      <workItem from="1729146894582" duration="21651000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -338,7 +343,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728916169488</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="добавлено модальное окно в шаблон добавления заказ, посредством которого можно создать новый счет. В base.html добавлено отображение имени текущего пользователя в виде меню для входа в профиль и выхода из него.">
+      <option name="closed" value="true" />
+      <created>1729086620703</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1729086620704</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -355,9 +368,10 @@
     <MESSAGE value="процесс идет" />
     <MESSAGE value="добавлена дата последнего заказа" />
     <MESSAGE value="добавлена и настроена опция создания организации или физ. лица через одну модель" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавлена и настроена опция создания организации или физ. лица через одну модель" />
+    <MESSAGE value="добавлено модальное окно в шаблон добавления заказ, посредством которого можно создать новый счет. В base.html добавлено отображение имени текущего пользователя в виде меню для входа в профиль и выхода из него." />
+    <option name="LAST_COMMIT_MESSAGE" value="добавлено модальное окно в шаблон добавления заказ, посредством которого можно создать новый счет. В base.html добавлено отображение имени текущего пользователя в виде меню для входа в профиль и выхода из него." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1729060651407" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1729156816372" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>
