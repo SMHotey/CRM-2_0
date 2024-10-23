@@ -39,6 +39,8 @@ class Organization(models.Model):
             .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
         )
 
+
+
 class Invoice(models.Model):
     ENTITY_CHOICE = (
         ('P', 'Палани'),
@@ -74,9 +76,12 @@ class Order(models.Model):
     due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
 
+    def get_items_filtered(self):
+        return self.items.exclude(status__in=['changed', 'canceled'])
+
     @property
     def doors_1_nk(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='door',
             p_construction='NK',
             p_active_trim=None,
@@ -84,7 +89,7 @@ class Order(models.Model):
 
     @property
     def doors_2_nk(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='door',
             p_construction='NK',
             p_active_trim__isnull=False,
@@ -92,14 +97,14 @@ class Order(models.Model):
 
     @property
     def hatch_nk(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='hatch',
             p_construction='NK',
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def doors_1_sk(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='door',
             p_construction='SK',
             p_active_trim=None,
@@ -107,7 +112,7 @@ class Order(models.Model):
 
     @property
     def doors_2_sk(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='door',
             p_construction='SK',
             p_active_trim__isnull=False,
@@ -115,20 +120,20 @@ class Order(models.Model):
 
     @property
     def hatch_sk(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='hatch',
             p_construction='SK',
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def transom(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='transom',
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def gate(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             p_kind='gate',
             p_width__lt=3000,
             p_height__lt=3000,
@@ -136,17 +141,25 @@ class Order(models.Model):
 
     @property
     def gate_3000(self):
-        return self.items.filter(
+        return self.get_items_filtered().filter(
             Q(p_kind='gate') & (Q(p_width__gte=3000) | Q(p_height__gte=3000)),
         ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def glass(self):
-        return self.items.filter(Q(p_glass__isnull=False) & ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self.get_items_filtered().filter(Q(p_glass__isnull=False) & ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def quantity(self):
-        return self.items.filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self.get_items_filtered().filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
+
+    @property
+    def status(self): # раскидываем позиции по статусам
+        in_query = self.get_items_filtered().filter(status='in_query').aggregate(total=Sum('p_quantity'))['total'] or 0
+        product = self.get_items_filtered().filter(status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
+        if in_query > product:
+            return in_query
+
 
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
         if not self.internal_order_number:  # Проверка, если внутренний номер не установлен

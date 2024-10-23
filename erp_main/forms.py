@@ -24,6 +24,7 @@ class OrderForm(forms.ModelForm):
         self.fields['order_file'].label = 'Файл заказа'
         self.fields['invoice'].label = 'Счет'
         self.fields['comment'].label = 'Комментарий'
+        self.user = user
 
         if not user.is_superuser:
             self.fields['invoice'].queryset = Invoice.objects.filter(user=user)
