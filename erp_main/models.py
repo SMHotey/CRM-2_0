@@ -77,7 +77,7 @@ class Order(models.Model):
     comment = models.TextField(blank=True, null=True)
 
     def get_items_filtered(self):
-        return self.items.exclude(status__in=['changed', 'canceled'])
+        return self.items.exclude(p_status__in=['changed', 'canceled'])
 
     @property
     def doors_1_nk(self):
@@ -155,10 +155,20 @@ class Order(models.Model):
 
     @property
     def status(self): # раскидываем позиции по статусам
-        in_query = self.get_items_filtered().filter(status='in_query').aggregate(total=Sum('p_quantity'))['total'] or 0
-        product = self.get_items_filtered().filter(status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
-        if in_query > product:
-            return in_query
+        in_query = self.get_items_filtered().filter(p_status='in_query').aggregate(total=Sum('p_quantity'))['total'] or 0
+        product = self.get_items_filtered().filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
+        ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
+        shipped = self.get_items_filtered().filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0
+        if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
+            return f'в очереди'
+        elif in_query == 0 and product > 0 and ready == 0 and shipped == 0:
+            return f'запущен'
+        elif in_query == 0 and product == 0 and ready > 0 and shipped == 0:
+            return f'готов'
+        elif in_query == 0 and product == 0 and ready == 0 and shipped > 0:
+            return f'отгружен'
+        else:
+            return f'всё сложно'
 
 
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
@@ -219,7 +229,7 @@ class OrderItem(models.Model):
     p_glass = models.CharField(max_length=255, blank=True, null=True) # тип, размер, толщина, кол-во
     p_others = models.CharField(max_length=200, blank=True, null=True) # прочее
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    status = models.CharField(max_length=15, default='in_query')
+    p_status = models.CharField(max_length=15, default='in_query')
     position_num = models.CharField(max_length=5)
     nameplate_range = models.CharField(max_length=100, blank=True, null=True)  # номерной диапзон шильдов для позиции
     p_quantity = models.IntegerField(default=1)

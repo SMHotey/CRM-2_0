@@ -36,7 +36,7 @@
           <td style="padding: 8px; text-align: center; vertical-align: middle;">
             <a href="{% url 'order_detail' order.id %}" >{{ order.id }}</a>
               <br>
-              <span style="font-size: 12px; line-height: 50%;">{{ order.status }}</span>
+              <span style="font-size: 12px; font-style: italic; color: grey; line-height: 50%;">{{ order.status }}</span>
           </td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">
@@ -54,7 +54,13 @@
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.transom }}</td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.gate }}</td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.gate_3000 }}</td>
-          <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.glass }}</td>
+          <td style="padding: 8px; text-align: center; vertical-align: middle;">
+            {% if order.glass != 0 %}
+              <a href="#" data-toggle="modal" data-target="#glassModal{{ order.id }}">{{ order.glass }}</a>
+            {% else %}
+              {{ order.glass }}
+            {% endif %}
+          </td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.created_at|date:"d.m.Y" }}</td>
           <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ order.invoice.organization.user.last_name }} {{ order.invoice.organization.user.first_name }}</td>

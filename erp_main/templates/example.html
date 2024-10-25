@@ -1,41 +1,42 @@
 <!DOCTYPE html>
 <html lang="ru">
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-  Открыть модальное окно
-</button>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Модальные окна</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
 
-<!-- Модальное окно -->
-<div class="modal" id="myModal">
-  <div class="modal-dialog">
+<div class="container">
+    <h1>Пример модального окна</h1>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+        Открыть модальное окно
+    </button>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <!-- Заголовок модального окна -->
       <div class="modal-header">
-        <h5 class="modal-title">Заголовок модального окна</h5>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h5 class="modal-title" id="myModalLabel">Заголовок модального окна</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <!-- Содержимое модального окна -->
       <div class="modal-body">
-        <table class="border-collapse: collapse;">
-                    <thead>
-                        <tr>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">№</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Наименование</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Тип</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Ширина</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Высота</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Откр.</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Стекло</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Кол-во</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Комментарий</th>
-                        </tr>
-                    </thead>
+        Здесь может быть ваш контент или форма.
       </div>
-      <!-- Подвал модального окна -->
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-        <button type="button" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-primary">Сохранить изменения</button>
       </div>
     </div>
   </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
 </html>

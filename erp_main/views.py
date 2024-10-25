@@ -246,7 +246,7 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
-    filtered_items = order.items.exclude(status__in=['changed', 'canceled']) #фильтрация по активным позициям
+    filtered_items = order.items.exclude(p_status__in=['changed', 'canceled']) #фильтрация по активным позициям
 
     if request.method == 'POST':
         form = OrderFileForm(request.POST, request.FILES)
