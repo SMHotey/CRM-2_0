@@ -3,42 +3,103 @@
 
 <div class="container my-4">
     <h1 id="form-title" class="mb-4 text-center">Добавить организацию</h1>
-    <form method="post" id="organization-form" class="d-flex flex-column align-items-center">
+    <form method="post" id="organization-form" class="needs-validation" novalidate>
         {% csrf_token %}
         {{ form.non_field_errors }}
 
-        <div class="mb-4 text-center">
-            <label class="form-check-inline">
-                <input type="radio" class="form-check-input" name="type" value="organization" checked onchange="toggleFields()"> Юридическое лицо
-            </label>
-            <label class="form-check-inline">
-                <input type="radio" class="form-check-input" name="type" value="individual" onchange="toggleFields()"> Физическое лицо
-            </label>
+        <div class="mb-4">
+            <h5>Тип организации</h5>
+            <div class="form-check form-check-inline">
+                <input type="radio" class="form-check-input" name="type" value="organization" checked onchange="toggleFields()">
+                <label class="form-check-label">Юридическое лицо</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" class="form-check-input" name="type" value="individual" onchange="toggleFields()">
+                <label class="form-check-label">Физическое лицо</label>
+            </div>
         </div>
 
-        <div id="organization-fields" class="mb-4 text-center">
+        <!-- Поля для юридического лица -->
+        <div id="organization-fields" class="mb-4">
             <div class="mb-3">
-                <label for="{{ form.inn.id_for_label }}" class="form-label">{{ form.inn.label }}</label>
+                <label for="{{ form.inn.id_for_label }}">{{ form.inn.label }}</label>
                 {{ form.inn }}
                 {{ form.inn.errors }}
             </div>
             <div class="mb-3">
-                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
                 {{ form.name }}
                 {{ form.name.errors }}
             </div>
         </div>
 
-        <div id="individual-fields" style="display:none;" class="mb-4 text-center">
+        <!-- Поля для физического лица -->
+        <div id="individual-fields" style="display:none;" class="mb-4">
             <div class="mb-3">
-                <label for="{{ form.name_fl.id_for_label }}" class="form-label">{{ form.name_fl.label }}</label>
+                <label for="{{ form.name_fl.id_for_label }}">{{ form.name_fl.label }}</label>
                 {{ form.name_fl }}
                 {{ form.name_fl.errors }}
             </div>
             <div class="mb-3">
-                <label for="{{ form.phone_number.id_for_label }}" class="form-label">{{ form.phone_number.label }}</label>
+                <label for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
                 {{ form.phone_number }}
                 {{ form.phone_number.errors }}
+            </div>
+        </div>
+
+        <div class="text-left mb-4">
+            <button type="button" class="btn btn-secondary" onclick="toggleAdditionalFields()">Расширенная информация</button>
+        </div>
+
+        <!-- Дополнительные поля -->
+        <div id="additional-fields" style="display:none;" class="mb-4 border p-3 rounded">
+            <h5>Дополнительная информация</h5>
+            <div class="mb-3">
+                <label for="id_ceo_footing">Подпись</label>
+                <select name="ceo_footing" id="id_ceo_footing" class="form-select">
+                    <option value="ustav">Устава</option>
+                    <option value="attorney">Доверенности</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="id_ogrn">ОГРН</label>
+                <input type="text" name="ogrn" id="id_ogrn" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_kpp">КПП</label>
+                <input type="text" name="kpp" id="id_kpp" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_r_s">Р/с</label>
+                <input type="text" name="r_s" id="id_r_s" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_bank">Банк</label>
+                <input type="text" name="bank" id="id_bank" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_bik">БИК</label>
+                <input type="text" name="bik" id="id_bik" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_k_s">К/с</label>
+                <input type="text" name="k_s" id="id_k_s" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_address">Адрес</label>
+                <input type="text" name="address" id="id_address" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_email">Email</label>
+                <input type="email" name="email" id="id_email" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_ceo_title">Должность</label>
+                <input type="text" name="ceo_title" id="id_ceo_title" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label for="id_ceo_name">ФИО</label>
+                <input type="text" name="ceo_name" id="id_ceo_name" class="form-control" />
             </div>
         </div>
 
@@ -58,7 +119,6 @@
 
         document.getElementById('form-title').innerText = isIndividual ? 'Добавить физическое лицо' : 'Добавить организацию';
 
-        // Условная установка атрибута required
         updateRequiredFields(isIndividual);
     }
 
@@ -78,6 +138,16 @@
             nameField.setAttribute('required', '');
             nameFlField.removeAttribute('required');
             phoneNumberField.removeAttribute('required');
+        }
+    }
+
+    function toggleAdditionalFields() {
+        const additionalFields = document.getElementById('additional-fields');
+        // Переключаем видимость всех дополнительных полей
+        if (additionalFields.style.display === 'none') {
+            additionalFields.style.display = 'block';
+        } else {
+            additionalFields.style.display = 'none';
         }
     }
     </script>

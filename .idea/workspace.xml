@@ -5,13 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции">
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0012_alter_invoice_number.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_28-02-23.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_30-11.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_30-11_0Ht4h5J.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_30-11_YhXFf7o.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка__415_17-04-23.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия_29-01-24.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Journal_4_0.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Journal_4_0.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_alter_orderitem_p_active_trim.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0003_alter_invoice_legal_entity_alter_orderitem_p_kind.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0004_rename_last_order_date_organization_create_at_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0005_remove_organization_create_at_organization_name_fl_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0006_alter_organization_inn_alter_organization_name_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0007_alter_organization_inn_alter_organization_name_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0008_alter_organization_inn_alter_organization_name_and_more.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0009_order_comment_order_readiness.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0010_alter_order_comment_alter_order_readiness.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0011_remove_order_readiness_order_due_date.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0012_alter_invoice_number.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/example.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/example.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,9 +49,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
         <option value="HTML File" />
         <option value="CSS File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -56,6 +81,9 @@
     &quot;accountId&quot;: &quot;59a21d8b-2e06-4d40-9cbf-dcacb02f3457&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/erp_main/templates/order_detail.html" root0="FORCE_HIGHLIGHTING" root1="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -215,7 +243,12 @@
       <workItem from="1729576932195" duration="9850000" />
       <workItem from="1729663797955" duration="17479000" />
       <workItem from="1729756453936" duration="10569000" />
-      <workItem from="1729835399585" duration="9092000" />
+      <workItem from="1729835399585" duration="9736000" />
+      <workItem from="1730101294720" duration="13684000" />
+      <workItem from="1730187478456" duration="4570000" />
+      <workItem from="1730272500336" duration="21289000" />
+      <workItem from="1730360233910" duration="17463000" />
+      <workItem from="1730443074677" duration="20816000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -361,7 +394,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729694023070</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции">
+      <option name="closed" value="true" />
+      <created>1729862946140</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1729862946140</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -384,6 +425,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1729856074987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1730467650490" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>

@@ -6,9 +6,10 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
-from .views import invoices_list, OrderUploadView
+from .views import OrderUploadView
 
 urlpatterns = [
+    path('update-order-item-status/', views.update_order_item_status, name='update_order_item_status'),
     path('order/upload/', OrderUploadView.as_view(), name='order_upload'),
     path('orders_list/', views.orders_list, name='orders_list'),
     path('organization/add/', views.organization_add, name='organization_add'),
@@ -25,5 +26,6 @@ urlpatterns = [
          auth_views.PasswordResetView.as_view(template_name='registration/password_reset_form.html'),
          name='password_reset'),
     path('register/', views.register, name='register'),
+
 ]
 

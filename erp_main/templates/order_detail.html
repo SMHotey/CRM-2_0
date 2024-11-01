@@ -2,7 +2,7 @@
 {% load humanize %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container-fluid my-4">
     <h1 class="mb-4 text-center">Детали заказа: №{{ order.id }}</h1>
 
     <div class="card shadow-sm mb-4">
@@ -18,20 +18,30 @@
                     <label for="order_file" class="form-label">Заменить файл заказа:</label>
                     <input type="file" class="form-control" id="order_file" name="order_file" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Заменить файл</button>
+                <button type="submit" class="btn btn-primary">Загрузить новый файл заказа</button>
             </form>
-            <h5 class="mt-4">Связанные счета</h5>
-            <ul class="list-group">
-                {% if order.invoice %}
-                    <li class="list-group-item">Счет №: <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a></li>
-                    <li class="list-group-item">Организация: <a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></li>
-                    <li class="list-group-item">Дата: {{ order.invoice.date }}</li>
-                    <li class="list-group-item">Сумма: {{ order.invoice.amount|intcomma }} р.</li>
-                    <li class="list-group-item">Оплаченная сумма: {{ order.invoice.payed_amount|intcomma }} р.</li>
-                {% else %}
-                    <li class="list-group-item">Отсутствуют связанные счета.</li>
-                {% endif %}
-            </ul>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Связанные счета</strong>
+            <button id="toggleInvoices" class="btn btn-primary">Развернуть</button>
+        </div>
+        <div id="invoiceItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
+            <div class="card-body">
+                <ul class="list-group">
+                    {% if order.invoice %}
+                        <li class="list-group-item">Счет №: <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a></li>
+                        <li class="list-group-item">Организация: <a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></li>
+                        <li class="list-group-item">Дата: {{ order.invoice.date }}</li>
+                        <li class="list-group-item">Сумма: {{ order.invoice.amount|intcomma }} р.</li>
+                        <li class="list-group-item">Оплаченная сумма: {{ order.invoice.payed_amount|intcomma }} р.</li>
+                    {% else %}
+                        <li class="list-group-item">Отсутствуют связанные счета.</li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -42,55 +52,111 @@
         </div>
         <div id="orderItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
             <div class="card-body">
-                <table class="border-collapse: collapse;">
+                <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">№</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Наименование</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Тип</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Ширина</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Высота</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Откр.</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Стекло</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Кол-во</th>
-                            <th style="padding: 4px; background-color: #37b1de; text-align: center; vertical-align: middle;">Комментарий</th>
+                            <th style="text-align: center;">№</th>
+                            <th style="text-align: center;">Наименование</th>
+                            <th style="text-align: center;">Тип</th>
+                            <th style="text-align: center;">Ширина</th>
+                            <th style="text-align: center;">Высота</th>
+                            <th style="text-align: center;">Откр.</th>
+                            <th style="text-align: center;">Стекло</th>
+                            <th style="text-align: center;">Кол-во</th>
+                            <th style="text-align: center;">Комментарий</th>
+                            <th style="text-align: center;">Статус</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in filtered_items %}
                         <tr>
-                            <td style="padding: 4px; text-align: center; vertical-align: middle;">{{ item.position_num }}</td>
-                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.get_p_kind_display }}</td>
-                            <td style="padding: 4px; text-align: center; vertical-align: middle; white-space: nowrap;">{{ item.get_p_type_display }}</td>
-                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
-                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
-                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
-                            <td style="padding: 8px; text-align: center; vertical-align: middle; ">
-                                {{ item.glass | safe}}
-                            </td>
-                            <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ item.p_quantity }}</td>
-                            {% if item.p_comment %}
-                                <td style="padding: 8px; text-align: left; vertical-align: middle;">{{ item.p_comment }}</td>
+                            <td style="text-align: center;">{{ item.position_num }}</td>
+                            <td style="text-align: center;">{{ item.get_p_kind_display }}</td>
+                            <td style="text-align: center; white-space: nowrap;">{{ item.get_p_type_display }}</td>
+                            <td style="text-align: center;">{{ item.p_width }}</td>
+                            <td style="text-align: center;">{{ item.p_height }}</td>
+                            <td style="text-align: center;">{{ item.p_open }}</td>
+                            <td style="text-align: center;">{{ item.glass | safe}}</td>
+                            <td style="text-align: center;">{{ item.p_quantity }}</td>
+                            {% if item.p_comment  %}
+                            	<td style="text-align: left;">{{ item.p_comment }}</td>
+                            {% else %}
+                                <td style="text-align: left;"></td>
                             {% endif %}
+                            <td style="width:200px; text-align: center;">
+                                <select class="form-select order-status-select" data-id="{{ item.id }}">
+                                    <option value="in_query" {% if item.p_status == 'in_query' %} selected {% endif %}>в очереди</option>
+                                    <option value="product" {% if item.p_status == 'product' %} selected {% endif %}>запущен</option>
+                                    <option value="ready" {% if item.p_status == 'ready' %} selected {% endif %}>готов</option>
+                                    <option value="shipped" {% if item.p_status == 'shipped' %} selected {% endif %}>отгружен</option>
+                                    <option value="canceled" {% if item.p_status == 'canceled' %} selected {% endif %}>отменен</option>
+                                    <option value="stopped" {% if item.p_status == 'stopped' %} selected {% endif %}>остановлен</option>
+                                </select>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                <button type="button" class="btn btn-primary" id="saveStatusChangesButton">Сохранить изменения</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const button = document.getElementById("toggleButton");
-    const orderItems = document.getElementById("orderItems");
+const saveStatusChangesButton = document.getElementById('saveStatusChangesButton');
+const csrfToken = '{{ csrf_token }}';
 
-    button.addEventListener("click", function() {
-        const isExpanded = orderItems.style.maxHeight !== "0px";
+saveStatusChangesButton.onclick = function() {
+    const statusUpdates = {};
+    const selectElements = document.querySelectorAll('.order-status-select');
 
-        orderItems.style.maxHeight = isExpanded ? "0px" : orderItems.scrollHeight + "px";
-        button.textContent = isExpanded ? "Развернуть" : "Скрыть";
+    selectElements.forEach(select => {
+        const id = select.getAttribute('data-id');
+        const newStatus = select.value;
+        statusUpdates[id] = newStatus;
+
+        // Обновление текста выбора статуса
+        const statusTextElement = select.previousElementSibling; // Предполагаем, что перед select есть элемент
+        if (statusTextElement) {
+            statusTextElement.innerText = newStatus; // Обновляем текст
+        }
     });
+
+    fetch(`/erp_main/update-order-item-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({'status_updates': statusUpdates})
+    })
+    .then(response => {
+        if (response.ok) {
+            alert('Статусы успешно обновлены!');
+        } else {
+            alert('Ошибка обновления статусов!');
+        }
+    });
+};
+
+document.getElementById("toggleInvoices").addEventListener("click", function() {
+    toggleSection("toggleInvoices", "invoiceItems");
+});
+
+document.getElementById("toggleButton").addEventListener("click", function() {
+    toggleSection("toggleButton", "orderItems");
+});
+
+function toggleSection(buttonId, sectionId) {
+    const button = document.getElementById(buttonId);
+    const section = document.getElementById(sectionId);
+    const isExpanded = section.style.maxHeight !== "0px";
+
+    section.style.maxHeight = isExpanded ? "0px" : section.scrollHeight + "px";
+    button.textContent = isExpanded ? "Развернуть" : "Скрыть";
+}
 </script>
 
 {% endblock %}
+

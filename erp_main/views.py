@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -5,10 +7,15 @@ from datetime import datetime
 from collections import Counter
 import re
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView
 from openpyxl import load_workbook
 from .models import Order, OrderItem, Organization, Invoice
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def index(request):
@@ -274,3 +281,32 @@ def invoice_detail(request, id):
 def invoices_list(request):
     invoices = Invoice.objects.all()
     return render(request, 'invoices_list.html', {'invoices': invoices})
+
+
+@csrf_exempt  # Используйте его только если CSRF токены не применяются, исправьте позже.
+def update_order_item_status(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            status_updates = data.get('status_updates', {})
+
+            for item_id, new_status in status_updates.items():
+                order_item = get_object_or_404(OrderItem, id=item_id)
+
+                # Проверка на возможность изменения статуса
+#                if order_item.p_status in ['shipped', 'canceled']:
+#                    return JsonResponse({'status': 'error', 'message': f'Cannot change status for item {item_id}.'}, status=403)
+
+                # Обновление статуса
+                order_item.p_status = new_status
+                order_item.save()
+
+            return JsonResponse({'status': 'success', 'message': 'Statuses updated successfully!'})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format.'}, status=400)
+        except Exception as e:
+            logger.exception("Error updating order items' statuses")
+            return JsonResponse({'status': 'error', 'message': 'An error occurred while processing your request.'}, status=500)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)

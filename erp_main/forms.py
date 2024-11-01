@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
-from erp_main.models import Organization, Invoice, Order
+from erp_main.models import Organization, Invoice, Order, LegalEntity
 
 
 class UserCreationForm(forms.ModelForm):
@@ -30,21 +30,58 @@ class OrderForm(forms.ModelForm):
             self.fields['invoice'].queryset = Invoice.objects.filter(user=user)
         else:
             self.fields['invoice'].queryset = Invoice.objects.all()
-# forms.py
-class OrganizationForm(forms.ModelForm):
 
+
+class LegalEntityForm(forms.ModelForm):
+    class Meta:
+        model = LegalEntity
+        fields = ['name', 'inn', 'ogrn', 'kpp', 'r_s', 'bank', 'bik', 'k_s', 'address', 'email', 'ceo_title', 'ceo_name']
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['name'].label = 'Название'
+        self.fields['inn'].label = 'ИНН'
+        self.fields['ogrn'].label = 'ОГРН'
+        self.fields['kpp'].label = 'КПП'
+        self.fields['r_s'].label = 'р/с'
+        self.fields['bank'].label = 'Банк'
+        self.fields['bik'].label = 'БИК'
+        self.fields['k_s'].label = 'к/с'
+        self.fields['address'].label = 'юр.адрес'
+        self.fields['email'].label = 'email'
+        self.fields['ceo_title'].label = 'должность подписанта'
+        self.fields['ceo_name'].label = 'ФИО полностью'
+
+
+from django import forms
+from .models import Organization  # Импортируйте вашу модель Organization
+
+
+class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
-        fields = ['name', 'inn', 'phone_number', 'name_fl']
-
-    # Изменение по умолчанию для полей
-    name_fl = forms.CharField(max_length=15, required=False)
-    phone_number = forms.CharField(max_length=15, required=False)
+        fields = ['name', 'inn', 'phone_number', 'name_fl', 'ceo_footing', 'ogrn', 'kpp',
+                  'r_s', 'bank', 'bik', 'k_s', 'address', 'email', 'ceo_title', 'ceo_name']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Наименование'}),
+            'inn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ИНН'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер телефона'}),
+            'name_fl': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Имя, фамилия'}),
+            'ceo_footing': forms.Select(attrs={'class': 'form-select'}),
+            'ogrn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ОГРН'}),
+            'kpp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'КПП'}),
+            'r_s': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Р/с'}),
+            'bank': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Банк'}),
+            'bik': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'БИК'}),
+            'k_s': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'К/с'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'ceo_title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Должность'}),
+            'ceo_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['inn'].label = 'ИНН'
-        self.fields['name'].label = 'Наименование'
         self.fields['name_fl'].label = 'Имя, фамилия'
         self.fields['phone_number'].label = 'Номер телефона'
 
@@ -66,7 +103,6 @@ class OrganizationForm(forms.ModelForm):
                 self.add_error('phone_number', 'Номер телефона обязателен для физического лица.')
 
         return cleaned_data
-
 
 class InvoiceForm(forms.ModelForm):
     class Meta:

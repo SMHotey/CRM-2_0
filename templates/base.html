@@ -5,31 +5,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-         .alert-info {
-            background: none; /* Убирает заливку */
-            padding-top: 0;  /* Убирает верхний отступ */
-            padding-bottom: 0; /* Убирает нижний отступ */
+        .alert-info {
+            background: none;
+            padding-top: 0;
+            padding-bottom: 0;
             border: none;
         }
-         .custom-button {
-            background-color: #4CAF50; /* Зеленый фон */
-            color: white; /* Белый текст */
-            padding: 1px 12px; /* Отступы */
-            text-align: center; /* Выравнивание текста */
-            text-decoration: none; /* Без подчеркивания */
-            display: inline; /* Отображение как блочный элемент */
-            font-size: 16px; /* Размер шрифта */
-            margin: 4px 2px; /* Отступы вокруг кнопки */
-            cursor: pointer; /* Курсор в виде указателя */
-            border: none; /* Без рамки */
-            border-radius: 25px; /* Скругление углов */
-            transition: background-color 0.8s; /* Плавный переход для фона */
+        .custom-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1px 12px;
+            text-align: center;
+            text-decoration: none;
+            display: inline;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            transition: background-color 0.8s;
         }
         .custom-button:hover {
-            background-color: #45a049; /* Темнее зеленый при наведении */
-        }    
+            background-color: #45a049;
+        }
         .nav-item {
             position: relative;
             list-style: none;
@@ -49,10 +49,9 @@
             background-color: #37b1de;
         }
         .dropdown-item:hover {
-            background-color: #e6e6fa; /* Замените на желаемый цвет при наведении */
-            color: red; /* Замените на желаемый цвет текста при наведении */
+            background-color: #e6e6fa;
+            color: red;
         }
-
         .nav-item.show .dropdown-menu {
             max-height: 200px;
         }
@@ -158,7 +157,6 @@
         <main role="main" class="col-md-10 main-content">
             <div class="row my-1">
                 <div class="col-md-12">
-                    <!-- Контейнер-строка разбитый на 2 столбца -->
                     <div class="row mb-0">
                         <div class="col-md-10 text-center" style="visibility: hidden;">
                             <div class="alert alert-info" role="alert">
@@ -221,15 +219,15 @@
                     </div>
                 </div>
             </div>
+
         {% block content %}
         {% endblock %}    
         </main>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     $(document).ready(function() {
         $('.nav-link').click(function() {
@@ -248,5 +246,6 @@
         });
     });
 </script>
+
 </body>
 </html>

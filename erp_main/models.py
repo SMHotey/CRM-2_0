@@ -16,12 +16,49 @@ def validate_numeric_only(value):
         raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
 
 
-class Organization(models.Model):
+class LegalEntity(models.Model):
     name = models.CharField(max_length=100, blank=True, null=True)
     inn = models.CharField(max_length=15, blank=True, null=True)
+    ogrn = models.CharField(max_length=15, blank=True, null=True)
+    kpp = models.CharField(max_length=15, blank=True, null=True)
+    r_s = models.CharField(max_length=25, blank=True, null=True)
+    bank = models.CharField(max_length=300, blank=True, null=True)
+    bik = models.CharField(max_length=10, blank=True, null=True)
+    k_s = models.CharField(max_length=25, blank=True, null=True)
+    address = models.CharField(max_length=150, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    ceo_title = models.CharField(max_length=30, blank=True, null=True)
+    ceo_name = models.CharField(max_length=150, blank=True, null=True)
+
+
+class Organization(models.Model):
+    FOOTING_CHOICES = (
+        ('ustav', 'устава'),
+        ('attorney', 'доверенности')
+    )
+    KIND_CHOICES = (
+        ('ooo', 'ООО'),
+        ('ao', 'АО'),
+        ('zao', 'ЗАО'),
+        ('ip', 'ИП'),
+    )
+    kind = models.CharField(max_length=100, choices=KIND_CHOICES)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     name_fl = models.CharField(max_length=15, blank=True, null=True)
     user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
+    ceo_footing = models.CharField(max_length=30, choices=FOOTING_CHOICES)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    inn = models.CharField(max_length=15, blank=True, null=True)
+    ogrn = models.CharField(max_length=15, blank=True, null=True)
+    kpp = models.CharField(max_length=15, blank=True, null=True)
+    r_s = models.CharField(max_length=25, blank=True, null=True)
+    bank = models.CharField(max_length=300, blank=True, null=True)
+    bik = models.CharField(max_length=10, blank=True, null=True)
+    k_s = models.CharField(max_length=25, blank=True, null=True)
+    address = models.CharField(max_length=150, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    ceo_title = models.CharField(max_length=30, blank=True, null=True)
+    ceo_name = models.CharField(max_length=150, blank=True, null=True)
 
     def __str__(self):
         if self.name_fl:
@@ -40,7 +77,6 @@ class Organization(models.Model):
         )
 
 
-
 class Invoice(models.Model):
     ENTITY_CHOICE = (
         ('P', 'Палани'),
@@ -57,7 +93,7 @@ class Invoice(models.Model):
     payed_amount = models.IntegerField(default=0)
     shipping_amount = models.IntegerField(default=0)
     montage_amount = models.IntegerField(default=0)
-    legal_entity = models.CharField(max_length=50, choices=ENTITY_CHOICE)
+    legal_entity = models.ForeignKey(LegalEntity, related_name='legal_entity', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Счет № {self.number}'
@@ -210,6 +246,15 @@ class OrderItem(models.Model):
         ('SK', 'старый конструктив'),
         ('NK', 'новый конструктив')
     )
+    STATUS_CHOICE = (
+        ('in_query', 'в очереди'),
+        ('product', 'запущен'),
+        ('ready', 'готов'),
+        ('shipped', 'отгружен'),
+        ('canceled', 'отменен'),
+        ('stopped', 'остановлен'),
+        ('changed', 'изменен'),
+    )
 
     p_kind = models.CharField(max_length=100, null=True, choices=KIND_CHOICE)
     p_type = models.CharField(max_length=100, choices=TYPE_CHOICE)
@@ -229,11 +274,11 @@ class OrderItem(models.Model):
     p_glass = models.CharField(max_length=255, blank=True, null=True) # тип, размер, толщина, кол-во
     p_others = models.CharField(max_length=200, blank=True, null=True) # прочее
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    p_status = models.CharField(max_length=15, default='in_query')
+    p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE)
     position_num = models.CharField(max_length=5)
     nameplate_range = models.CharField(max_length=100, blank=True, null=True)  # номерной диапзон шильдов для позиции
     p_quantity = models.IntegerField(default=1)
-    p_comment = models.CharField(max_length=255, blank=True, null=True)
+    p_comment = models.TextField(max_length=255, blank=True, null=True, default='')
     firm_plate = models.BooleanField(default=True)  # фирменный шильд
     mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True)  # монтажные уши: размер, кол-во
 

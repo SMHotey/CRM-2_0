@@ -2,12 +2,16 @@
 {% load static %}
 {% load my_filters %}
 
+{% block head %}
+<!-- Импорт Bootstrap CSS -->
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5" style="width: 30%;">
     <h2 class="mb-4">Загрузка заказа</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="form-group">
+        <div class="mb-3">
             {{ form.order_file.label_tag }}
             {{ form.order_file }}  <!-- Поле файла -->
             {% if form.order_file.errors %}
@@ -16,10 +20,10 @@
                 </div>
             {% endif %}
         </div>
-        <div class="form-group">
+        <div class="mb-3">
             {{ form.invoice.label_tag }}
             {{ form.invoice }}  <!-- Поле счета -->
-            <button type="button" class="custom-button" data-toggle="modal" data-target="#newInvoiceModal">Новый счет</button>
+            <button type="button" class="custom-button" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">Новый счет</button>
             {% if form.invoice.errors %}
                 <div class="text-danger">
                     {{ form.invoice.errors }}
@@ -28,19 +32,19 @@
         </div>
 
         <!-- Новые поля для ввода -->
-        <div class="form-group">
+        <div class="mb-3">
             <label for="id_readiness"><b>Согласованный срок изготовления</b></label><br>
             <input type="radio" name="kind_of_date" value="working" checked onchange="calculateDate()"> рабочие дни
             <input type="radio" name="kind_of_date" value="calendar" onchange="calculateDate()"> календарные дни<br>
 
-            <input type="number" class="form-control numeric-input" id="id_readiness" name="readiness" value="1" style="width: 60%" required placeholder="Введите готовность" oninput="calculateDate()">
+            <input type="number" class="form-control numeric-input" id="id_readiness" name="readiness" value="1" style="width: 60%;" required placeholder="Введите готовность" oninput="calculateDate()">
             <input type="hidden" id="dueDateInput" name="due_date"> <!-- Скрытое поле для даты готовности -->
             <div>
                 <strong>Планируемая дата готовности:</strong> <span id="dueDate"></span>
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="mb-3">
             <label for="id_comment"><b>Комментарий</b></label>
             <textarea class="form-control" id="id_comment" name="comment" rows="3" placeholder="Введите комментарий"></textarea>
         </div>
@@ -50,41 +54,39 @@
 </div>
 
 <!-- Модальное окно для добавления нового счета -->
-<div class="modal fade" id="newInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="newInvoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="newInvoiceModal" tabindex="-1" aria-labelledby="newInvoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="newInvoiceModalLabel">Добавить новый счет</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="newInvoiceForm" method="post" action="{% url 'invoice_add' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_number">Номер</label>
                         <input type="text" class="form-control" id="id_number" name="number" maxlength="5" required>
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_amount">Сумма</label>
                         <input type="text" class="form-control numeric-input" id="id_amount" name="amount" required placeholder="Введите сумму">
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_payed_amount">Оплачено</label>
                         <input type="text" class="form-control numeric-input" id="id_payed_amount" name="payed_amount" value="0" placeholder="Введите оплачено">
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_shipping_amount">Стоимость доставки</label>
                         <input type="text" class="form-control numeric-input" id="id_shipping_amount" name="shipping_amount" value="0" placeholder="Введите стоимость доставки">
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_montage_amount">Стоимость монтажа</label>
                         <input type="text" class="form-control numeric-input" id="id_montage_amount" name="montage_amount" value="0" placeholder="Введите стоимость монтажа">
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_legal_entity">Юридическое лицо</label>
-                        <select class="form-control" id="id_legal_entity" name="legal_entity" required>
+                        <select class="form-select" id="id_legal_entity" name="legal_entity" required>
                             <option value="" disabled selected>Выберите юридическое лицо</option>
                             <option value="P">Палани</option>
                             <option value="PI">Палани Инжиниринг</option>
@@ -94,9 +96,9 @@
                             <option value="FL">Прочее</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label for="id_organization">Организация</label>
-                        <select class="form-control" id="id_organization" name="organization" required>
+                        <select class="form-select" id="id_organization" name="organization" required>
                             <option value="" disabled selected>Выберите организацию</option>
                             {% for organization in organizations %}
                                 <option value="{{ organization.id }}">{{ organization.name }}</option>
@@ -106,7 +108,7 @@
                     <div id="modal-error-messages" class="text-danger" style="display: none;"></div> <!-- Для отображения ошибок -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
                     <button type="submit" class="btn btn-primary">Сохранить счет</button>
                 </div>
             </form>
@@ -114,8 +116,6 @@
     </div>
 </div>
 
-<!-- Скрипт для обработки AJAX запроса и числовой валидации -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     // Валидация для полей ввода числовых значений
     $(document).on('input', '.numeric-input', function() {
@@ -143,8 +143,7 @@
             }
         });
     });
-</script>
-<script>
+
     function calculateDate() {
         const readinessInput = document.getElementById('id_readiness').value;
         const kindOfDate = document.querySelector('input[name="kind_of_date"]:checked').value;
