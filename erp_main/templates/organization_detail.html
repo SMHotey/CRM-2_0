@@ -3,7 +3,9 @@
 {% block content %}
     <b>Детальная информация по </b>
         {% if organization.name %}
-            <b>организации: {{ organization.name }}</b>
+            <b>организации:
+                <br>
+                <a href="{% url 'edit_organization' organization.pk %}">{{ organization.name }}</a></b>
         {% else %}
             физическому лицу: {{ organization.name_fl }} ({{ organization.phone_number }})
         {% endif %}
@@ -17,4 +19,14 @@
     Аванс по заказам в работе <br>
     Ожидаемые доплаты <br>
     Ожидаемые оплаты <br>
+
+
+<a href="{% url 'create_contract' organization.pk %}">Создать договор</a></b>
+    <br><br>
+    {% if new_contract_url %}
+        <a href="{{ new_contract_url }}">Скачать договор</a>
+    {% endif %}
+
+
+
 {% endblock %}

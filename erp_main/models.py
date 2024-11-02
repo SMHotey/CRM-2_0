@@ -16,21 +16,6 @@ def validate_numeric_only(value):
         raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
 
 
-class LegalEntity(models.Model):
-    name = models.CharField(max_length=100, blank=True, null=True)
-    inn = models.CharField(max_length=15, blank=True, null=True)
-    ogrn = models.CharField(max_length=15, blank=True, null=True)
-    kpp = models.CharField(max_length=15, blank=True, null=True)
-    r_s = models.CharField(max_length=25, blank=True, null=True)
-    bank = models.CharField(max_length=300, blank=True, null=True)
-    bik = models.CharField(max_length=10, blank=True, null=True)
-    k_s = models.CharField(max_length=25, blank=True, null=True)
-    address = models.CharField(max_length=150, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    ceo_title = models.CharField(max_length=30, blank=True, null=True)
-    ceo_name = models.CharField(max_length=150, blank=True, null=True)
-
-
 class Organization(models.Model):
     FOOTING_CHOICES = (
         ('ustav', 'устава'),
@@ -42,7 +27,7 @@ class Organization(models.Model):
         ('zao', 'ЗАО'),
         ('ip', 'ИП'),
     )
-    kind = models.CharField(max_length=100, choices=KIND_CHOICES)
+    kind = models.CharField(max_length=100, blank=True, null=True, choices=KIND_CHOICES)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     name_fl = models.CharField(max_length=15, blank=True, null=True)
     user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
@@ -77,15 +62,28 @@ class Organization(models.Model):
         )
 
 
+class LegalEntity(models.Model):
+    name = models.CharField(max_length=255)
+    inn = models.CharField(max_length=12, unique=True)
+    ogrn = models.CharField(max_length=15, unique=True)
+    kpp = models.CharField(max_length=9)
+    r_s = models.CharField(max_length=20)
+    bank = models.CharField(max_length=255)
+    bik = models.CharField(max_length=9)
+    k_s = models.CharField(max_length=20)
+    address = models.CharField(max_length=255)
+    email = models.EmailField()
+    ceo_title = models.CharField(max_length=100)
+    ceo_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'Юридические лица'
+
+
 class Invoice(models.Model):
-    ENTITY_CHOICE = (
-        ('P', 'Палани'),
-        ('PI', 'Палани Инжиниринг'),
-        ('PD', 'Палани Дистрибуция'),
-        ('GP', 'Глобал Палани'),
-        ('DMM', 'Двери металл-М'),
-        ('FL', 'Прочее')
-    )
     number = models.CharField(max_length=5, blank=True, null=True)
     organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)

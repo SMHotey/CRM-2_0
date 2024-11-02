@@ -1,5 +1,6 @@
 import json
-
+import os
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,10 +11,10 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView
 from openpyxl import load_workbook
-from .models import Order, OrderItem, Organization, Invoice
-from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm
+from .models import Order, OrderItem, Organization, Invoice, LegalEntity
+from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
-
+from docx import Document
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,6 @@ class OrderUploadView(FormView):
         except Exception as e:
             form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
             return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
-
 
         # Обработка загруженного файла
         sheet = wb.active
@@ -165,7 +165,6 @@ def change_order(request):
     pass
 
 
-
 @login_required(login_url='login')
 def organization_add(request):
     if request.method == 'POST':
@@ -197,6 +196,7 @@ def organization_add(request):
         form = OrganizationForm()
 
     return render(request, 'organization_add.html', {'form': form})
+
 
 @login_required(login_url='login')
 def invoice_add(request):
@@ -253,7 +253,7 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
-    filtered_items = order.items.exclude(p_status__in=['changed', 'canceled']) #фильтрация по активным позициям
+    filtered_items = order.items.exclude(p_status__in=['changed', 'canceled'])  #фильтрация по активным позициям
 
     if request.method == 'POST':
         form = OrderFileForm(request.POST, request.FILES)
@@ -266,14 +266,14 @@ def order_detail(request, order_id):
 
 
 @login_required(login_url='login')
-def organization_detail(request, id):
-    organization = get_object_or_404(Organization, id=id)
+def organization_detail(request, pk):
+    organization = get_object_or_404(Organization, pk=pk)
     return render(request, 'organization_detail.html', {'organization': organization})
 
 
 @login_required(login_url='login')
-def invoice_detail(request, id):
-    invoice = get_object_or_404(Invoice, id=id)
+def invoice_detail(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
     return render(request, 'invoice_detail.html', {'invoice': invoice})
 
 
@@ -294,8 +294,8 @@ def update_order_item_status(request):
                 order_item = get_object_or_404(OrderItem, id=item_id)
 
                 # Проверка на возможность изменения статуса
-#                if order_item.p_status in ['shipped', 'canceled']:
-#                    return JsonResponse({'status': 'error', 'message': f'Cannot change status for item {item_id}.'}, status=403)
+                #                if order_item.p_status in ['shipped', 'canceled']:
+                #                    return JsonResponse({'status': 'error', 'message': f'Cannot change status for item {item_id}.'}, status=403)
 
                 # Обновление статуса
                 order_item.p_status = new_status
@@ -307,6 +307,71 @@ def update_order_item_status(request):
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON format.'}, status=400)
         except Exception as e:
             logger.exception("Error updating order items' statuses")
-            return JsonResponse({'status': 'error', 'message': 'An error occurred while processing your request.'}, status=500)
+            return JsonResponse({'status': 'error', 'message': 'An error occurred while processing your request.'},
+                                status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+def edit_organization(request, pk):
+    organization = get_object_or_404(Organization, pk=pk)  # Получаем организацию по первичному ключу
+    if request.method == 'POST':
+        form = OrganizationForm(request.POST, instance=organization)  # Передаем экземпляр в форму
+        if form.is_valid():
+            form.save()  # Сохраняем изменения
+            return redirect('organization_detail',
+                            pk=organization.pk)  # Перенаправление на страницу детализации или список
+    else:
+        form = OrganizationForm(instance=organization)  # Заполняем форму данными существующей организации
+
+    return render(request, 'organization_edit.html', {'form': form, 'organization': organization})
+
+
+def create_legal_entity(request):
+    if request.method == 'POST':
+        form = LegalEntityForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()  # Сохраните объект LegalEntity
+            return redirect('organization_list')  # Перенаправление на страницу успеха
+    else:
+        form = LegalEntityForm(request.user)
+
+    return render(request, 'legal_entity_form.html', {'form': form})
+
+
+def create_contract(request, pk):
+    num_of = 123
+    organization = get_object_or_404(Organization, pk=pk)
+
+    data = {
+        'ЮЛ': 'ПАЛАНИ',
+        'юл_огрн': '123456',
+        'юл_инн': '654321',
+        'юл_должность': 'квадробер',
+        'юл_фио': 'Иванов Иван',
+        'организация': organization.name
+    }
+
+    # Полный путь к шаблону
+    file_path = os.path.join(settings.BASE_DIR, 'media/Contract/contract.docx')
+    doc = Document(file_path)
+
+    # Проходим по всем параграфам и заменяем метки
+    for paragraph in doc.paragraphs:
+        for key, value in data.items():
+            if f'{{{key}}}' in paragraph.text or f'[[{key}]]' in paragraph.text:
+                paragraph.text = paragraph.text.replace(f'{{{key}}}', value)
+
+    # Определяем путь, по которому будет сохраняться новый документ
+    new_file_path = os.path.join(settings.MEDIA_ROOT, 'Contract/new_contract.docx')
+    # Создаем директорию, если ее нет
+    os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
+
+    # Сохраняем изменённый документ
+    doc.save(new_file_path)
+
+    # URL к новому файлу
+    new_contract_url = os.path.join(settings.MEDIA_URL, 'Contract/new_contract.docx')
+
+    return render(request, 'organization_detail.html',
+                  {'organization': organization, 'new_contract_url': new_contract_url})

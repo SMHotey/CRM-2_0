@@ -6,7 +6,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
-from .views import OrderUploadView
+from .views import OrderUploadView, edit_organization, create_legal_entity, create_contract
 
 urlpatterns = [
     path('update-order-item-status/', views.update_order_item_status, name='update_order_item_status'),
@@ -17,7 +17,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(next_page='index'), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
-    path('organization/<int:id>/', views.organization_detail, name='organization_detail'),
+    path('organization/<int:pk>/', views.organization_detail, name='organization_detail'),
     path('invoice/<int:id>/', views.invoice_detail, name='invoice_detail'),
     path('invoices_list/', views.invoices_list, name='invoices_list'),
     path('organization_list/', views.organization_list, name='organization_list'),
@@ -26,6 +26,9 @@ urlpatterns = [
          auth_views.PasswordResetView.as_view(template_name='registration/password_reset_form.html'),
          name='password_reset'),
     path('register/', views.register, name='register'),
+    path('organization/edit/<int:pk>/', edit_organization, name='edit_organization'),
+    path('legal-entity/create/', create_legal_entity, name='create_legal_entity'),
+    path('organization/contract/<int:pk>', create_contract, name='create_contract'),
 
 ]
 

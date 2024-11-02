@@ -53,9 +53,6 @@ class LegalEntityForm(forms.ModelForm):
         self.fields['ceo_name'].label = 'ФИО полностью'
 
 
-from django import forms
-from .models import Organization  # Импортируйте вашу модель Organization
-
 
 class OrganizationForm(forms.ModelForm):
     class Meta:
@@ -84,6 +81,8 @@ class OrganizationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['name_fl'].label = 'Имя, фамилия'
         self.fields['phone_number'].label = 'Номер телефона'
+        self.fields['inn'].label = ''
+        self.fields['name'].label = ''
 
     def clean(self):
         cleaned_data = super().clean()

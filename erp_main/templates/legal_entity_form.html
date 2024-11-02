@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load my_filters %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4 text-center">Создание юридического лица</h1>
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+                {{ form.name|add_class:"form-control" }}  <!-- Убедитесь, что добавлен нужный класс -->
+                {{ form.name.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.inn.id_for_label }}" class="form-label">{{ form.inn.label }}</label>
+                {{ form.inn|add_class:"form-control" }}
+                {{ form.inn.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.ogrn.id_for_label }}" class="form-label">{{ form.ogrn.label }}</label>
+                {{ form.ogrn|add_class:"form-control" }}
+                {{ form.ogrn.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.kpp.id_for_label }}" class="form-label">{{ form.kpp.label }}</label>
+                {{ form.kpp|add_class:"form-control" }}
+                {{ form.kpp.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.r_s.id_for_label }}" class="form-label">{{ form.r_s.label }}</label>
+                {{ form.r_s|add_class:"form-control" }}
+                {{ form.r_s.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.bank.id_for_label }}" class="form-label">{{ form.bank.label }}</label>
+                {{ form.bank|add_class:"form-control" }}
+                {{ form.bank.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.bik.id_for_label }}" class="form-label">{{ form.bik.label }}</label>
+                {{ form.bik|add_class:"form-control" }}
+                {{ form.bik.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.k_s.id_for_label }}" class="form-label">{{ form.k_s.label }}</label>
+                {{ form.k_s|add_class:"form-control" }}
+                {{ form.k_s.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }}</label>
+                {{ form.address|add_class:"form-control" }}
+                {{ form.address.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                {{ form.email|add_class:"form-control" }}
+                {{ form.email.errors }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.ceo_title.id_for_label }}" class="form-label">{{ form.ceo_title.label }}</label>
+                {{ form.ceo_title|add_class:"form-control" }}
+                {{ form.ceo_title.errors }}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.ceo_name.id_for_label }}" class="form-label">{{ form.ceo_name.label }}</label>
+                {{ form.ceo_name|add_class:"form-control" }}
+                {{ form.ceo_name.errors }}
+            </div>
+        </div>
+
+        <div class="text-center mb-4">
+            <button type="submit" class="btn btn-primary">Создать юридическое лицо</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
