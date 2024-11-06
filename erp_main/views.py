@@ -350,33 +350,54 @@ def create_contract(request, pk):
         num_of = 123
         organization = get_object_or_404(Organization, pk=pk)
 
-
-
         data = {
-            'ЮЛ': legal_entity.name,
+            'юл': legal_entity.name,
             'юл_огрн': legal_entity.ogrn,
             'юл_инн': legal_entity.inn,
             'юл_должность': legal_entity.ceo_title,
             'юл_фио': legal_entity.ceo_name,
-            'организация': organization.name,
+            'юл_кпп': legal_entity.kpp,
+            'юл_рс': legal_entity.r_s,
+            'юл_банк': legal_entity.bank,
+            'юл_бик': legal_entity.bik,
+            'юл_корс': legal_entity.k_s,
+            'юл_адрес': legal_entity.address,
+            'юл_email': legal_entity.email,
+            'орг': organization.name,
             'орг_огрн': organization.ogrn,
             'орг_инн': organization.inn,
             'орг_должность': organization.ceo_title,
             'орг_фио': organization.ceo_name,
-            'основание': organization.ceo_footing
-
-
+            'основание': organization.ceo_footing,
+            'орг_кпп': organization.kpp,
+            'орг_рс': organization.r_s,
+            'орг_банк': organization.bank,
+            'орг_бик': organization.bik,
+            'орг_счет': organization.k_s,
+            'орг_адрес': organization.address,
+            'орг_email': organization.email,
         }
-
+        print(organization.k_s)
         # Полный путь к шаблону
         file_path = os.path.join(settings.BASE_DIR, 'media/Contract/contract.docx')
         doc = Document(file_path)
 
         # Проходим по всем параграфам и заменяем метки
-        for paragraph in doc.paragraphs:
-            for key, value in data.items():
-                if f'{{{key}}}' in paragraph.text or f'[[{key}]]' in paragraph.text:
-                    paragraph.text = paragraph.text.replace(f'{{{key}}}', value)
+        def replace_in_paragraphs(paragraphs, data):
+            for paragraph in paragraphs:
+                for key, value in data.items():
+                    if f'{{{key}}}' in paragraph.text or f'[[{key}]]' in paragraph.text:
+                        paragraph.text = paragraph.text.replace(f'{{{key}}}', value)
+                        paragraph.text = paragraph.text.replace(f'[[{key}]]', value)
+
+        # Заменяем метки в главных параграфах
+        replace_in_paragraphs(doc.paragraphs, data)
+
+        # Заменяем метки в таблицах
+        for table in doc.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    replace_in_paragraphs(cell.paragraphs, data)
 
         # Определяем путь, по которому будет сохраняться новый документ
         new_file_path = os.path.join(settings.MEDIA_ROOT, 'Contract/new_contract.docx')
