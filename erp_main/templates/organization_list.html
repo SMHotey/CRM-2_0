@@ -33,7 +33,7 @@
     <h2>Ваши организации</h2>
     <div class="list-group">
         {% for org in organizations %}
-        <a href="#" class="list-group-item list-group-item-action">{{ org.name }}</a> <!-- Замените # на URL-адрес для каждой организации -->
+        <a href="{% url 'organization_detail' org.id %}" class="list-group-item list-group-item-action">{{ org.name }}</a> <!-- Замените # на URL-адрес для каждой организации -->
         {% empty %}
         <li class="list-group-item">Нет организаций</li>
         {% endfor %}

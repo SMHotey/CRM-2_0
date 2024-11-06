@@ -267,8 +267,12 @@ def order_detail(request, order_id):
 
 @login_required(login_url='login')
 def organization_detail(request, pk):
-    organization = get_object_or_404(Organization, pk=pk)
-    return render(request, 'organization_detail.html', {'organization': organization})
+    organization = get_object_or_404(Organization, pk=pk)  # замените на вашу модель
+    legal_entities = LegalEntity.objects.all()  # Получаем все экземпляры LegalEntity
+    return render(request, 'organization_detail.html', {
+        'organization': organization,
+        'legal_entities': legal_entities,
+    })
 
 
 @login_required(login_url='login')
@@ -340,38 +344,51 @@ def create_legal_entity(request):
 
 
 def create_contract(request, pk):
-    num_of = 123
-    organization = get_object_or_404(Organization, pk=pk)
+    if request.method == 'POST':
+        legal_entity_id = request.POST.get('legal_entity')
+        legal_entity = get_object_or_404(LegalEntity, pk=legal_entity_id)
+        num_of = 123
+        organization = get_object_or_404(Organization, pk=pk)
 
-    data = {
-        'ЮЛ': 'ПАЛАНИ',
-        'юл_огрн': '123456',
-        'юл_инн': '654321',
-        'юл_должность': 'квадробер',
-        'юл_фио': 'Иванов Иван',
-        'организация': organization.name
-    }
 
-    # Полный путь к шаблону
-    file_path = os.path.join(settings.BASE_DIR, 'media/Contract/contract.docx')
-    doc = Document(file_path)
 
-    # Проходим по всем параграфам и заменяем метки
-    for paragraph in doc.paragraphs:
-        for key, value in data.items():
-            if f'{{{key}}}' in paragraph.text or f'[[{key}]]' in paragraph.text:
-                paragraph.text = paragraph.text.replace(f'{{{key}}}', value)
+        data = {
+            'ЮЛ': legal_entity.name,
+            'юл_огрн': legal_entity.ogrn,
+            'юл_инн': legal_entity.inn,
+            'юл_должность': legal_entity.ceo_title,
+            'юл_фио': legal_entity.ceo_name,
+            'организация': organization.name,
+            'орг_огрн': organization.ogrn,
+            'орг_инн': organization.inn,
+            'орг_должность': organization.ceo_title,
+            'орг_фио': organization.ceo_name,
+            'основание': organization.ceo_footing
 
-    # Определяем путь, по которому будет сохраняться новый документ
-    new_file_path = os.path.join(settings.MEDIA_ROOT, 'Contract/new_contract.docx')
-    # Создаем директорию, если ее нет
-    os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
 
-    # Сохраняем изменённый документ
-    doc.save(new_file_path)
+        }
 
-    # URL к новому файлу
-    new_contract_url = os.path.join(settings.MEDIA_URL, 'Contract/new_contract.docx')
+        # Полный путь к шаблону
+        file_path = os.path.join(settings.BASE_DIR, 'media/Contract/contract.docx')
+        doc = Document(file_path)
 
-    return render(request, 'organization_detail.html',
-                  {'organization': organization, 'new_contract_url': new_contract_url})
+        # Проходим по всем параграфам и заменяем метки
+        for paragraph in doc.paragraphs:
+            for key, value in data.items():
+                if f'{{{key}}}' in paragraph.text or f'[[{key}]]' in paragraph.text:
+                    paragraph.text = paragraph.text.replace(f'{{{key}}}', value)
+
+        # Определяем путь, по которому будет сохраняться новый документ
+        new_file_path = os.path.join(settings.MEDIA_ROOT, 'Contract/new_contract.docx')
+        # Создаем директорию, если ее нет
+        os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
+
+        # Сохраняем изменённый документ
+        doc.save(new_file_path)
+
+        # URL к новому файлу
+        new_contract_url = os.path.join(settings.MEDIA_URL, 'Contract/new_contract.docx')
+        legal_entity = LegalEntity.objects.all()
+
+        return render(request, 'organization_detail.html',
+                      {'organization': organization, 'new_contract_url': new_contract_url, 'legal_entities': legal_entity})

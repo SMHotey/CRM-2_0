@@ -20,13 +20,21 @@
     Ожидаемые доплаты <br>
     Ожидаемые оплаты <br>
 
+    <form method="POST" action="{% url 'create_contract' organization.pk %}">
+        {% csrf_token %}
+        <label for="legal_entity">Выберите юридическое лицо:</label>
+        <select name="legal_entity" id="legal_entity">
+            {% for entity in legal_entities %}
+                <option value="{{ entity.pk }}">{{ entity.name }}</option>
+            {% endfor %}
+        </select>
 
-<a href="{% url 'create_contract' organization.pk %}">Создать договор</a></b>
-    <br><br>
+        <button type="submit">Создать договор</button>
+    </form>
+
+    <br>
+
     {% if new_contract_url %}
         <a href="{{ new_contract_url }}">Скачать договор</a>
     {% endif %}
-
-
-
 {% endblock %}

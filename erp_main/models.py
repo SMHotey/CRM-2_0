@@ -27,6 +27,7 @@ class Organization(models.Model):
         ('zao', 'ЗАО'),
         ('ip', 'ИП'),
     )
+
     kind = models.CharField(max_length=100, blank=True, null=True, choices=KIND_CHOICES)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     name_fl = models.CharField(max_length=15, blank=True, null=True)
@@ -44,6 +45,7 @@ class Organization(models.Model):
     email = models.EmailField(blank=True, null=True)
     ceo_title = models.CharField(max_length=30, blank=True, null=True)
     ceo_name = models.CharField(max_length=150, blank=True, null=True)
+    contracts = models.FileField(upload_to='uploads/contracts', blank=True, null=True)
 
     def __str__(self):
         if self.name_fl:
@@ -92,6 +94,7 @@ class Invoice(models.Model):
     shipping_amount = models.IntegerField(default=0)
     montage_amount = models.IntegerField(default=0)
     legal_entity = models.ForeignKey(LegalEntity, related_name='legal_entity', on_delete=models.CASCADE)
+    invoice_files = models.FileField(upload_to='uploads/invoices', blank=True, null=True)
 
     def __str__(self):
         return f'Счет № {self.number}'
