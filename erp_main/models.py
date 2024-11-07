@@ -88,16 +88,26 @@ class LegalEntity(models.Model):
 class Invoice(models.Model):
     number = models.CharField(max_length=5, blank=True, null=True)
     organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()
     amount = models.IntegerField(default=0)
     payed_amount = models.IntegerField(default=0)
     shipping_amount = models.IntegerField(default=0)
     montage_amount = models.IntegerField(default=0)
     legal_entity = models.ForeignKey(LegalEntity, related_name='legal_entity', on_delete=models.CASCADE)
     invoice_files = models.FileField(upload_to='uploads/invoices', blank=True, null=True)
+    year = models.PositiveIntegerField(editable=False)
 
     def __str__(self):
         return f'Счет № {self.number}'
+
+    def save(self, *args, **kwargs):
+        self.year = self.date.year  # Получаем год из даты
+        super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['number', 'legal_entity', 'year'], name='unique_field_combination')
+        ]
 
 
 #def order_file_upload_to(instance, filename):
@@ -286,9 +296,9 @@ class OrderItem(models.Model):
     @property
     def glass(self):
         if self.p_glass != '{}':
-            return self.p_glass.translate(str.maketrans("", "", "{}()")).replace(",", "х") + "<br>"
+            return self.p_glass.translate(str.maketrans("", "", "{}()")).replace(", ", "х") + "<br>"
         else:
-            return f'глухая'
+            return f'нет'
 
 
 

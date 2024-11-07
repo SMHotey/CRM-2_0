@@ -2,6 +2,7 @@ import json
 import os
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
@@ -33,6 +34,7 @@ class OrderUploadView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['organizations'] = Organization.objects.all()
+        context['legal_entities'] = LegalEntity.objects.all()
         return context
 
     def get_form_kwargs(self):
@@ -203,9 +205,14 @@ def invoice_add(request):
     if request.method == 'POST':
         form = InvoiceForm(user=request.user, data=request.POST)
         if form.is_valid():
-            form.save()
-            # При успешном сохранении возвращаем JSON ответ
-            return JsonResponse({'success': True})
+            try:
+                form.save()  # Пытаемся сохранить форму
+                # При успешном сохранении возвращаем JSON ответ
+                return JsonResponse({'success': True})
+
+            except IntegrityError:
+                # Обработка исключения: запись уже существует
+                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'}, status=400)
 
         # Если форма не валидна, возвращаем ошибки в формате JSON
         error_messages = form.errors.as_json()
@@ -283,8 +290,31 @@ def invoice_detail(request, pk):
 
 @login_required(login_url='login')
 def invoices_list(request):
-    invoices = Invoice.objects.all()
-    return render(request, 'invoices_list.html', {'invoices': invoices})
+    search_query = request.GET.get('search', '')
+    selected_legal_entity_id = request.GET.get('legal_entity', None)
+
+    # Начальное значение для queryset
+    if request.user.is_staff:
+        invoices = Invoice.objects.all()
+    else:
+        invoices = Invoice.objects.filter(user=request.user)()
+
+    # Фильтрация по поисковому запросу
+    if search_query:
+        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(organization__name__icontains=search_query)
+
+    # Фильтрация по выбранному юридическому лицу
+    if selected_legal_entity_id:
+        invoices = invoices.filter(legal_entity_id=selected_legal_entity_id)
+
+    # Получение всех юридических лиц для отображения в выпадающем списке
+    legal_entities = LegalEntity.objects.all()
+
+    return render(request, 'invoices_list.html', {
+        'invoices': invoices,
+        'legal_entities': legal_entities,
+        'selected_legal_entity_id': selected_legal_entity_id,
+    })
 
 
 @csrf_exempt  # Используйте его только если CSRF токены не применяются, исправьте позже.
@@ -413,3 +443,6 @@ def create_contract(request, pk):
 
         return render(request, 'organization_detail.html',
                       {'organization': organization, 'new_contract_url': new_contract_url, 'legal_entities': legal_entity})
+
+    def get_full_name(self):
+        return f'{self.first_name} {self.last_name}'

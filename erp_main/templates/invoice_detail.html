@@ -3,7 +3,7 @@
 
 {% block content %}
     <b>Детальная информация по счету №{{ invoice.number }} от {{ invoice.date }}</b> <br><br>
-    <b>Юридическое лицо:</b> <i>{{ invoice.get_legal_entity_display }}</i> <br>
+    <b>Юридическое лицо:</b> <i>{{ invoice.legal_entity }}</i> <br>
     <b>Организация:</b> <i>{{ invoice.organization }}</i> <br>
     <b>Менеджер:</b> <i>{{ invoice.organization.user.first_name }} {{ invoice.organization.user.last_name }} </i> <br>
     <b>Сумма счета:</b> <i>{{ invoice.amount|intcomma }} р.</i> <br>

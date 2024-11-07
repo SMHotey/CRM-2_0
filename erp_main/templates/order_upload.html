@@ -69,6 +69,10 @@
                         <input type="text" class="form-control" id="id_number" name="number" maxlength="5" required>
                     </div>
                     <div class="mb-3">
+                        <label for="id_date">Дата</label>
+                        <input type="text" class="form-control" id="id_date" name="date" maxlength="10" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="id_amount">Сумма</label>
                         <input type="text" class="form-control numeric-input" id="id_amount" name="amount" required placeholder="Введите сумму">
                     </div>
@@ -88,12 +92,9 @@
                         <label for="id_legal_entity">Юридическое лицо</label>
                         <select class="form-select" id="id_legal_entity" name="legal_entity" required>
                             <option value="" disabled selected>Выберите юридическое лицо</option>
-                            <option value="P">Палани</option>
-                            <option value="PI">Палани Инжиниринг</option>
-                            <option value="PD">Палани Дистрибуция</option>
-                            <option value="GP">Глобал Палани</option>
-                            <option value="DMM">Двери металл-М</option>
-                            <option value="FL">Прочее</option>
+                            {% for entity in legal_entities %}
+                                <option value="{{ entity.id }}">{{ entity.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="mb-3">

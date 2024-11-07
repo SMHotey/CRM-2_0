@@ -18,7 +18,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('organization/<int:pk>/', views.organization_detail, name='organization_detail'),
-    path('invoice/<int:id>/', views.invoice_detail, name='invoice_detail'),
+    path('invoice/<int:pk>/', views.invoice_detail, name='invoice_detail'),
     path('invoices_list/', views.invoices_list, name='invoices_list'),
     path('organization_list/', views.organization_list, name='organization_list'),
     path('index/', views.index, name='index'),

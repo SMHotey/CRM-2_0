@@ -106,12 +106,13 @@ class OrganizationForm(forms.ModelForm):
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['number', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'legal_entity',
+        fields = ['number', 'date', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'legal_entity',
                   'organization']
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['number'].label = 'Номер'
+        self.fields['date'].label = 'Дата выставления'
         self.fields['amount'].label = 'Сумма'
         self.fields['payed_amount'].label = 'Оплачено'
         self.fields['shipping_amount'].label = 'Стоимость доставки'

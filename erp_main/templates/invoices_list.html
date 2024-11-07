@@ -13,8 +13,8 @@
         <label>
             <select name="legal_entity" class="form-control mr-2">
                 <option value="">Все юридические лица</option>
-                {% for key, value in invoice.ENTITY_CHOICE %}
-                    <option value="{{ key }}" {% if request.GET.legal_entity == key %}selected{% endif %}>{{ value }}</option>
+                {% for l_e in legal_entities %}
+                    <option value="{{ l_e.id }}" {% if l_e.id == selected_legal_entity_id %}selected{% endif %}>{{ l_e.name }}</option>
                 {% endfor %}
             </select>
         </label>
@@ -26,27 +26,30 @@
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Номер</th>
-                <th>Организация</th>
-                <th>Дата</th>
-                <th>Сумма</th>
-                <th>Оплачено</th>
-                <th>Доставка</th>
-                <th>Монтаж</th>
-                <th>Юридическое лицо</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Номер</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Организация</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Дата</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Сумма</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Оплачено</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Доставка</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Монтаж</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Менеджер</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Юридическое лицо</th>
             </tr>
         </thead>
         <tbody>
             {% for invoice in invoices %}
             <tr>
-                <td>{{ invoice.number }}</td>
-                <td>{{ invoice.organization.name }}</td>
-                <td>{{ invoice.date }}</td>
-                <td>{{ invoice.amount }}</td>
-                <td>{{ invoice.payed_amount }}</td>
-                <td>{{ invoice.shipping_amount }}</td>
-                <td>{{ invoice.montage_amount }}</td>
-                <td>{{ invoice.get_legal_entity_display }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">
+                    <a href="{% url 'invoice_detail' invoice.id %}">{{ invoice.number }}</a></td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.name }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.date }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.amount }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.payed_amount }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.shipping_amount }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.montage_amount }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.user.get_full_name }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.legal_entity }}</td>
             </tr>
             {% empty %}
             <tr>
