@@ -3,13 +3,16 @@ import os
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
 from collections import Counter
 import re
 from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.views.generic import FormView
 from openpyxl import load_workbook
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity
@@ -163,6 +166,10 @@ class OrderUploadView(FormView):
         return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
 
 
+def glass(request):
+    return render(request, 'glass.html')
+
+
 def change_order(request):
     pass
 
@@ -212,7 +219,8 @@ def invoice_add(request):
 
             except IntegrityError:
                 # Обработка исключения: запись уже существует
-                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'}, status=400)
+                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'},
+                                    status=400)
 
         # Если форма не валидна, возвращаем ошибки в формате JSON
         error_messages = form.errors.as_json()
@@ -301,7 +309,8 @@ def invoices_list(request):
 
     # Фильтрация по поисковому запросу
     if search_query:
-        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(organization__name__icontains=search_query)
+        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(
+            organization__name__icontains=search_query)
 
     # Фильтрация по выбранному юридическому лицу
     if selected_legal_entity_id:
@@ -442,7 +451,8 @@ def create_contract(request, pk):
         legal_entity = LegalEntity.objects.all()
 
         return render(request, 'organization_detail.html',
-                      {'organization': organization, 'new_contract_url': new_contract_url, 'legal_entities': legal_entity})
+                      {'organization': organization, 'new_contract_url': new_contract_url,
+                       'legal_entities': legal_entity})
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'

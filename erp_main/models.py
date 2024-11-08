@@ -1,3 +1,4 @@
+import ast
 import os
 import re
 
@@ -194,7 +195,8 @@ class Order(models.Model):
 
     @property
     def glass(self):
-        return self.get_items_filtered().filter(Q(p_glass__isnull=False) & ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self.get_items_filtered().filter(Q(p_glass__isnull=False) &
+                                                ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def quantity(self):
@@ -216,7 +218,6 @@ class Order(models.Model):
             return f'отгружен'
         else:
             return f'всё сложно'
-
 
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
         if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
@@ -266,6 +267,10 @@ class OrderItem(models.Model):
         ('stopped', 'остановлен'),
         ('changed', 'изменен'),
     )
+    GLASS_STATUS_CHOICE = (
+        ('not_ordered', 'не заказано'),
+
+    )
 
     p_kind = models.CharField(max_length=100, null=True, choices=KIND_CHOICE)
     p_type = models.CharField(max_length=100, choices=TYPE_CHOICE)
@@ -283,7 +288,7 @@ class OrderItem(models.Model):
     p_vent_grate = models.CharField(max_length=100, blank=True, null=True) # вент. решетки (тип, размер, толщина, кол-во)
     p_plate = models.CharField(max_length=100, blank=True, null=True) # отбойная пластина (высота, отступ от низа, сторонность)
     p_glass = models.CharField(max_length=255, blank=True, null=True) # тип, размер, толщина, кол-во
-    p_others = models.CharField(max_length=200, blank=True, null=True) # прочее
+    p_glass_status = models.CharField(max_length=15, default='not_ordered', choices=GLASS_STATUS_CHOICE) # статус стекла
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE)
     position_num = models.CharField(max_length=5)
@@ -296,10 +301,11 @@ class OrderItem(models.Model):
     @property
     def glass(self):
         if self.p_glass != '{}':
-            return self.p_glass.translate(str.maketrans("", "", "{}()")).replace(", ", "х") + "<br>"
+            data = ast.literal_eval(self.p_glass)
+            result = '<br>'.join(f"({key[0]}x{key[1]}): {value}" for key, value in data.items())
+            return result  # Убираем фигурные скобки
         else:
-            return f'нет'
-
+            return 'нет'
 
 
 
