@@ -4,76 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="изменения по дизайну">
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0005_remove_invoice_invoice_files_invoice_invoice_file_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0006_alter_invoice_invoice_file_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/invoices/счет_-_Диал_348.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/invoices/счет_-_Диал_348_AWQkJvG.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/invoices/счет_-_Диал_791.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/invoices/счет_-_Диал_791_MvFbYHe.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/invoices/счет_-_Диал_791_uc1PLJo.pdf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_AJQvIrX.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Journal_4_0.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Journal_4_0.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/Договор ДЛЯ РАБОТЫ.docx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_2WvsS8w.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_5UZmBHG.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_EVQf5V6.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_LJ9OebN.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_SGsuFRe.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_YgeUuH5.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_dEXqOmm.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_gMLqZcx.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_lwaSzun.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_qdPCXpF.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_sLRQaRh.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_03-06-24_Пушкино_xw2txuN.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-02-24.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-02-24_zpd78am.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский_2AfxK2F.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский_9ui2iqj.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский_BbdNWwM.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский_LEXuXVX.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский_eDMUujn.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_14-05-24_Правдинский_g0c5Qu4.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_23-01-24.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_25-04-24.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Гамма_Плюс_112.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Гамма_Плюс_18-03-24.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Гамма_Плюс_466.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Монтажсервис_-ЭНКО_счет_282.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_03-07-24.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_24.06.24_-_ЖК_-_13_Эклипт.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_24.06.24_-_ЖК_-_15_Эклипт.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_24_XJ9eiyz.06.24_-_ЖК_-_13_Эклипт.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_24_voc0pYh.06.24_-_ЖК_-_13_Эклипт.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_ГП_1718_остаток.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_ГП_1718_остаток_sgrdLv8.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_ГП_17_18.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Маэстро_ГП-3.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-1.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-1_imfHma5.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-2.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-2_UECxpiV.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-2_nj82Bd7.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-2_t32XbI7.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт..xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт_MiFEw05..xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/media/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт_omyWczx..xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoices_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoices_list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/Contract/base_contract.docx" beforeDir="false" afterPath="$PROJECT_DIR$/media/contracts/base_contract.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/Contract/contract.docx" beforeDir="false" afterPath="$PROJECT_DIR$/media/contracts/contract.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/media/Contract/new_contract.docx" beforeDir="false" afterPath="$PROJECT_DIR$/media/contracts/new_contract.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/new_contract.docx" beforeDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="добавлена опция изменения данных по счету и загрузки файла счета">
+      <change afterPath="$PROJECT_DIR$/media/invoices/Счет_на_оплату__112_от_09_февраля_2023_г.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/invoices/Счет_на_оплату__660_от_21_июня_2023_г_2.pdf" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -291,7 +224,7 @@
       <workItem from="1730873900084" duration="10100000" />
       <workItem from="1730963386157" duration="21702000" />
       <workItem from="1731046672714" duration="20988000" />
-      <workItem from="1731310169340" duration="21881000" />
+      <workItem from="1731310169340" duration="22228000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -485,7 +418,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731072380000</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="добавлена опция изменения данных по счету и загрузки файла счета">
+      <option name="closed" value="true" />
+      <created>1731335263653</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1731335263653</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -520,7 +461,8 @@
     <MESSAGE value="продолжаем работу с договором" />
     <MESSAGE value="работа со списком счетов" />
     <MESSAGE value="изменения по дизайну" />
-    <option name="LAST_COMMIT_MESSAGE" value="изменения по дизайну" />
+    <MESSAGE value="добавлена опция изменения данных по счету и загрузки файла счета" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавлена опция изменения данных по счету и загрузки файла счета" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1731332472415" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
