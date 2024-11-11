@@ -35,6 +35,7 @@
                 <th style="padding: 8px; text-align: center; vertical-align: middle;">Монтаж</th>
                 <th style="padding: 8px; text-align: center; vertical-align: middle;">Менеджер</th>
                 <th style="padding: 8px; text-align: center; vertical-align: middle;">Юридическое лицо</th>
+                <th style="padding: 8px; text-align: center; vertical-align: middle;">Файл</th>
             </tr>
         </thead>
         <tbody>
@@ -50,6 +51,12 @@
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.montage_amount }}</td>
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.user.get_full_name }}</td>
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.legal_entity }}</td>
+                {% if invoice.invoice_file%}
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;"><a href="{{ invoice.invoice_file.url }}" target="_blank">скачать</a></td>
+                {% else %}
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;"> </td>
+                {% endif %}
+
             </tr>
             {% empty %}
             <tr>

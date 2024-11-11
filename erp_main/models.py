@@ -46,7 +46,7 @@ class Organization(models.Model):
     email = models.EmailField(blank=True, null=True)
     ceo_title = models.CharField(max_length=30, blank=True, null=True)
     ceo_name = models.CharField(max_length=150, blank=True, null=True)
-    contracts = models.FileField(upload_to='uploads/contracts', blank=True, null=True)
+    contracts = models.FileField(upload_to='contracts/', blank=True, null=True)
 
     def __str__(self):
         if self.name_fl:
@@ -95,7 +95,7 @@ class Invoice(models.Model):
     shipping_amount = models.IntegerField(default=0)
     montage_amount = models.IntegerField(default=0)
     legal_entity = models.ForeignKey(LegalEntity, related_name='legal_entity', on_delete=models.CASCADE)
-    invoice_files = models.FileField(upload_to='uploads/invoices', blank=True, null=True)
+    invoice_file = models.FileField(upload_to='invoices/', blank=True, null=True)
     year = models.PositiveIntegerField(editable=False)
 
     def __str__(self):

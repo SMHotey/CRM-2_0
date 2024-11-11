@@ -2,16 +2,95 @@
 {% load humanize %}
 
 {% block content %}
-    <b>Детальная информация по счету №{{ invoice.number }} от {{ invoice.date }}</b> <br><br>
-    <b>Юридическое лицо:</b> <i>{{ invoice.legal_entity }}</i> <br>
-    <b>Организация:</b> <i>{{ invoice.organization }}</i> <br>
-    <b>Менеджер:</b> <i>{{ invoice.organization.user.first_name }} {{ invoice.organization.user.last_name }} </i> <br>
-    <b>Сумма счета:</b> <i>{{ invoice.amount|intcomma }} р.</i> <br>
-    <b>Оплачено:</b> <i>{{ invoice.payed_amount|intcomma }} р.</i> <br>
-    {% if invoice.shipping_amount > 0 %}
-       <b> Включено за доставку:</b> <i>{{ invoice.shipping_amount|intcomma }} р.</i> <br>
-    {% endif %}
-    {% if invoice.montage_amount > 0 %}
-       <b> Включено за монтаж:</b> <i>{{ invoice.montage_amount|intcomma }} р.</i> <br>
-    {% endif %}
+<div class="container mt-5">
+    <h2 class="mb-4">Детальная информация по счету №{{ invoice.number }} от {{ invoice.date }}</h2>
+
+    <div class="mb-4">
+        <b>Юридическое лицо:</b> <i>{{ invoice.legal_entity }}</i> <br>
+        <b>Организация:</b> <i>{{ invoice.organization }}</i> <br>
+        <b>Менеджер:</b> <i>{{ invoice.organization.user.first_name }} {{ invoice.organization.user.last_name }}</i> <br>
+        <b>Сумма счета:</b> <i>{{ invoice.amount|intcomma }} р.</i> <br>
+        <b>Оплачено:</b> <i>{{ invoice.payed_amount|intcomma }} р.</i> <br>
+        {% if invoice.shipping_amount > 0 %}
+           <b>Включено за доставку:</b> <i>{{ invoice.shipping_amount|intcomma }} р.</i> <br>
+        {% endif %}
+        {% if invoice.montage_amount > 0 %}
+           <b>Включено за монтаж:</b> <i>{{ invoice.montage_amount|intcomma }} р.</i> <br>
+        {% endif %}
+
+        {% if invoice.invoice_file %}
+            <b>Загруженный файл:</b> <a href="{{ invoice.invoice_file.url }}" target="_blank">Скачать файл</a> <br>
+        {% else %}
+            <b>Загруженный файл:</b> <i>Файл не загружен.</i> <br>
+        {% endif %}
+    </div>
+
+    <button id="editButton" class="btn btn-warning mb-3">Редактировать</button>
+
+    <form id="editForm" method="POST" enctype="multipart/form-data" style="display: none;">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="id_legal_entity" class="form-label">Юридическое лицо</label>
+            <select name="legal_entity" id="id_legal_entity" class="form-control" required>
+                {% for entity in form.legal_entity.field.queryset %}
+                    <option value="{{ entity.id }}" {% if entity.id == invoice.legal_entity.id %}selected{% endif %}>{{ entity }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="id_organization" class="form-label">Организация</label>
+            <select name="organization" id="id_organization" class="form-control" required>
+                {% for org in form.organization.field.queryset %}
+                    <option value="{{ org.id }}" {% if org.id == invoice.organization.id %}selected{% endif %}>{{ org }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="id_number" class="form-label">Номер счета</label>
+            <input type="text" name="number" id="id_number" class="form-control" value="{{ invoice.number }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="id_date" class="form-label">Дата выставления</label>
+            <input type="date" name="date" id="id_date" class="form-control" value="{{ invoice.date }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="id_amount" class="form-label">Сумма счета</label>
+            <input type="number" name="amount" id="id_amount" class="form-control" value="{{ invoice.amount }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="id_payed_amount" class="form-label">Оплачено</label>
+            <input type="number" name="payed_amount" id="id_payed_amount" class="form-control" value="{{ invoice.payed_amount }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="id_shipping_amount" class="form-label">Стоимость доставки</label>
+            <input type="number" name="shipping_amount" id="id_shipping_amount" class="form-control" value="{{ invoice.shipping_amount }}">
+        </div>
+        <div class="mb-3">
+            <label for="id_montage_amount" class="form-label">Стоимость монтажа</label>
+            <input type="number" name="montage_amount" id="id_montage_amount" class="form-control" value="{{ invoice.montage_amount }}">
+        </div>
+
+        <div class="mb-3">
+            <label for="id_invoice_file" class="form-label">Заменить файл счета (если необходимо)</label>
+            <input type="file" name="invoice_file" id="id_invoice_file" class="form-control">
+            <div class="form-text">Файл не обязателен. Максимальный размер: 10MB.</div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Сохранить изменения</button>
+        <button type="button" id="cancelButton" class="btn btn-secondary">Отменить</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('editButton').addEventListener('click', function() {
+    document.getElementById('editForm').style.display = 'block';
+    document.getElementById('editButton').style.display = 'none';
+});
+
+document.getElementById('cancelButton').addEventListener('click', function() {
+    document.getElementById('editForm').style.display = 'none';
+    document.getElementById('editButton').style.display = 'block';
+});
+</script>
 {% endblock %}

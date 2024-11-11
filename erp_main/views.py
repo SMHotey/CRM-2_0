@@ -9,6 +9,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
 from collections import Counter
 import re
+
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -210,25 +212,22 @@ def organization_add(request):
 @login_required(login_url='login')
 def invoice_add(request):
     if request.method == 'POST':
-        form = InvoiceForm(user=request.user, data=request.POST)
+        form = InvoiceForm(request.user, request.POST, request.FILES)
         if form.is_valid():
             try:
-                form.save()  # Пытаемся сохранить форму
-                # При успешном сохранении возвращаем JSON ответ
-                return JsonResponse({'success': True})
+                print('Hi ', request.FILES)
+                invoice = form.save()
+                file_url = invoice.invoice_file.url if invoice.invoice_file else None
+                print('By ', file_url)
+                return JsonResponse({'success': True, 'redirect_url': reverse('invoices_list'), 'file_url': file_url})
 
             except IntegrityError:
-                # Обработка исключения: запись уже существует
-                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'},
-                                    status=400)
+                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'}, status=400)
 
-        # Если форма не валидна, возвращаем ошибки в формате JSON
         error_messages = form.errors.as_json()
         return JsonResponse({'success': False, 'error': error_messages}, status=400)
 
-    else:
-        form = InvoiceForm(user=request.user)
-
+    form = InvoiceForm(user=request.user)
     return render(request, 'invoice_add.html', {'form': form})
 
 
@@ -292,8 +291,27 @@ def organization_detail(request, pk):
 
 @login_required(login_url='login')
 def invoice_detail(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
-    return render(request, 'invoice_detail.html', {'invoice': invoice})
+    invoice = get_object_or_404(Invoice, id=pk)
+
+    if request.method == 'POST':
+        form = InvoiceForm(user=request.user, data=request.POST, files=request.FILES, instance=invoice)
+        if form.is_valid():
+            invoice = form.save()
+            file_url = invoice.invoice_file.url if invoice.invoice_file else None
+
+            return JsonResponse({
+                'success': True,
+                'file_url': file_url,
+                'redirect_url': reverse('invoice_detail', args=[invoice.id])  # using args here
+            })
+        else:
+            error_messages = form.errors.as_json()
+            return JsonResponse({'success': False, 'error': error_messages}, status=400)
+
+    else:
+        form = InvoiceForm(user=request.user, instance=invoice)
+
+    return render(request, 'invoice_detail.html', {'invoice': invoice, 'form': form})
 
 
 @login_required(login_url='login')
@@ -418,7 +436,7 @@ def create_contract(request, pk):
         }
         print(organization.k_s)
         # Полный путь к шаблону
-        file_path = os.path.join(settings.BASE_DIR, 'media/Contract/contract.docx')
+        file_path = os.path.join(settings.BASE_DIR, 'media/contracts/contract.docx')
         doc = Document(file_path)
 
         # Проходим по всем параграфам и заменяем метки
@@ -439,7 +457,7 @@ def create_contract(request, pk):
                     replace_in_paragraphs(cell.paragraphs, data)
 
         # Определяем путь, по которому будет сохраняться новый документ
-        new_file_path = os.path.join(settings.MEDIA_ROOT, 'Contract/new_contract.docx')
+        new_file_path = os.path.join(settings.MEDIA_ROOT, 'contracts/new_contract.docx')
         # Создаем директорию, если ее нет
         os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
 
@@ -447,7 +465,7 @@ def create_contract(request, pk):
         doc.save(new_file_path)
 
         # URL к новому файлу
-        new_contract_url = os.path.join(settings.MEDIA_URL, 'Contract/new_contract.docx')
+        new_contract_url = os.path.join(settings.MEDIA_URL, 'contracts/new_contract.docx')
         legal_entity = LegalEntity.objects.all()
 
         return render(request, 'organization_detail.html',

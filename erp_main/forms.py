@@ -103,11 +103,12 @@ class OrganizationForm(forms.ModelForm):
 
         return cleaned_data
 
+
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = ['number', 'date', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'legal_entity',
-                  'organization']
+                  'organization', 'invoice_file']
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
