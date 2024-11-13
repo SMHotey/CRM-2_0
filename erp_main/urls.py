@@ -29,7 +29,7 @@ urlpatterns = [
     path('organization/edit/<int:pk>/', edit_organization, name='edit_organization'),
     path('legal-entity/create/', create_legal_entity, name='create_legal_entity'),
     path('organization/contract/<int:pk>', create_contract, name='create_contract'),
-    path('glass/', views.glass, name='glass'),
+    path('glass_info/', views.glass_info, name='glass_info'),
 
 ]
 

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Общие стили для таблицы */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0 auto;
+    }
+    th, td {
+        padding: 4px; /* Уменьшаем padding для уменьшения высоты строк */
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid #dee2e6; /* Установка границы для ячеек */
+    }
+    th {
+        background-color: #f8f9fa; /* Цвет фона заголовков */
+    }
+    tbody tr:hover {
+        background-color: #e6e6fa; /* Цвет строки при наведении */
+    }
+</style>
+<div class="container">
+    <h2 class="my-4">Список заказов со стеклом</h2>
+    <table class="table table-bordered table-hover text-center">
+        <thead class="table-#f8f9fa">
+            <tr>
+                <th>Заказ</th>
+                <th>Счет</th>
+                <th>Количество стекол</th>
+                <th>Статус стекла</th>
+                <th>Дата отгрузки заказа</th>
+                <th>Менеджер</th>
+                <th>Контрагент</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            {% if order.glass %}
+            <tr>
+                <td>
+                    <a href="{% url 'order_detail' order.id %}">{{ order.id }}</a>
+                    <br>
+                    <span style="font-size: 11px; font-style: italic; color: grey;">{{ order.status }}</span>
+                </td>
+                <td><a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a></td>
+                <td>{{ order.glass }}</td>
+                <td></td>
+                <td>{{ order.due_date }}</td>
+                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                <td><a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

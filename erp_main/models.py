@@ -120,7 +120,7 @@ class Order(models.Model):
     internal_order_number = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
-    invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, related_name='invoice',blank=True, null=True, on_delete=models.CASCADE)
     due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
 
@@ -198,6 +198,7 @@ class Order(models.Model):
         return self.get_items_filtered().filter(Q(p_glass__isnull=False) &
                                                 ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
 
+
     @property
     def quantity(self):
         return self.get_items_filtered().filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
@@ -269,6 +270,9 @@ class OrderItem(models.Model):
     )
     GLASS_STATUS_CHOICE = (
         ('not_ordered', 'не заказано'),
+        ('ordered', 'заказано'),
+        ('ready', 'изготовлено'),
+        ('received', 'получено'),
 
     )
 
@@ -308,6 +312,13 @@ class OrderItem(models.Model):
             return 'нет'
 
 
+    class Glass(models.Model):
+        KIND_CHOICE = (
 
+        )
+        OPTIONS_CHOICE = (
 
+        )
+
+        kind = models.CharField(max_length=20, choices=KIND_CHOICE)
 

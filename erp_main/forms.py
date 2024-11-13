@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
-from erp_main.models import Organization, Invoice, Order, LegalEntity
+from erp_main.models import Organization, Invoice, Order, LegalEntity, OrderItem
 
 
 class UserCreationForm(forms.ModelForm):
@@ -132,3 +132,9 @@ class InvoiceForm(forms.ModelForm):
 
 class OrderFileForm(forms.Form):
     order_file = forms.FileField()
+
+
+class GlassStatusForm(forms.ModelForm):
+    class Meta:
+        model = OrderItem
+        fields = ['p_glass_status']

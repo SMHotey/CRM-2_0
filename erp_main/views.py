@@ -3,11 +3,12 @@ import os
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Q, Count
+from django.forms import IntegerField
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
-from collections import Counter
+from collections import Counter, defaultdict
 import re
 
 from django.urls import reverse
@@ -17,6 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView
 from openpyxl import load_workbook
+
+from . import models
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
@@ -133,12 +136,10 @@ class OrderUploadView(FormView):
             n_ral = position[i][10]
             n_quantity = position[i][11]
             n_comment = position[i][12]
-
             glass = position[i][13:]
             counted_glass = dict(Counter(list(zip(glass[::2], glass[1::2]))))
             if (None, None) in counted_glass:
                 del counted_glass[(None, None)]
-            n_glass = sum(counted_glass.values()) if counted_glass else 0
 
             new_item = OrderItem(
                 order=order,
@@ -169,7 +170,7 @@ class OrderUploadView(FormView):
 
 
 def glass(request):
-    return render(request, 'glass.html')
+    return render(request, 'glass_info.html')
 
 
 def change_order(request):
@@ -474,3 +475,14 @@ def create_contract(request, pk):
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
+
+
+def glass_info(request):
+    orders = Order.objects.all()  # Получаем уникальные заказы с п. стеклом
+
+
+    return render(request, 'glass_info.html', {'orders': orders})
+
+
+
+
