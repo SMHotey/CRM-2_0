@@ -53,7 +53,6 @@ class LegalEntityForm(forms.ModelForm):
         self.fields['ceo_name'].label = 'ФИО полностью'
 
 
-
 class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
@@ -134,7 +133,4 @@ class OrderFileForm(forms.Form):
     order_file = forms.FileField()
 
 
-class GlassStatusForm(forms.ModelForm):
-    class Meta:
-        model = OrderItem
-        fields = ['p_glass_status']
+

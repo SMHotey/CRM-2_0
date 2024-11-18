@@ -75,10 +75,10 @@
                 <td>{{ order.gate }}</td>
                 <td>{{ order.gate_3000 }}</td>
                 <td>
-                    {% if order.glass != 0 %}
+                    {% if order.q_glass != 0 %}
                         <a href="#" data-bs-toggle="modal" data-bs-target="#glassModal{{ order.id }}">{{ order.glass }}</a>
                     {% else %}
-                        {{ order.glass }}
+                        {{ order.q_glass }}
                     {% endif %}
                 </td>
                 <td></td>

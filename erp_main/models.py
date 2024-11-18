@@ -268,13 +268,6 @@ class OrderItem(models.Model):
         ('stopped', 'остановлен'),
         ('changed', 'изменен'),
     )
-    GLASS_STATUS_CHOICE = (
-        ('not_ordered', 'не заказано'),
-        ('ordered', 'заказано'),
-        ('ready', 'изготовлено'),
-        ('received', 'получено'),
-
-    )
 
     p_kind = models.CharField(max_length=100, null=True, choices=KIND_CHOICE)
     p_type = models.CharField(max_length=100, choices=TYPE_CHOICE)
@@ -291,8 +284,7 @@ class OrderItem(models.Model):
     p_metal = models.CharField(max_length=100, blank=True, null=True) # возможные компановки толщины металла изделия
     p_vent_grate = models.CharField(max_length=100, blank=True, null=True) # вент. решетки (тип, размер, толщина, кол-во)
     p_plate = models.CharField(max_length=100, blank=True, null=True) # отбойная пластина (высота, отступ от низа, сторонность)
-    p_glass = models.CharField(max_length=255, blank=True, null=True) # тип, размер, толщина, кол-во
-    p_glass_status = models.CharField(max_length=15, default='not_ordered', choices=GLASS_STATUS_CHOICE) # статус стекла
+    p_glass = models.CharField(max_length=100, blank=True, null=True)
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE)
     position_num = models.CharField(max_length=5)
@@ -303,7 +295,7 @@ class OrderItem(models.Model):
     mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True)  # монтажные уши: размер, кол-во
 
     @property
-    def glass(self):
+    def d_glass(self):
         if self.p_glass != '{}':
             data = ast.literal_eval(self.p_glass)
             result = '<br>'.join(f"({key[0]}x{key[1]}): {value}" for key, value in data.items())
@@ -312,13 +304,41 @@ class OrderItem(models.Model):
             return 'нет'
 
 
-    class Glass(models.Model):
-        KIND_CHOICE = (
+class GlassInfo(models.Model):
+    KIND_CHOICE = (
+        ('pp', 'п/п'),
+        ('spo', 'СПО'),
+        ('zkl', 'закаленное'),
+        ('sp_2', '2-кам. стеклопакет'),
+        ('triplex', 'триплекс')
+    )
+    OPTIONS_CHOICE = (
+        ('a1_1', 'пленка A1 с одной стороны'),
+        ('a1_2', 'пленка A1 с двух сторон'),
+        ('a2_1', 'пленка A2 с одной стороны'),
+        ('a2_2', 'пленка A2 с двух сторон'),
+        ('a3_1', 'пленка A3 с одной стороны'),
+        ('a3_2', 'пленка A3 с двух сторон'),
+    )
+    GLASS_STATUS_CHOICE = (
+        ('not_ordered', 'не заказано'),
+        ('ordered', 'заказано'),
+        ('ready', 'изготовлено'),
+        ('received', 'получено'),
 
-        )
-        OPTIONS_CHOICE = (
+    )
 
-        )
+    kind = models.CharField(max_length=20, blank=True, null=True,choices=KIND_CHOICE)
+    option = models.CharField(max_length=20, blank=True, null=True, choices=OPTIONS_CHOICE)
+    order_items = models.ForeignKey(OrderItem, related_name='glasses', on_delete=models.CASCADE)
+    height = models.IntegerField(blank=True, null=True)
+    width = models.IntegerField(blank=True, null=True)
+    depth = models.IntegerField(blank=True, null=True)
+    quantity = models.IntegerField(blank=True, null=True)
+    status = models.CharField(max_length=100, blank=True, null=True, choices=GLASS_STATUS_CHOICE)
+    comment = models.TextField(max_length=255, blank=True, null=True, default='')
 
-        kind = models.CharField(max_length=20, choices=KIND_CHOICE)
+
+
+
 

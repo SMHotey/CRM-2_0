@@ -76,7 +76,7 @@
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
-                    <td style="text-align: center; vertical-align: middle;">{{ item.glass }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ item.d_glass|safe }}</td>
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_quantity }}</td>
                     {% if item.p_comment %}
                         <td style="text-align: left; vertical-align: middle;">{{ item.p_comment }}</td>

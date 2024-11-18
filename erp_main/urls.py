@@ -6,7 +6,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
-from .views import OrderUploadView, edit_organization, create_legal_entity, create_contract
+from .views import OrderUploadView, edit_organization, create_legal_entity, create_contract, glass_info
 
 urlpatterns = [
     path('update-order-item-status/', views.update_order_item_status, name='update_order_item_status'),
@@ -29,7 +29,6 @@ urlpatterns = [
     path('organization/edit/<int:pk>/', edit_organization, name='edit_organization'),
     path('legal-entity/create/', create_legal_entity, name='create_legal_entity'),
     path('organization/contract/<int:pk>', create_contract, name='create_contract'),
-    path('glass_info/', views.glass_info, name='glass_info'),
-
+    path('glass_info/', glass_info, name='glass_info'),
 ]
 

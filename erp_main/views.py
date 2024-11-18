@@ -20,7 +20,7 @@ from django.views.generic import FormView
 from openpyxl import load_workbook
 
 from . import models
-from .models import Order, OrderItem, Organization, Invoice, LegalEntity
+from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
 from docx import Document
@@ -136,8 +136,8 @@ class OrderUploadView(FormView):
             n_ral = position[i][10]
             n_quantity = position[i][11]
             n_comment = position[i][12]
-            glass = position[i][13:]
-            counted_glass = dict(Counter(list(zip(glass[::2], glass[1::2]))))
+            n_glass = position[i][13:]
+            counted_glass = dict(Counter(list(zip(n_glass[::2], n_glass[1::2]))))
             if (None, None) in counted_glass:
                 del counted_glass[(None, None)]
 
@@ -161,6 +161,13 @@ class OrderUploadView(FormView):
                 p_glass=counted_glass,
             )
             new_item.save()
+
+            for key, value in counted_glass.items():
+                height = key[0]
+                width = key[1]
+                quantity = value
+                new_glass = GlassInfo(height=height, width=width, quantity=quantity, order_items=new_item)
+                new_glass.save()
 
         return redirect('orders_list')
 
@@ -223,7 +230,8 @@ def invoice_add(request):
                 return JsonResponse({'success': True, 'redirect_url': reverse('invoices_list'), 'file_url': file_url})
 
             except IntegrityError:
-                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'}, status=400)
+                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'},
+                                    status=400)
 
         error_messages = form.errors.as_json()
         return JsonResponse({'success': False, 'error': error_messages}, status=400)
@@ -478,11 +486,9 @@ def create_contract(request, pk):
 
 
 def glass_info(request):
-    orders = Order.objects.all()  # Получаем уникальные заказы с п. стеклом
-
-
-    return render(request, 'glass_info.html', {'orders': orders})
-
-
+    orders = Order.objects.all()
+    return render(request, 'glass_info.html', {'orders': orders,
+                                               'glass_options': GlassInfo.OPTIONS_CHOICE,
+                                               'glass_status': GlassInfo.GLASS_STATUS_CHOICE})
 
 

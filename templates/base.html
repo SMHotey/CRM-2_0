@@ -42,19 +42,6 @@
             background-color: #1164b4;
             color: white;
         }
-        .dropdown-menu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-in-out;
-            background-color: #37b1de;
-        }
-        .dropdown-item:hover {
-            background-color: #e6e6fa;
-            color: red;
-        }
-        .nav-item.show .dropdown-menu {
-            max-height: 200px;
-        }
         .sidebar {
             width: 200px;
             padding-top: 20px;
@@ -110,22 +97,22 @@
             <br>
             <div class="sidebar-sticky">
                 <ul class="nav flex-column text-center">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Заказы</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a>
-                            <a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a>
-                            <a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a>
-                            <a class="dropdown-item" href="#">Умный поиск</a>
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Заказы</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a></li>
+                            <li><a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a></li>
+                            <li><a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a></li>
+                            <li><a class="dropdown-item" href="#">Умный поиск</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Организации</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{% url 'organization_list' %}">Все организации</a>
-                            <a class="dropdown-item" href="{% url 'create_legal_entity' %}">Юридические лица</a>
-                            <a class="dropdown-item" href="{% url 'organization_add' %}">Добавить</a>
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Организации</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все организации</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">Юридические лица</a></li>
+                            <li><a class="dropdown-item" href="{% url 'organization_add' %}">Добавить</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'glass_info' %}">Стекло</a>
@@ -133,22 +120,22 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Статистика</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Расчеты</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Прайс общий</a>
-                            <a class="dropdown-item" href="#">Прайсы клиентов</a>
-                            <a class="dropdown-item" href="#">Создать КП</a>
-                            <a class="dropdown-item" href="{% url 'invoice_add' %}">Добавить счет</a>
-                            <a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a>
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Расчеты</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Прайс общий</a></li>
+                            <li><a class="dropdown-item" href="#">Прайсы клиентов</a></li>
+                            <li><a class="dropdown-item" href="#">Создать КП</a></li>
+                            <li><a class="dropdown-item" href="{% url 'invoice_add' %}">Добавить счет</a></li>
+                            <li><a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Отгрузки</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="#">Цех №1</a>
-                            <a class="dropdown-item" href="#">Цех №3</a>
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Отгрузки</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Цех №1</a></li>
+                            <li><a class="dropdown-item" href="#">Цех №3</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -166,15 +153,17 @@
                         <div class="col-md-2 text-center" style="background: none;">
                             <div class="alert alert-info" role="alert">
                                 {% if user.is_authenticated %}
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#">{{ user.first_name }} {{ user.last_name }}</a>
-                                        <div class="dropdown-menu">
-                                            <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                                                {% csrf_token %}
-                                                <a href="javascript:void(0);" onclick="this.closest('form').submit();" class="dropdown-item">Выйти</a>
-                                            </form>
-                                            <a class="dropdown-item" href="#">Профиль</a>
-                                        </div>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.first_name }} {{ user.last_name }}</a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <a href="javascript:void(0);" onclick="this.closest('form').submit();" class="dropdown-item">Выйти</a>
+                                                </form>
+                                            </li>
+                                            <li><a class="dropdown-item" href="#">Профиль</a></li>
+                                        </ul>
                                     </li>
                                 {% endif %}
                             </div>
@@ -226,26 +215,6 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('.nav-link').click(function() {
-            const $dropdown = $(this).next('.dropdown-menu');
-            $dropdown.parent().toggleClass('show');
-            $dropdown.slideToggle(300);
-        });
-
-        // Скрываем меню при уходе курсора
-        $('.nav-item').mouseleave(function() {
-            const $dropdown = $(this).find('.dropdown-menu');
-            if ($dropdown.is(':visible')) {
-                $dropdown.slideUp(300);
-                $(this).removeClass('show');
-            }
-        });
-    });
-</script>
-
 </body>
 </html>
