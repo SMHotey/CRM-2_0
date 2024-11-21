@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
 <div class="container mt-4">
@@ -43,12 +44,13 @@
             <tr>
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">
                     <a href="{% url 'invoice_detail' invoice.id %}">{{ invoice.number }}</a></td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.name }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">
+                    <a href="{% url 'organization_detail' invoice.organization.id %}">{{ invoice.organization.name }}</a></td>
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.date }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.amount }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.payed_amount }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.shipping_amount }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.montage_amount }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.amount|intcomma }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.payed_amount|intcomma }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.shipping_amount|intcomma }}</td>
+                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.montage_amount|intcomma }}</td>
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.user.get_full_name }}</td>
                 <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.legal_entity }}</td>
                 {% if invoice.invoice_file%}

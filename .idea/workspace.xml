@@ -5,23 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="таблица стекла">
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия_03-11-23_1lJlngm.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия_03-11-23_IneZN2Z.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия_03-11-23_wSlbRgc.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/invoices/счет_1141.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_Академика_Пилюгина_д.8_к1.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_03-06-24_Пушкино_Hc8QG3v.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_14-05-24_Правдинский_uGx2R7u.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Монтажсервис_-_Песьяное.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_RaXztRR.06.24_-_ЖК_-_15_Эклипт.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Маэстро_ГП-3_nXAhdLP.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт_d1ILG6W..xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия-Слобода-_5_шт_y0jUCcx..xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия_29-01-24_4ZH96F1.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_alter_invoice_year.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0003_alter_invoice_date.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0004_rename_p_others_orderitem_p_glass_status.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0005_remove_invoice_invoice_files_invoice_invoice_file_and_more.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0006_alter_invoice_invoice_file_and_more.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/glass_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/glass_info.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoices_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoices_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templatetags/my_filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templatetags/my_filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/media/contracts/new_contract.docx" beforeDir="false" afterPath="$PROJECT_DIR$/media/contracts/new_contract.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -245,7 +249,10 @@
       <workItem from="1731480291089" duration="18084000" />
       <workItem from="1731566241777" duration="18004000" />
       <workItem from="1731653815343" duration="12287000" />
-      <workItem from="1731914071621" duration="4997000" />
+      <workItem from="1731914071621" duration="6694000" />
+      <workItem from="1731999216014" duration="14551000" />
+      <workItem from="1732084993913" duration="16574000" />
+      <workItem from="1732170191164" duration="18247000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -463,7 +470,15 @@
       <option name="project" value="LOCAL" />
       <updated>1731507890051</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="таблица стекла">
+      <option name="closed" value="true" />
+      <created>1731936593406</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1731936593407</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -503,6 +518,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="таблица стекла" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1731915371223" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1732194756750" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>

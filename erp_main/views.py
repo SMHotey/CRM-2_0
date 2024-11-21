@@ -2,24 +2,19 @@ import json
 import os
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
-from django.db.models import Q, Count
-from django.forms import IntegerField
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
-from collections import Counter, defaultdict
+from collections import Counter
 import re
-
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import FormView
+from django.views.generic import FormView, CreateView, ListView, DetailView
 from openpyxl import load_workbook
-
-from . import models
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
@@ -34,8 +29,7 @@ def index(request):
     return render(request, 'registration/login.html')
 
 
-@method_decorator(login_required(login_url='login'), name='dispatch')
-class OrderUploadView(FormView):
+class OrderUploadView(LoginRequiredMixin, FormView):
     template_name = 'order_upload.html'
     form_class = OrderForm
 
@@ -184,37 +178,66 @@ def change_order(request):
     pass
 
 
-@login_required(login_url='login')
-def organization_add(request):
+class OrganizationCreateView(LoginRequiredMixin, CreateView):
+    model = Organization
+    form_class = OrganizationForm
+    template_name = 'organization_add.html'
+
+    def form_valid(self, form):
+        type_ = self.request.POST.get('type')
+
+        organization = form.save(commit=False)
+        if type_ == 'organization':
+            organization.inn = form.cleaned_data.get('inn')
+            organization.name = form.cleaned_data.get('name')
+            organization.phone_number = None
+            organization.name_fl = None
+        elif type_ == 'individual':
+            organization.name_fl = form.cleaned_data.get('name_fl')
+            organization.phone_number = form.cleaned_data.get('phone_number')
+            organization.inn = None
+            organization.name = None
+
+        organization.user = self.request.user
+        organization.save()
+        return redirect('organization_list')
+
+
+class OrganizationListView(LoginRequiredMixin, ListView):
+    model = Organization
+    template_name = 'organization_list.html'
+    context_object_name = 'organizations'
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Organization.objects.all()
+        return Organization.objects.filter(user=user)
+
+
+class OrganizationDetailView(LoginRequiredMixin, DetailView):
+    model = Organization
+    template_name = 'organization_detail.html'
+    context_object_name = 'organization'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['legal_entities'] = LegalEntity.objects.all()  # Или другой способ получить нужные данные
+        return context
+
+
+def edit_organization(request, pk):
+    organization = get_object_or_404(Organization, pk=pk)  # Получаем организацию по первичному ключу
     if request.method == 'POST':
-        form = OrganizationForm(request.POST)
-
-        # Получаем тип из POST данных
-        type_ = request.POST.get('type')
-
+        form = OrganizationForm(request.POST, instance=organization)  # Передаем экземпляр в форму
         if form.is_valid():
-            organization = form.save(commit=False)  # Создаём объект, но не сохраняем пока в БД
-
-            if type_ == 'organization':
-                organization.inn = form.cleaned_data.get('inn')
-                organization.name = form.cleaned_data.get('name')
-                organization.phone_number = None
-                organization.name_fl = None
-
-            elif type_ == 'individual':
-                organization.name_fl = form.cleaned_data.get('name_fl')
-                organization.phone_number = form.cleaned_data.get('phone_number')
-                organization.inn = None
-                organization.name = None
-
-            organization.user = request.user  # Если нужно сохранить пользователя, который добавляет
-            organization.save()
-            return redirect('organization_list')  # Обновите на именованный URL или представление
-
+            form.save()  # Сохраняем изменения
+            return redirect('organization_detail',
+                            pk=organization.pk)  # Перенаправление на страницу детализации или список
     else:
-        form = OrganizationForm()
+        form = OrganizationForm(instance=organization)  # Заполняем форму данными существующей организации
 
-    return render(request, 'organization_add.html', {'form': form})
+    return render(request, 'organization_edit.html', {'form': form, 'organization': organization})
 
 
 @login_required(login_url='login')
@@ -223,32 +246,25 @@ def invoice_add(request):
         form = InvoiceForm(request.user, request.POST, request.FILES)
         if form.is_valid():
             try:
-                print('Hi ', request.FILES)
                 invoice = form.save()
-                file_url = invoice.invoice_file.url if invoice.invoice_file else None
-                print('By ', file_url)
-                return JsonResponse({'success': True, 'redirect_url': reverse('invoices_list'), 'file_url': file_url})
+                # Возвращаем информацию о новом счете
+                return JsonResponse({
+                    'success': True,
+                    'invoice_id': invoice.id,
+                    'invoice_number': invoice.number,
+                })
 
             except IntegrityError:
-                return JsonResponse({'success': False, 'error': 'Запись с такими значениями полей уже существует.'},
-                                    status=400)
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Запись с такими значениями полей уже существует.'
+                }, status=400)
 
         error_messages = form.errors.as_json()
         return JsonResponse({'success': False, 'error': error_messages}, status=400)
 
     form = InvoiceForm(user=request.user)
     return render(request, 'invoice_add.html', {'form': form})
-
-
-@login_required
-def organization_list(request):
-    user = request.user
-    if user.is_superuser:  # Если пользователь является администратором
-        organizations = Organization.objects.all()  # Заранее загружаем связанные заказы
-    else:
-        organizations = Organization.objects.filter(user=user)
-
-    return render(request, 'organization_list.html', {'organizations': organizations, 'is_admin': user.is_superuser})
 
 
 def register(request):
@@ -287,15 +303,6 @@ def order_detail(request, order_id):
 
     return render(request, 'order_detail.html', {'order': order, 'filtered_items': filtered_items})
 
-
-@login_required(login_url='login')
-def organization_detail(request, pk):
-    organization = get_object_or_404(Organization, pk=pk)  # замените на вашу модель
-    legal_entities = LegalEntity.objects.all()  # Получаем все экземпляры LegalEntity
-    return render(request, 'organization_detail.html', {
-        'organization': organization,
-        'legal_entities': legal_entities,
-    })
 
 
 @login_required(login_url='login')
@@ -382,19 +389,6 @@ def update_order_item_status(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
-
-def edit_organization(request, pk):
-    organization = get_object_or_404(Organization, pk=pk)  # Получаем организацию по первичному ключу
-    if request.method == 'POST':
-        form = OrganizationForm(request.POST, instance=organization)  # Передаем экземпляр в форму
-        if form.is_valid():
-            form.save()  # Сохраняем изменения
-            return redirect('organization_detail',
-                            pk=organization.pk)  # Перенаправление на страницу детализации или список
-    else:
-        form = OrganizationForm(instance=organization)  # Заполняем форму данными существующей организации
-
-    return render(request, 'organization_edit.html', {'form': form, 'organization': organization})
 
 
 def create_legal_entity(request):
@@ -485,10 +479,24 @@ def create_contract(request, pk):
         return f'{self.first_name} {self.last_name}'
 
 
-def glass_info(request):
-    orders = Order.objects.all()
+def glass_info(request, pk=''):
+    if pk == '':
+        orders = Order.objects.all()
+    else:
+        orders = [get_object_or_404(Order, pk=pk)]
+
     return render(request, 'glass_info.html', {'orders': orders,
                                                'glass_options': GlassInfo.OPTIONS_CHOICE,
                                                'glass_status': GlassInfo.GLASS_STATUS_CHOICE})
 
+
+
+@require_POST
+def update_glass_status(request, glass_id):
+    glass = get_object_or_404(GlassInfo, id=glass_id)
+    new_status = request.POST.get('status')
+    if new_status in dict(GlassInfo.GLASS_STATUS_CHOICE).keys():
+        glass.status = new_status
+        glass.save()
+    return redirect('glass_info')  # Перенаправление обратно на страницу с заказами
 

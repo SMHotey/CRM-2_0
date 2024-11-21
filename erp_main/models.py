@@ -1,15 +1,10 @@
 import ast
-import os
 import re
-
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
-from django.utils import timezone
-from django.utils.timezone import now
 
 
 def validate_numeric_only(value):
@@ -197,7 +192,6 @@ class Order(models.Model):
     def glass(self):
         return self.get_items_filtered().filter(Q(p_glass__isnull=False) &
                                                 ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
-
 
     @property
     def quantity(self):

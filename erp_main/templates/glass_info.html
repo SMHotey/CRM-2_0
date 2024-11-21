@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load my_filters %}
 
 {% block content %}
 <style>
@@ -22,37 +23,99 @@
     }
 </style>
 <div class="container">
-    <h2 class="my-4">Список заказов со стеклом</h2>
+    {% with order=orders.0 %}
+    <h2 class="my-4">Список позиций со стеклами из заявки № <a href="{% url 'order_detail' order.id %}">{{ order.id }}</a></h2>
+        <b>Статус заявки: </b><i>{{ order.status }} </i><br>
+        <b>Планируемая дата готовности:  </b><i>{{ order.due_date }} </i><br>
+        <b>Менеджер:  </b><i>{{ user.first_name }} {{ user.last_name }} </i><br>
+        <b>Контрагент:  </b><i><a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></i><br><br>
+
+    {% endwith %}
     <table class="table table-bordered table-hover text-center">
-        <thead class="table-#f8f9fa">
+        <thead>
             <tr>
-                <th>Заказ</th>
-                <th>Счет</th>
-                <th>Количество стекол</th>
+                <th>Позиция</th>
+                <th>Размер стекла</th>
+                <th>Кол-во</th>
+                <th>Тип стекла</th>
+                <th>Опции</th>
                 <th>Статус стекла</th>
-                <th>Дата отгрузки заказа</th>
-                <th>Менеджер</th>
-                <th>Контрагент</th>
+
             </tr>
         </thead>
         <tbody>
-            {% for order in orders %}
-            {% if order.glass %}
-            <tr>
-                <td>
-                    <a href="{% url 'order_detail' order.id %}">{{ order.id }}</a>
-                    <br>
-                    <span style="font-size: 11px; font-style: italic; color: grey;">{{ order.status }}</span>
-                </td>
-                <td><a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a></td>
-                <td>{{ order.glass }}</td>
-                <td></td>
-                <td>{{ order.due_date }}</td>
-                <td>{{ user.first_name }} {{ user.last_name }}</td>
-                <td><a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></td>
-            </tr>
+            {% if orders %}
+                {% if orders|length == 1 %}
+                    {# Обработка случая, когда orders состоит из одного элемента #}
+                    {% with order=orders.0 %}
+                        {% for item in order.items.all %}
+                            {% for glass in item.glasses.all %}
+                            <tr>
+
+                                <td>{{ item.position_num }}</td>
+                                <td>{{ glass.height }} x {{ glass.width }}</td>
+                                <td>
+                                        {{ item.p_quantity|multiply:glass.quantity }}
+                                </td>
+                                <td>{{ glass.kind }}</td>
+                                <td>{{ glass.option }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'update_glass_status' glass.id %}">
+                                        {% csrf_token %}
+                                        <select name="status" onchange="this.form.submit()">
+                                            {% for status_code, status_label in glass.GLASS_STATUS_CHOICE %}
+                                                <option value="{{ status_code }}" {% if glass.status == status_code %}selected{% endif %}>
+                                                    {{ status_label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endwith %}
+                {% else %}
+                    {# Обработка случая, когда orders состоит из списка #}
+                    {% for order in orders %}
+                        {% for item in order.items.all %}
+                            {% for glass in item.glasses.all %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'order_detail' order.id %}">{{ order.id }}</a>
+                                    <br>
+                                    <span style="font-size: 11px; font-style: italic; color: grey;">{{ order.status }}</span>
+                                </td>
+                                <td>{{ item.position_num }}</td>
+                                <td>{{ glass.height }} x {{ glass.width }}</td>
+                                <td><a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a></td>
+                                <td>{{ glass.quantity }}</td>
+                                <td>
+                                    <form method="POST" action="{% url 'update_glass_status' glass.id %}">
+                                        {% csrf_token %}
+                                        <select name="status" onchange="this.form.submit()">
+                                            {% for status_code, status_label in glass.GLASS_STATUS_CHOICE %}
+                                                <option value="{{ status_code }}" {% if glass.status == status_code %}selected{% endif %}>
+                                                    {{ status_label }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </td>
+                                <td>{{ order.due_date }}</td>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                <td><a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td colspan="9">Нет заказов для отображения.</td>
+                </tr>
             {% endif %}
-            {% endfor %}
         </tbody>
     </table>
 </div>

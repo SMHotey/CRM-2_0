@@ -2,7 +2,6 @@
 
 {% block content %}
 
-{% if is_admin %}
     <table class="table table-striped table-hover">
         <thead class="thead-dark">
             <tr>
@@ -29,15 +28,7 @@
             {% endfor %}
         </tbody>
     </table>
-{% else %}
-    <h2>Ваши организации</h2>
-    <div class="list-group">
-        {% for org in organizations %}
-        <a href="{% url 'organization_detail' org.id %}" class="list-group-item list-group-item-action">{{ org.name }}</a> <!-- Замените # на URL-адрес для каждой организации -->
-        {% empty %}
-        <li class="list-group-item">Нет организаций</li>
-        {% endfor %}
-    </div>
-{% endif %}
+
+
 
 {% endblock %}
