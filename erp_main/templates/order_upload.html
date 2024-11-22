@@ -120,27 +120,26 @@
 <script>
     // Валидация для полей ввода числовых значений
     $(document).on('input', '.numeric-input', function() {
-        this.value = this.value.replace(/[^0-9]/g, ''); // Удалить все символы, кроме цифр
+        this.value = this.value.replace(/[^0-9]/g, '');
     });
 
     // Обработка отправки формы с помощью AJAX
     $(document).on('submit', '#newInvoiceForm', function(event) {
-        event.preventDefault(); // предотвращаем отправку формы
-        const formData = $(this).serialize(); // собираем данные формы
+        event.preventDefault();
+        const formData = $(this).serialize();
 
         $.ajax({
             type: 'POST',
-            url: $(this).attr('action'), // URL для отправки данных формы
+            url: $(this).attr('action'),
             data: formData,
             success: function(response) {
                 if (response.success) {
-                    location.reload(); // Обновите страницу после успешного добавления
+                    location.reload();
                 }
             },
             error: function(xhr) {
-                // Обработка ошибок
                 const errors = xhr.responseJSON.error;
-                $('#modal-error-messages').html(errors).show(); // Выводим ошибки в модальном окне
+                $('#modal-error-messages').html(errors).show();
             }
         });
     });
@@ -151,6 +150,7 @@
         const workDays = kindOfDate === 'working';
         const startDate = new Date();
 
+        // Начальное количество дней для добавления
         let daysToAdd = parseInt(readinessInput) || 0;
         let resultDate = new Date(startDate);
 
@@ -168,10 +168,12 @@
 
         const dueDateFormatted = resultDate.toLocaleDateString();
         document.getElementById('dueDate').textContent = dueDateFormatted;
-        document.getElementById('dueDateInput').value = resultDate.toISOString().split('T')[0]; // Сохраните дату в формате 'YYYY-MM-DD'
+        document.getElementById('dueDateInput').value = resultDate.toISOString().split('T')[0];
     }
 
     // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', calculateDate);
+    document.addEventListener('DOMContentLoaded', function() {
+        calculateDate(); // Рассчитать дату сразу при загрузке
+    });
 </script>
 {% endblock %}

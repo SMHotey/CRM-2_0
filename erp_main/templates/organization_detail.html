@@ -5,7 +5,7 @@
         {% if organization.name %}
             <b>организации:
                 <br>
-                <a href="{% url 'edit_organization' organization.pk %}">{{ organization.name }}</a></b>
+                <a href="{% url 'organization_edit' organization.pk %}">{{ organization.name }}</a></b>
         {% else %}
             физическому лицу: {{ organization.name_fl }} ({{ organization.phone_number }})
         {% endif %}

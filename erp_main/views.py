@@ -9,11 +9,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from datetime import datetime
 from collections import Counter
 import re
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.views.generic import FormView, CreateView, ListView, DetailView
+from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
 from openpyxl import load_workbook
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
@@ -27,155 +27,6 @@ def index(request):
     if request.user.is_authenticated:
         return render(request, 'index.html')
     return render(request, 'registration/login.html')
-
-
-class OrderUploadView(LoginRequiredMixin, FormView):
-    template_name = 'order_upload.html'
-    form_class = OrderForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['organizations'] = Organization.objects.all()
-        context['legal_entities'] = LegalEntity.objects.all()
-        return context
-
-    def get_form_kwargs(self):
-        """ Передаем текущего пользователя в форму """
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def form_valid(self, form):
-        uploaded_file = form.cleaned_data.get('order_file')
-        organizations = Organization.objects.all()
-
-        if not uploaded_file:
-            form.add_error('order_file', 'Пожалуйста, загрузите файл.')
-            return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
-
-        order = form.save(commit=False)
-
-        # Сохраните дату готовности, если она была предоставлена
-        due_date = self.request.POST.get('due_date')
-        if due_date:
-            order.due_date = datetime.strptime(due_date, '%Y-%m-%d')
-        order.save()
-
-        # Логика проверки правильности загруженного файла
-        try:
-            wb = load_workbook(uploaded_file)
-        except Exception as e:
-            form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
-            return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
-
-        # Обработка загруженного файла
-        sheet = wb.active
-        header_cell_value = sheet.cell(row=1, column=3).value
-        if header_cell_value != "Бланк №":
-            form.add_error('order_file', 'Выберите правильный файл заказа')
-            return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
-        cur_row, cur_column = 9, 15
-        position, line = [], []
-
-        def get_value(r, c):
-            return sheet.cell(row=r, column=c).value
-
-        while get_value(cur_row, cur_column) != 'шт.':
-            cur_row += 1
-        max_row = cur_row
-
-        seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
-        for row in range(8, max_row):
-            if get_value(row, 2):
-                if 8 < row < max_row:
-                    position.append(line)
-                line = []
-                for column in seq:
-                    line.append(get_value(row, column))
-            else:
-                line.append(get_value(row, 7))
-                line.append(get_value(row, 8))
-            if row == max_row - 1:
-                position.append(line)
-
-        kind_mapping = {
-            'дверь': 'door',
-            'люк': 'hatch',
-            'ворота': 'gate',
-            'калитка': 'door',
-            'фрамуга': 'transom'
-        }
-        type_mapping = {
-            'ei-60': 'ei-60',
-            'eis-60': 'eis-60',
-            'eiws-60': 'eiws-60',
-            'тех': 'tech',
-            'ревиз': 'revision'
-        }
-
-        for i in range(len(position)):
-            n_num = position[i][0]
-            name = position[i][1]
-            n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
-            n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
-            n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
-
-            n_width, n_height = position[i][2], position[i][3]
-            n_active_trim = position[i][4]
-            n_open = position[i][5]
-            n_platband = position[i][6]
-            n_furniture = position[i][7]
-            n_door_closer = position[i][8]
-            n_step = position[i][9]
-            n_ral = position[i][10]
-            n_quantity = position[i][11]
-            n_comment = position[i][12]
-            n_glass = position[i][13:]
-            counted_glass = dict(Counter(list(zip(n_glass[::2], n_glass[1::2]))))
-            if (None, None) in counted_glass:
-                del counted_glass[(None, None)]
-
-            new_item = OrderItem(
-                order=order,
-                position_num=n_num,
-                p_kind=n_kind,
-                p_type=n_type,
-                p_construction=n_construction,
-                p_width=n_width,
-                p_height=n_height,
-                p_active_trim=n_active_trim,
-                p_open=n_open,
-                p_platband=n_platband,
-                p_furniture=n_furniture,
-                p_door_closer=n_door_closer,
-                p_step=n_step,
-                p_ral=n_ral,
-                p_quantity=n_quantity,
-                p_comment=n_comment,
-                p_glass=counted_glass,
-            )
-            new_item.save()
-
-            for key, value in counted_glass.items():
-                height = key[0]
-                width = key[1]
-                quantity = value
-                new_glass = GlassInfo(height=height, width=width, quantity=quantity, order_items=new_item)
-                new_glass.save()
-
-        return redirect('orders_list')
-
-    def form_invalid(self, form):
-        organizations = Organization.objects.all()
-        return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
-
-
-def glass(request):
-    return render(request, 'glass_info.html')
-
-
-def change_order(request):
-    pass
 
 
 class OrganizationCreateView(LoginRequiredMixin, CreateView):
@@ -226,18 +77,156 @@ class OrganizationDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-def edit_organization(request, pk):
-    organization = get_object_or_404(Organization, pk=pk)  # Получаем организацию по первичному ключу
-    if request.method == 'POST':
-        form = OrganizationForm(request.POST, instance=organization)  # Передаем экземпляр в форму
-        if form.is_valid():
-            form.save()  # Сохраняем изменения
-            return redirect('organization_detail',
-                            pk=organization.pk)  # Перенаправление на страницу детализации или список
-    else:
-        form = OrganizationForm(instance=organization)  # Заполняем форму данными существующей организации
+class OrganizationUpdateView(UpdateView):
+    model = Organization
+    form_class = OrganizationForm
+    template_name = 'organization_edit.html'
+    context_object_name = 'organization'
 
-    return render(request, 'organization_edit.html', {'form': form, 'organization': organization})
+    def get_object(self, queryset=None):
+        return get_object_or_404(Organization, pk=self.kwargs['pk'])
+
+    def get_success_url(self):
+        return reverse('organization_detail', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+
+class OrderUploadView(LoginRequiredMixin, FormView):
+    template_name = 'order_upload.html'
+    form_class = OrderForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['organizations'] = Organization.objects.all()
+        context['legal_entities'] = LegalEntity.objects.all()
+        return context
+
+    def get_form_kwargs(self):
+        """ Передаем текущего пользователя в форму """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        uploaded_file = form.cleaned_data.get('order_file')
+        if not uploaded_file:
+            form.add_error('order_file', 'Пожалуйста, загрузите файл.')
+            return self._render_form_with_context(form)
+
+        order = self._create_order(form)
+
+        try:
+            wb = load_workbook(uploaded_file)
+        except Exception as e:
+            form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
+            return self._render_form_with_context(form)
+
+        if not self._check_header(wb.active):
+            form.add_error('order_file', 'Выберите правильный файл заказа')
+            return self._render_form_with_context(form)
+
+        position = self._process_file(wb.active)
+        self._save_order_items(order, position)
+
+        return redirect('orders_list')
+
+    def _render_form_with_context(self, form):
+        organizations = Organization.objects.all()
+        return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
+
+    def _create_order(self, form):
+        order = form.save(commit=False)
+        if self.request.POST.get('due_date'):
+            due_date = self.request.POST.get('due_date')
+        else:
+            due_date = datetime.now().strftime('%Y-%m-%d')
+        order.due_date = datetime.strptime(due_date, '%Y-%m-%d')
+        order.save()
+        return order
+
+    def _check_header(self, sheet):
+        return sheet.cell(row=1, column=3).value == "Бланк №"
+
+    def _process_file(self, sheet):
+        cur_row, cur_column = 9, 15
+        while sheet.cell(row=cur_row, column=cur_column).value != 'шт.':
+            cur_row += 1
+        max_row = cur_row
+
+        seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
+        position, line = [], []
+
+        for row in range(8, max_row):
+            if sheet.cell(row=row, column=2).value:
+                if line:
+                    position.append(line)
+                line = [sheet.cell(row=row, column=column).value for column in seq]
+            else:
+                line.extend([sheet.cell(row=row, column=7).value, sheet.cell(row=row, column=8).value])
+
+        if line:
+            position.append(line)
+
+        return position
+
+    def _save_order_items(self, order, position):
+        kind_mapping = {
+            'дверь': 'door', 'люк': 'hatch', 'ворота': 'gate',
+            'калитка': 'door', 'фрамуга': 'transom'
+        }
+        type_mapping = {
+            'ei-60': 'ei-60', 'eis-60': 'eis-60', 'eiws-60': 'eiws-60',
+            'тех': 'tech', 'ревиз': 'revision'
+        }
+
+        for data in position:
+            n_num = data[0]
+            name = data[1]
+            n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+            n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+            n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
+
+            counted_glass = self._count_glass(data[13:])  # Получаем данные стекол
+
+            new_item = OrderItem(
+                order=order,
+                position_num=n_num,
+                p_kind=n_kind,
+                p_type=n_type,
+                p_construction=n_construction,
+                p_width=data[2],
+                p_height=data[3],
+                p_active_trim=data[4],
+                p_open=data[5],
+                p_platband=data[6],
+                p_furniture=data[7],
+                p_door_closer=data[8],
+                p_step=data[9],
+                p_ral=data[10],
+                p_quantity=data[11],
+                p_comment=data[12],
+                p_glass=counted_glass,  # Обратите внимание на это изменение
+            )
+            new_item.save()
+
+            for (height, width), quantity in counted_glass.items():
+                new_glass = GlassInfo(height=height, width=width, quantity=quantity, order_items=new_item)
+                new_glass.save()
+
+    def _count_glass(self, glass_data):
+        counted_glass = dict(Counter(list(zip(glass_data[::2], glass_data[1::2]))))
+        counted_glass.pop((None, None), None)
+        return counted_glass
+
+    def form_invalid(self, form):
+        organizations = Organization.objects.all()
+        return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
+
+
+def glass(request):
+    return render(request, 'glass_info.html')
 
 
 @login_required(login_url='login')
