@@ -232,16 +232,20 @@ def glass(request):
 @login_required(login_url='login')
 def invoice_add(request):
     if request.method == 'POST':
+        referer_url = request.META.get('HTTP_REFERER')
+        expected_url = request.build_absolute_uri(reverse('invoice_add'))
         form = InvoiceForm(request.user, request.POST, request.FILES)
         if form.is_valid():
             try:
                 invoice = form.save()
-                # Возвращаем информацию о новом счете
-                return JsonResponse({
-                    'success': True,
-                    'invoice_id': invoice.id,
-                    'invoice_number': invoice.number,
-                })
+                if referer_url != expected_url:
+                    return JsonResponse({
+                        'success': True,
+                        'invoice_id': invoice.id,
+                        'invoice_number': form.cleaned_data['number'],
+                        'message': 'Счет добавлен'})
+                else:
+                    return redirect(invoices_list)
 
             except IntegrityError:
                 return JsonResponse({
@@ -252,8 +256,9 @@ def invoice_add(request):
         error_messages = form.errors.as_json()
         return JsonResponse({'success': False, 'error': error_messages}, status=400)
 
-    form = InvoiceForm(user=request.user)
-    return render(request, 'invoice_add.html', {'form': form})
+    form = InvoiceForm(request.user)  # Создание экземпляра формы
+    return render(request, 'invoice_add.html', {'form': form})  # Возвращаем шаблон с формой
+
 
 
 def register(request):

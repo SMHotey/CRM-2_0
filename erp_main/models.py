@@ -92,13 +92,18 @@ class Invoice(models.Model):
     legal_entity = models.ForeignKey(LegalEntity, related_name='legal_entity', on_delete=models.CASCADE)
     invoice_file = models.FileField(upload_to='invoices/', blank=True, null=True)
     year = models.PositiveIntegerField(editable=False)
+    is_paid = models.BooleanField(default=False, blank=True, null=True)
+    change_date = models.DateField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        self.is_paid = self.payed_amount >= self.amount
+        if not self.pk:
+            self.year = self.date.year
+        self.change_date = self.date
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'Счет № {self.number}'
-
-    def save(self, *args, **kwargs):
-        self.year = self.date.year  # Получаем год из даты
-        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [

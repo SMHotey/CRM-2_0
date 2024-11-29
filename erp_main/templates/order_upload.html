@@ -4,12 +4,14 @@
 
 {% block head %}
 <!-- Импорт Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5" style="width: 30%;">
     <h2 class="mb-4">Загрузка заказа</h2>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="orderForm">
         {% csrf_token %}
         <div class="mb-3">
             {{ form.order_file.label_tag }}
@@ -119,28 +121,44 @@
 
 <script>
     // Валидация для полей ввода числовых значений
-    $(document).on('input', '.numeric-input', function() {
-        this.value = this.value.replace(/[^0-9]/g, '');
+    document.addEventListener('input', function(event) {
+        if (event.target.classList.contains('numeric-input')) {
+            event.target.value = event.target.value.replace(/[^0-9]/g, '');
+        }
     });
 
-    // Обработка отправки формы с помощью AJAX
-    $(document).on('submit', '#newInvoiceForm', function(event) {
-        event.preventDefault();
-        const formData = $(this).serialize();
+    // Обработка отправки формы с помощью Fetch API
+    document.getElementById('newInvoiceForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Предотвращает перезагрузку страницы
+        const formData = new FormData(this);
 
-        $.ajax({
-            type: 'POST',
-            url: $(this).attr('action'),
-            data: formData,
-            success: function(response) {
-                if (response.success) {
-                    location.reload();
-                }
-            },
-            error: function(xhr) {
-                const errors = xhr.responseJSON.error;
-                $('#modal-error-messages').html(errors).show();
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Добавляем CSRF-токен
             }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Закрыть модальное окно
+                const newInvoiceModal = new bootstrap.Modal(modalElement);
+                newInvoiceModal.hide();
+                
+                // Убедимся, что фокус уходит с кнопки в модальном окне
+                setTimeout(() => document.querySelector('button[data-bs-target="#newInvoiceModal"]').focus(), 100);
+
+                // Обновляем сообщение об успехе на родительской странице
+                const successMessage = `Счет № ${data.invoice_number} успешно добавлен`;
+                document.querySelector('.container').insertAdjacentHTML('beforeend', `<div class="alert alert-success mt-3">${successMessage}<button type="button" class="btn btn-secondary" onclick="window.close();">Закрыть</button></div>`);
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            const errorMessage = 'Произошла ошибка при добавлении счета.';
+            document.getElementById('modal-error-messages').innerText = errorMessage;
+            document.getElementById('modal-error-messages').style.display = 'block';
         });
     });
 
@@ -150,7 +168,6 @@
         const workDays = kindOfDate === 'working';
         const startDate = new Date();
 
-        // Начальное количество дней для добавления
         let daysToAdd = parseInt(readinessInput) || 0;
         let resultDate = new Date(startDate);
 

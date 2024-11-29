@@ -4,33 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="представления по организации в классы.">
-      <change afterPath="$PROJECT_DIR$/media/uploads/Pi.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_410.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_410_LYi7eXM.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_410_NaTwQaf.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_410_uyBw4le.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515_JcxoqPj.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515_r7xWxDv.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_680.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_7UpMf9D.06.24_-_ЖК_-_15_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_8jLBGwI.06.24_-_ЖК_-_15_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_VfkRcBc.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_XEXl6hy.06.24_-_ЖК_-_13_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_uvZJro3.06.24_-_ЖК_-_15_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_ГП_1718.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_ГП_1718_остаток_PevvsIX.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Маэстро_ГП-3_Nc9jXWu.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Маэстро_ГП-3_dph2wiX.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Олег_20-09-24_AT8WGyG.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_Скандия_03-11-23_zS2ELui.xlsx" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="начало работы на чистовик">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -258,7 +238,12 @@
       <workItem from="1731999216014" duration="14551000" />
       <workItem from="1732084993913" duration="16574000" />
       <workItem from="1732170191164" duration="18956000" />
-      <workItem from="1732258518205" duration="16360000" />
+      <workItem from="1732258518205" duration="17144000" />
+      <workItem from="1732520242313" duration="7447000" />
+      <workItem from="1732601877747" duration="9379000" />
+      <workItem from="1732691493275" duration="15540000" />
+      <workItem from="1732776291183" duration="9539000" />
+      <workItem from="1732863352833" duration="9645000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -492,7 +477,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732199518216</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="начало работы на чистовик">
+      <option name="closed" value="true" />
+      <created>1732281605317</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1732281605317</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -530,9 +523,10 @@
     <MESSAGE value="добавлена опция изменения данных по счету и загрузки файла счета" />
     <MESSAGE value="таблица стекла" />
     <MESSAGE value="представления по организации в классы." />
-    <option name="LAST_COMMIT_MESSAGE" value="представления по организации в классы." />
+    <MESSAGE value="начало работы на чистовик" />
+    <option name="LAST_COMMIT_MESSAGE" value="начало работы на чистовик" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1732261355218" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1732864206414" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>
