@@ -4,14 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="начало работы на чистовик">
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="обработка добавления счета">
+      <change afterPath="$PROJECT_DIR$/media/invoices/счет_-_Диал_791_KWlWg7L.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_680_oH3iheu.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_Электронжилсоцстрой_22-10-24.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_add.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -243,7 +242,8 @@
       <workItem from="1732601877747" duration="9379000" />
       <workItem from="1732691493275" duration="15540000" />
       <workItem from="1732776291183" duration="9539000" />
-      <workItem from="1732863352833" duration="9645000" />
+      <workItem from="1732863352833" duration="10306000" />
+      <workItem from="1733123161602" duration="5455000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -485,7 +485,15 @@
       <option name="project" value="LOCAL" />
       <updated>1732281605317</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="обработка добавления счета">
+      <option name="closed" value="true" />
+      <created>1732886223970</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1732886223970</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -524,9 +532,10 @@
     <MESSAGE value="таблица стекла" />
     <MESSAGE value="представления по организации в классы." />
     <MESSAGE value="начало работы на чистовик" />
-    <option name="LAST_COMMIT_MESSAGE" value="начало работы на чистовик" />
+    <MESSAGE value="обработка добавления счета" />
+    <option name="LAST_COMMIT_MESSAGE" value="обработка добавления счета" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1732864206414" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1733123195578" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>

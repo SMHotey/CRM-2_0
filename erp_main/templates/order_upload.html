@@ -4,8 +4,6 @@
 
 {% block head %}
 <!-- Импорт Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -39,7 +37,9 @@
             <input type="radio" name="kind_of_date" value="working" checked onchange="calculateDate()"> рабочие дни
             <input type="radio" name="kind_of_date" value="calendar" onchange="calculateDate()"> календарные дни<br>
 
-            <input type="number" class="form-control numeric-input" id="id_readiness" name="readiness" value="1" style="width: 60%;" required placeholder="Введите готовность" oninput="calculateDate()">
+            <input type="number" class="form-control numeric-input" id="id_readiness" name="readiness"
+                   value="1" style="width: 60%;" required placeholder="Введите готовность"
+                   oninput="calculateDate()">
             <input type="hidden" id="dueDateInput" name="due_date"> <!-- Скрытое поле для даты готовности -->
             <div>
                 <strong>Планируемая дата готовности:</strong> <span id="dueDate"></span>
@@ -143,15 +143,20 @@
         .then(data => {
             if (data.success) {
                 // Закрыть модальное окно
-                const newInvoiceModal = new bootstrap.Modal(modalElement);
+                const modalElement = document.getElementById('newInvoiceModal');
+                const newInvoiceModal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
                 newInvoiceModal.hide();
-                
-                // Убедимся, что фокус уходит с кнопки в модальном окне
-                setTimeout(() => document.querySelector('button[data-bs-target="#newInvoiceModal"]').focus(), 100);
 
-                // Обновляем сообщение об успехе на родительской странице
-                const successMessage = `Счет № ${data.invoice_number} успешно добавлен`;
-                document.querySelector('.container').insertAdjacentHTML('beforeend', `<div class="alert alert-success mt-3">${successMessage}<button type="button" class="btn btn-secondary" onclick="window.close();">Закрыть</button></div>`);
+                // Убедиться, что фокус уходит с кнопки в модальном окне
+                setTimeout(() => {
+                    document.querySelector('button[data-bs-target="#newInvoiceModal"]').focus();
+                }, 100);
+
+                // Выбор только что сохраненного счета
+                const invoiceSelect = document.querySelector('#id_invoice');
+                const newOption = new Option(`Счет № ${data.invoice_number}`, data.invoice_id);
+                invoiceSelect.add(newOption);
+                invoiceSelect.value = data.invoice_id; // Устанавливаем его как выбранный
             }
         })
         .catch(error => {
