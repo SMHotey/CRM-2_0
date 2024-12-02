@@ -20,11 +20,12 @@
     tbody tr:hover {
         background-color: #e6e6fa; /* Цвет строки при наведении */
     }
+
 </style>
 
 <table>
     <thead>
-        <tr>
+        <tr class="bold-border;">
             <th rowspan="2">№ заказа</th>
             <th rowspan="2">Цех</th>
             <th rowspan="2">Организация</th>
@@ -85,10 +86,37 @@
                 <td>{{ order.created_at|date:"d.m.Y" }}</td>
                 <td>{{ order.invoice.organization.user.get_full_name }}</td>
                 <td>{{ order.due_date|date:"d.m.Y" }}</td>
-                <td></td>
+                <td>{{ order.comment }}</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
+
+    <div class="pagination text-center mt-4">
+    {% if orders.has_previous %}
+        <a href="?page=1" class="btn btn-primary">&laquo; Первая</a>
+        &nbsp
+        <a href="?page={{ orders.previous_page_number }}" class="btn btn-primary">Предыдущая</a>
+        &nbsp &nbsp
+    {% endif %}
+
+
+    {% for i in orders.paginator.page_range %}
+        {% if orders.number == i %}
+            <a href="?page={{ i }}" class="btn btn-secondary active">{{ i }}</a>
+            &nbsp
+        {% else %}
+            <a href="?page={{ i }}" class="btn btn-primary">{{ i }}</a>
+            &nbsp
+        {% endif %}
+    {% endfor %}
+
+    {% if orders.has_next %}
+        &nbsp
+        <a href="?page={{ orders.next_page_number }}" class="btn btn-primary">Следующая</a>
+        &nbsp
+        <a href="?page={{ orders.paginator.num_pages }}" class="btn btn-primary">Последняя &raquo;</a>
+    {% endif %}
+</div>
 
 {% endblock %}

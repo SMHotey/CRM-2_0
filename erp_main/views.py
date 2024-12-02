@@ -3,6 +3,7 @@ import os
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -116,6 +117,9 @@ class OrderUploadView(LoginRequiredMixin, FormView):
             return self._render_form_with_context(form)
 
         order = self._create_order(form)
+
+        comment = form.cleaned_data.get('comment', '')
+        order.comment = comment
 
         try:
             wb = load_workbook(uploaded_file)
@@ -276,9 +280,15 @@ def register(request):
 @login_required(login_url='login')
 def orders_list(request):
     if request.user.is_staff:
-        return render(request, 'orders_list.html', {'orders': Order.objects.all()})
+        orders_queryset = Order.objects.all().order_by('-id')
     else:
-        return render(request, 'orders_list.html', {'orders': Order.objects.filter(user=request.user)()})
+        orders_queryset = Order.objects.filter(user=request.user).order_by('-id')
+
+    paginator = Paginator(orders_queryset, 20)  # Создаем пагинатор
+    page_number = request.GET.get('page')  # Получаем номер страницы из GET параметров
+    orders = paginator.get_page(page_number)  # Получаем заказы для текущей страницы
+
+    return render(request, 'orders_list.html', {'orders': orders})
 
 
 @login_required(login_url='login')
@@ -328,29 +338,47 @@ def invoice_detail(request, pk):
 def invoices_list(request):
     search_query = request.GET.get('search', '')
     selected_legal_entity_id = request.GET.get('legal_entity', None)
+    sort_by = request.GET.get('sort', 'id')
+    direction = request.GET.get('direction', 'desc')
 
     # Начальное значение для queryset
     if request.user.is_staff:
         invoices = Invoice.objects.all()
     else:
-        invoices = Invoice.objects.filter(user=request.user)()
+        invoices = Invoice.objects.filter(user=request.user)
 
     # Фильтрация по поисковому запросу
     if search_query:
-        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(
-            organization__name__icontains=search_query)
+        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(organization__name__icontains=search_query)
 
     # Фильтрация по выбранному юридическому лицу
     if selected_legal_entity_id:
-        invoices = invoices.filter(legal_entity_id=selected_legal_entity_id)
+        # Выберите только если selected_legal_entity_id является числом
+        try:
+            selected_legal_entity_id = int(selected_legal_entity_id)  # Приводим к числу
+            invoices = invoices.filter(legal_entity_id=selected_legal_entity_id)
+        except ValueError:
+            pass  # Игнорируем, если не удалось привести к числу
+
+    # Сортировка
+    if sort_by == 'number':
+        invoices = invoices.order_by(f"{'-' if direction == 'desc' else ''}id")
+    else:
+        invoices = invoices.order_by('-id')  # Сортировка по умолчанию
+
+    # Пагинация
+    paginator = Paginator(invoices, 10)
+    page_number = request.GET.get('page')
+    invoices_page = paginator.get_page(page_number)
 
     # Получение всех юридических лиц для отображения в выпадающем списке
     legal_entities = LegalEntity.objects.all()
 
     return render(request, 'invoices_list.html', {
-        'invoices': invoices,
+        'invoices': invoices_page,
         'legal_entities': legal_entities,
         'selected_legal_entity_id': selected_legal_entity_id,
+        'request': request,
     })
 
 

@@ -24,63 +24,90 @@
     </form>
 
     <!-- Таблица с инвойсами -->
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Номер</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Организация</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Дата</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Сумма</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Оплачено</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Доставка</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Монтаж</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Менеджер</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Юридическое лицо</th>
-                <th style="padding: 8px; text-align: center; vertical-align: middle;">Файл</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for invoice in invoices %}
-            <tr>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">
-                    <a href="{% url 'invoice_detail' invoice.id %}">{{ invoice.number }}</a></td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">
-                    <a href="{% url 'organization_detail' invoice.organization.id %}">{{ invoice.organization.name }}</a></td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.date }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.amount|intcomma }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.payed_amount|intcomma }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.shipping_amount|intcomma }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.montage_amount|intcomma }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.user.get_full_name }}</td>
-                <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.legal_entity }}</td>
-                {% if invoice.invoice_file%}
-                    <td style="padding: 8px; text-align: center; vertical-align: middle;"><a href="{{ invoice.invoice_file.url }}" target="_blank">скачать</a></td>
-                {% else %}
-                    <td style="padding: 8px; text-align: center; vertical-align: middle;"> </td>
-                {% endif %}
-
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-center">Нет данных для отображения</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div style="overflow-y: auto; max-height: 500px;">
+        <table class="table table-bordered">
+            <thead style="position: sticky; top: 0; background-color: #fff; z-index: 10;">
+                <tr>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}legal_entity={{ selected_legal_entity_id }}&sort=number{% if request.GET.sort == 'number' and request.GET.direction == 'asc' %}&direction=desc{% else %}&direction=asc{% endif %}">
+                        Номер
+                        {% if request.GET.sort == 'number' %}
+                            {% if request.GET.direction == 'asc' %}
+                                &#9650; <!-- Стрелка вверх для сортировки по возрастанию -->
+                            {% else %}
+                                &#9660; <!-- Стрелка вниз для сортировки по убыванию -->
+                            {% endif %}
+                        {% endif %}
+                        </a>
+                    </th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Организация</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Дата</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Сумма</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Оплачено</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Доставка</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Монтаж</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Менеджер</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Юридическое лицо</th>
+                    <th style="padding: 8px; text-align: center; vertical-align: middle;">Файл</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">
+                        <a href="{% url 'invoice_detail' invoice.id %}">{{ invoice.number }}</a>
+                    </td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">
+                        <a href="{% url 'organization_detail' invoice.organization.id %}">{{ invoice.organization.name }}</a>
+                    </td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.date }}</td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.amount|intcomma }}</td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.payed_amount|intcomma }}</td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.shipping_amount|intcomma }}</td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.montage_amount|intcomma }}</td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.organization.user.get_full_name }}</td>
+                    <td style="padding: 8px; text-align: center; vertical-align: middle;">{{ invoice.legal_entity }}</td>
+                    {% if invoice.invoice_file %}
+                        <td style="padding: 8px; text-align: center; vertical-align: middle;"><a href="{{ invoice.invoice_file.url }}" target="_blank">скачать</a></td>
+                    {% else %}
+                        <td style="padding: 8px; text-align: center; vertical-align: middle;"></td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center">Нет данных для отображения</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Пагинация -->
-    <div class="pagination">
-        {% if invoices.has_previous %}
-            <a href="?page=1">&laquo; Первая</a>
-            <a href="?page={{ invoices.previous_page_number }}">Предыдущая</a>
-        {% endif %}
+    <div class="pagination text-center mt-4">
+    {% if invoices.has_previous %}
+        <a href="?page=1" class="btn btn-primary">&laquo; Первая</a>
+        &nbsp
+        <a href="?page={{ invoices.previous_page_number }}" class="btn btn-primary">Предыдущая</a>
+        &nbsp &nbsp
+    {% endif %}
 
-        <span>Страница {{ invoices.number }} из {{ invoices.paginator.num_pages }}</span>
 
-        {% if invoices.has_next %}
-            <a href="?page={{ invoices.next_page_number }}">Следующая</a>
-            <a href="?page={{ invoices.paginator.num_pages }}">Последняя &raquo;</a>
+    {% for i in invoices.paginator.page_range %}
+        {% if invoices.number == i %}
+            <a href="?page={{ i }}" class="btn btn-secondary active">{{ i }}</a>
+            &nbsp
+        {% else %}
+            <a href="?page={{ i }}" class="btn btn-primary">{{ i }}</a>
+            &nbsp
         {% endif %}
-    </div>
+    {% endfor %}
+
+    {% if invoices.has_next %}
+        &nbsp
+        <a href="?page={{ invoices.next_page_number }}" class="btn btn-primary">Следующая</a>
+        &nbsp
+        <a href="?page={{ invoices.paginator.num_pages }}" class="btn btn-primary">Последняя &raquo;</a>
+    {% endif %}
+</div>
 </div>
 {% endblock %}

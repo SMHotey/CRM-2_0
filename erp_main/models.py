@@ -111,6 +111,7 @@ class Invoice(models.Model):
         ]
 
 
+
 #def order_file_upload_to(instance, filename):
 #        # Создает уникальный путь для каждого загружаемого файла
 #    return os.path.join('uploads', f"{now().strftime('%Y%m%d_%H%M%S')}_{filename}")
