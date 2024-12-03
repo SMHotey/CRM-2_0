@@ -522,3 +522,14 @@ def update_glass_status(request, glass_id):
         glass.save()
     return redirect('glass_info')  # Перенаправление обратно на страницу с заказами
 
+@csrf_exempt
+def update_workshop(request, order_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        workshop_value = data.get('workshop')
+        # Обновление workshop для всех OrderItem, соответствующих order_id
+        OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
+        OrderItem.objects.filter(order_id=order_id).update(p_status='product')
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+

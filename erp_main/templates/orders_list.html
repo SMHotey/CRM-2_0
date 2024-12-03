@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
@@ -59,7 +60,41 @@
                     <br>
                     <span style="font-size: 11px; font-style: italic; color: grey;">{{ order.status }}</span>
                 </td>
-                <td></td>
+                <td>
+                    <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#workshopModal{{ order.id }}">
+                        {% if order.status == 'в очереди' %}
+                            <img id="iconPlay{{ order.id }}" src="{% static 'erp_main/images/icon_play.png' %}" style="width: 30px; height: auto;" alt="запуск">
+                        {% elif order.workshop %}
+                            <img id="iconPlay{{ order.id }}" src="{{ order.workshop }}" style="width: 30px; height: auto;" alt="">
+                        {% endif %}
+                    </button>
+
+    <!-- Модальное окно -->
+                    <div class="modal fade" id="workshopModal{{ order.id }}" tabindex="-1" aria-labelledby="workshopModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-sm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="workshopModalLabel">Выберите номер цеха:</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>
+                                        <input type="radio" id="workshop1{{ order.id }}" name="workshop{{ order.id }}" value="1">
+                                        <label for="workshop1{{ order.id }}">1 цех</label>
+                                    </p>
+                                    <p>
+                                        <input type="radio" id="workshop3{{ order.id }}" name="workshop{{ order.id }}" value="3">
+                                        <label for="workshop3{{ order.id }}">3 цех</label>
+                                    </p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                    <button type="button" class="btn btn-primary" onclick="saveWorkshop({{ order.id }})">Запустить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
                 <td>
                     <a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a>
                 </td>
@@ -118,5 +153,44 @@
         <a href="?page={{ orders.paginator.num_pages }}" class="btn btn-primary">Последняя &raquo;</a>
     {% endif %}
 </div>
+<script>
+function saveWorkshop(orderId) {
+    const selectedWorkshop = document.querySelector('input[name="workshop' + orderId + '"]:checked');
+    if (selectedWorkshop) {
+        const workshopValue = selectedWorkshop.value;
 
+        fetch(`/erp_main/update_workshop/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ workshop: workshopValue })
+        })
+        .then(response => {
+            if (response.ok) {
+                // Обновляем иконку в зависимости от выбранного значения
+                const iconElement = document.getElementById(`iconPlay${orderId}`);
+                if (workshopValue === "1") {
+                    iconElement.src = "{% static 'erp_main/images/icon_play1.png' %}";
+                } else if (workshopValue === "3") {
+                    iconElement.src = "{% static 'erp_main/images/icon_play3.png' %}";
+                }
+
+
+                // Закрыть модальное окно
+                const modalElement = bootstrap.Modal.getInstance(document.getElementById(`workshopModal${orderId}`));
+                modalElement.hide();
+            } else {
+                alert('Ошибка при обновлении цеха.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    } else {
+        alert('Пожалуйста, выберите номер цеха.');
+    }
+}
+</script>
 {% endblock %}

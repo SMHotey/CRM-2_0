@@ -5,10 +5,12 @@ from . import views
 from django.contrib.auth import views as auth_views
 
 from .views import OrderUploadView, create_legal_entity, create_contract, glass_info, \
-    update_glass_status, OrganizationCreateView, OrganizationListView, OrganizationDetailView, OrganizationUpdateView
+    update_glass_status, OrganizationCreateView, OrganizationListView, OrganizationDetailView, OrganizationUpdateView, \
+    update_workshop
 
 urlpatterns = [
     path('update-order-item-status/', views.update_order_item_status, name='update_order_item_status'),
+    path('update_workshop/<int:order_id>/', update_workshop, name='update_workshop'),
     path('order/upload/', OrderUploadView.as_view(), name='order_upload'),
     path('orders_list/', views.orders_list, name='orders_list'),
     path('organization/<int:pk>/edit/', OrganizationUpdateView.as_view(), name='organization_edit'),

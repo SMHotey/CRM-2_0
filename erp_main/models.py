@@ -5,6 +5,7 @@ from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
+from django.templatetags.static import static
 
 
 def validate_numeric_only(value):
@@ -220,6 +221,20 @@ class Order(models.Model):
         else:
             return f'всё сложно'
 
+    @property
+    def workshop(self):
+        ws_1 = self.get_items_filtered().filter(workshop='1').aggregate(total=Sum('p_quantity'))['total'] or 0
+        ws_3 = self.get_items_filtered().filter(workshop='3').aggregate(total=Sum('p_quantity'))['total'] or 0
+        icon_path = static('erp_main/images/icon_play.png')
+        if ws_1:
+            icon_path = static('erp_main/images/icon_play1.png')
+        if ws_3:
+            icon_path = static('erp_main/images/icon_play3.png')
+        if ws_1 and ws_3:
+            icon_path = static('erp_main/images/icon_play13.png')
+
+        return icon_path
+
     def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
         if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
             self.internal_order_number = self.generate_internal_order_number()
@@ -293,6 +308,7 @@ class OrderItem(models.Model):
     p_comment = models.TextField(max_length=255, blank=True, null=True, default='')
     firm_plate = models.BooleanField(default=True)  # фирменный шильд
     mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True)  # монтажные уши: размер, кол-во
+    workshop = models.IntegerField(default=0)
 
     @property
     def d_glass(self):

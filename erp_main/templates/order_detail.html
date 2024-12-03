@@ -62,9 +62,11 @@
                     <th style="text-align: center; vertical-align: middle;">Высота</th>
                     <th style="text-align: center; vertical-align: middle;">Откр.</th>
                     <th style="text-align: center; vertical-align: middle; width: 120px">Стекло</th>
+                    <th style="text-align: center; vertical-align: middle; width: 120px">Фурнитура</th>
                     <th style="text-align: center; vertical-align: middle;">Кол-во</th>
                     <th style="text-align: center; vertical-align: middle;">Комментарий</th>
                     <th style="text-align: center; vertical-align: middle;">Статус</th>
+                    <th style="text-align: center; vertical-align: middle;">Цех</th>
                 </tr>
             </thead>
             <tbody>
@@ -78,6 +80,7 @@
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
                     <td style="text-align: center; vertical-align: middle;">{{ item.d_glass|safe }}</td>
+                    <td style="text-align: center; vertical-align: middle;">{{ item.p_furniture }}</td>
                     <td style="text-align: center; vertical-align: middle;">{{ item.p_quantity }}</td>
                     {% if item.p_comment %}
                         <td style="text-align: left; vertical-align: middle;">{{ item.p_comment }}</td>
@@ -94,6 +97,7 @@
                             <option value="stopped" {% if item.p_status == 'stopped' %} selected {% endif %}>остановлен</option>
                         </select>
                     </td>
+                    <td style="text-align: center; vertical-align: middle;">{{ item.workshop }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
