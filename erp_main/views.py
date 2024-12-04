@@ -387,17 +387,16 @@ def update_order_item_status(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            status_updates = data.get('status_updates', {})
+            updates = data.get('updates', {})
 
-            for item_id, new_status in status_updates.items():
+            for item_id in updates.keys():
                 order_item = get_object_or_404(OrderItem, id=item_id)
-
-                # Проверка на возможность изменения статуса
-                #                if order_item.p_status in ['shipped', 'canceled']:
-                #                    return JsonResponse({'status': 'error', 'message': f'Cannot change status for item {item_id}.'}, status=403)
-
-                # Обновление статуса
-                order_item.p_status = new_status
+#                print(updates[item_id])
+                new_data = updates[item_id]
+                order_item.p_status = new_data['status']
+                order_item.workshop = new_data['workshop']
+                if order_item.workshop == '2':
+                    order_item.p_status = 'stopped'
                 order_item.save()
 
             return JsonResponse({'status': 'success', 'message': 'Statuses updated successfully!'})
@@ -527,9 +526,12 @@ def update_workshop(request, order_id):
     if request.method == 'POST':
         data = json.loads(request.body)
         workshop_value = data.get('workshop')
-        # Обновление workshop для всех OrderItem, соответствующих order_id
-        OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
-        OrderItem.objects.filter(order_id=order_id).update(p_status='product')
+        if workshop_value in ['1', '3']:
+            OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
+            OrderItem.objects.filter(order_id=order_id).update(p_status='product')
+        elif workshop_value == '2':
+            OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
+            OrderItem.objects.filter(order_id=order_id).update(p_status='stopped')
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 

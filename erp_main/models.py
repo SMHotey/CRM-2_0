@@ -210,6 +210,8 @@ class Order(models.Model):
         product = self.get_items_filtered().filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
         ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
         shipped = self.get_items_filtered().filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0
+        stopped = self.get_items_filtered().filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0
+        print(str(stopped))
         if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'в очереди'
         elif in_query == 0 and product > 0 and ready == 0 and shipped == 0:
@@ -218,6 +220,8 @@ class Order(models.Model):
             return f'готов'
         elif in_query == 0 and product == 0 and ready == 0 and shipped > 0:
             return f'отгружен'
+        elif stopped > 0 and product == 0 and ready == 0 and shipped == 0:
+            return f'остановлен'
         else:
             return f'всё сложно'
 
@@ -225,6 +229,7 @@ class Order(models.Model):
     def workshop(self):
         ws_1 = self.get_items_filtered().filter(workshop='1').aggregate(total=Sum('p_quantity'))['total'] or 0
         ws_3 = self.get_items_filtered().filter(workshop='3').aggregate(total=Sum('p_quantity'))['total'] or 0
+        stopped = self.get_items_filtered().filter(workshop='2').aggregate(total=Sum('p_quantity'))['total'] or 0
         icon_path = static('erp_main/images/icon_play.png')
         if ws_1:
             icon_path = static('erp_main/images/icon_play1.png')
@@ -232,6 +237,8 @@ class Order(models.Model):
             icon_path = static('erp_main/images/icon_play3.png')
         if ws_1 and ws_3:
             icon_path = static('erp_main/images/icon_play13.png')
+        if stopped:
+            icon_path = static('erp_main/images/pause.png')
 
         return icon_path
 

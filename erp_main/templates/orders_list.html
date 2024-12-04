@@ -86,10 +86,14 @@
                                         <input type="radio" id="workshop3{{ order.id }}" name="workshop{{ order.id }}" value="3">
                                         <label for="workshop3{{ order.id }}">3 цех</label>
                                     </p>
+                                    <p>
+                                        <input type="radio" id="workshop2{{ order.id }}" name="workshop{{ order.id }}" value="2">
+                                        <label for="stopped{{ order.id }}">Остановить</label>
+                                    </p>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                    <button type="button" class="btn btn-primary" onclick="saveWorkshop({{ order.id }})">Запустить</button>
+                                    <button type="button" class="btn btn-primary" onclick="saveWorkshop({{ order.id }})">Сохранить</button>
                                 </div>
                             </div>
                         </div>
@@ -156,6 +160,7 @@
 <script>
 function saveWorkshop(orderId) {
     const selectedWorkshop = document.querySelector('input[name="workshop' + orderId + '"]:checked');
+
     if (selectedWorkshop) {
         const workshopValue = selectedWorkshop.value;
 
@@ -175,12 +180,18 @@ function saveWorkshop(orderId) {
                     iconElement.src = "{% static 'erp_main/images/icon_play1.png' %}";
                 } else if (workshopValue === "3") {
                     iconElement.src = "{% static 'erp_main/images/icon_play3.png' %}";
+                } else if (workshopValue === "2") {
+                    iconElement.src = "{% static 'erp_main/images/pause.png' %}";
                 }
 
-
                 // Закрыть модальное окно
-                const modalElement = bootstrap.Modal.getInstance(document.getElementById(`workshopModal${orderId}`));
-                modalElement.hide();
+                const modalElement = document.getElementById(`workshopModal${orderId}`);
+                const bsModalElement = bootstrap.Modal.getInstance(modalElement);
+                bsModalElement.hide();
+
+                // Управление атрибутами доступности
+                modalElement.setAttribute('aria-hidden', 'true');
+                modalElement.setAttribute('inert', 'true');
             } else {
                 alert('Ошибка при обновлении цеха.');
             }
@@ -192,5 +203,22 @@ function saveWorkshop(orderId) {
         alert('Пожалуйста, выберите номер цеха.');
     }
 }
+
+function openWorkshopModal(orderId) {
+    const modalElement = document.getElementById(`workshopModal${orderId}`);
+    modalElement.removeAttribute('aria-hidden');
+    modalElement.removeAttribute('inert');
+}
+
+// Привязываем функцию открытия модального окна к событию открытия
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll("button[data-bs-toggle='modal']");
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-bs-target').replace('#workshopModal', '');
+            openWorkshopModal(orderId);
+        });
+    });
+});
 </script>
 {% endblock %}
