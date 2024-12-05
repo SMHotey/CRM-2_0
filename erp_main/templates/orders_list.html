@@ -5,23 +5,36 @@
 <style>
     /* Общие стили для таблицы */
     table {
-        border-collapse: collapse;
+        border-collapse: collapse; /* Объединяем границы ячеек */
         width: 100%;
         margin: 0 auto;
     }
-    th, td {
+    th {
         padding: 4px; /* Уменьшаем padding для уменьшения высоты строк */
         text-align: center;
         vertical-align: middle;
-        border: 1px solid #dee2e6; /* Установка границы для ячеек */
+        border-bottom: 2px solid #dee2e6; /* Нижняя граница для заголовка */
+        background-color: #37b1de; /* Цвет фона заголовков */
     }
-    th {
-        background-color: #f8f9fa; /* Цвет фона заголовков */
+    td {
+        padding: 4px; /* Уменьшаем padding для уменьшения высоты строк */
+        text-align: center;
+        vertical-align: middle;
+        border-top: 2px solid #dee2e6; /* Верхняя граница */
+        border-bottom: 2px solid #dee2e6; /* Нижняя граница */
+        border-left: none; /* Убираем левую границу */
+        border-right: none; /* Убираем правую границу */
+    }
+    tbody tr {
+        transition: background-color 0.3s ease; /* Плавный переход при изменении цвета */
     }
     tbody tr:hover {
-        background-color: #e6e6fa; /* Цвет строки при наведении */
+        background-color: #e6e6fa !important; /* Цвет строки при наведении с переопределением */
     }
-
+    td.visible-border {
+        border-left: 2px solid #dee2e6; /* Левый край ячейки */
+        border-right: 2px solid #dee2e6; /* Правый край ячейки */
+    }
 </style>
 
 <table>
@@ -54,16 +67,23 @@
     </thead>
     <tbody>
         {% for order in orders %}
-            <tr>
+            <tr style="background-color: {% if order.status == 'готов' %} #BFEEC6 {% endif %}
+                                         {% if order.status == 'остановлен' %} #EEE1E2 {% endif %}
+                                         {% if order.status == 'отменен' %} #ff9085 {% endif %}
+                                         {% if order.status == 'отгружен' %} #c8bfe7 {% endif %}">
                 <td>
                     <a href="{% url 'order_detail' order.id %}">{{ order.id }}</a>
                     <br>
-                    <span style="font-size: 11px; font-style: italic; color: grey;">{{ order.status }}</span>
+                    <span style="font-size: 11px; font-style: italic; color: {% if order.status == 'отгружен' or order.status == 'отменен'%} white {% else %} grey {% endif %};">{{ order.status }}</span>
                 </td>
                 <td>
                     <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#workshopModal{{ order.id }}">
                         {% if order.status == 'в очереди' %}
                             <img id="iconPlay{{ order.id }}" src="{% static 'erp_main/images/icon_play.png' %}" style="width: 30px; height: auto;" alt="запуск">
+                        {% elif order.status == 'отгружен' %}
+                            <img id="iconPlay{{ order.id }}" src="{% static 'erp_main/images/delivered.png' %}" style="width: 30px; height: auto;" alt="">
+                        {% elif order.status == 'отменен' %}
+                            <img id="iconPlay{{ order.id }}" src="{% static 'erp_main/images/canceled.png' %}" style="width: 30px; height: auto;" alt="">
                         {% elif order.workshop %}
                             <img id="iconPlay{{ order.id }}" src="{{ order.workshop }}" style="width: 30px; height: auto;" alt="">
                         {% endif %}
@@ -86,10 +106,12 @@
                                         <input type="radio" id="workshop3{{ order.id }}" name="workshop{{ order.id }}" value="3">
                                         <label for="workshop3{{ order.id }}">3 цех</label>
                                     </p>
+                                    {% if order.status != 'в очереди' and order.status != 'остановлен' %}
                                     <p>
                                         <input type="radio" id="workshop2{{ order.id }}" name="workshop{{ order.id }}" value="2">
                                         <label for="stopped{{ order.id }}">Остановить</label>
                                     </p>
+                                    {% endif %}
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
@@ -105,23 +127,21 @@
                 <td>
                     <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a>
                 </td>
-                <td>{{ order.doors_1_nk }}</td>
-                <td>{{ order.doors_2_nk }}</td>
-                <td>{{ order.hatch_nk }}</td>
-                <td>{{ order.doors_1_sk }}</td>
-                <td>{{ order.doors_2_sk }}</td>
-                <td>{{ order.hatch_sk }}</td>
-                <td>{{ order.transom }}</td>
-                <td>{{ order.gate }}</td>
-                <td>{{ order.gate_3000 }}</td>
-                <td>
+                <td class="visible-border"> {% if order.doors_1_nk != 0 %}{{ order.doors_1_nk }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.doors_2_nk != 0 %}{{ order.doors_2_nk }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.hatch_nk != 0 %}{{ order.hatch_nk }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.doors_1_sk != 0 %}{{ order.doors_1_sk }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.doors_2_sk != 0 %}{{ order.doors_2_sk }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.hatch_sk != 0 %}{{ order.hatch_sk }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.transom != 0 %}{{ order.transom }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.gate != 0 %}{{ order.gate }}{% else %} {% endif %}</td>
+                <td class="visible-border">{% if order.gate_3000 != 0 %}{{ order.gate_3000 }}{% else %} {% endif %}</td>
+                <td class="visible-border">
                     {% if order.glass != 0 %}
                         <a href="{% url 'glass_info' order.id %}">{{ order.glass }}</a>
-                    {% else %}
-                        {{ order.glass }}
-                    {% endif %}
+                    {% else %} {% endif %}
                 </td>
-                <td></td>
+                <td class="visible-border"></td>
                 <td>{{ order.created_at|date:"d.m.Y" }}</td>
                 <td>{{ order.invoice.organization.user.get_full_name }}</td>
                 <td>{{ order.due_date|date:"d.m.Y" }}</td>

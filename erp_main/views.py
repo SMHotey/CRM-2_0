@@ -211,7 +211,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 p_ral=data[10],
                 p_quantity=data[11],
                 p_comment=data[12],
-                p_glass=counted_glass,  # Обратите внимание на это изменение
+                p_glass=counted_glass,
             )
             new_item.save()
 
@@ -296,7 +296,7 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
-    filtered_items = order.items.exclude(p_status__in=['changed', 'canceled'])  #фильтрация по активным позициям
+    filtered_items = order.items.exclude(p_status__in=['changed',])  #фильтрация по активным позициям
 
     if request.method == 'POST':
         form = OrderFileForm(request.POST, request.FILES)
@@ -391,12 +391,13 @@ def update_order_item_status(request):
 
             for item_id in updates.keys():
                 order_item = get_object_or_404(OrderItem, id=item_id)
-#                print(updates[item_id])
                 new_data = updates[item_id]
                 order_item.p_status = new_data['status']
                 order_item.workshop = new_data['workshop']
-                if order_item.workshop == '2':
+                if order_item.workshop == '2' and new_data['path'] != 'order_detail':
                     order_item.p_status = 'stopped'
+                if (order_item.p_status == 'stopped' or order_item.p_status == 'canceled') and new_data['path'] != 'order_detail':
+                    order_item.workshop = '2'
                 order_item.save()
 
             return JsonResponse({'status': 'success', 'message': 'Statuses updated successfully!'})
@@ -458,7 +459,6 @@ def create_contract(request, pk):
             'орг_адрес': organization.address,
             'орг_email': organization.email,
         }
-        print(organization.k_s)
         # Полный путь к шаблону
         file_path = os.path.join(settings.BASE_DIR, 'media/contracts/contract.docx')
         doc = Document(file_path)

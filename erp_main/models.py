@@ -127,7 +127,7 @@ class Order(models.Model):
     comment = models.TextField(blank=True, null=True)
 
     def get_items_filtered(self):
-        return self.items.exclude(p_status__in=['changed', 'canceled'])
+        return self.items.exclude(p_status__in=['changed',])
 
     @property
     def doors_1_nk(self):
@@ -211,7 +211,10 @@ class Order(models.Model):
         ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
         shipped = self.get_items_filtered().filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0
         stopped = self.get_items_filtered().filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0
-        print(str(stopped))
+        canceled = self.get_items_filtered().filter(p_status='canceled').aggregate(total=Sum('p_quantity'))['total'] or 0
+
+        print(product, ready, shipped, stopped, canceled)
+
         if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'в очереди'
         elif in_query == 0 and product > 0 and ready == 0 and shipped == 0:
@@ -222,6 +225,8 @@ class Order(models.Model):
             return f'отгружен'
         elif stopped > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'остановлен'
+        elif canceled > 0 and product == 0 and ready == 0 and shipped == 0:
+            return f'отменен'
         else:
             return f'всё сложно'
 

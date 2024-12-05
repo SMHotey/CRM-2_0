@@ -65,7 +65,7 @@
             <div class="card-body">
                 <table class="table table-bordered">
                     <thead>
-                        <tr>
+                        <tr style="background-color: #37b1de">
                             <th style="text-align: center; vertical-align: middle;">№</th>
                             <th style="text-align: center; vertical-align: middle;">Наименование</th>
                             <th style="text-align: center; vertical-align: middle;">Тип</th>
@@ -82,7 +82,7 @@
                     </thead>
                     <tbody>
                         {% for item in filtered_items %}
-                        <tr>
+                            <tr>
                             <td style="text-align: center; vertical-align: middle;">{{ item.position_num }}</td>
                             <td style="text-align: center; vertical-align: middle;">{{ item.get_p_kind_display }}</td>
                             <td style="text-align: center; vertical-align: middle; white-space: nowrap;">{{ item.get_p_type_display }}</td>
@@ -105,7 +105,7 @@
                                 </select>
                             </td>
                             <td style="width:120px; text-align: center; vertical-align: middle;">
-                                <span class="current-workshop">{{ item.workshop }}</span>
+                                <span class="current-workshop">{% if  item.workshop != 2 %} {{ item.workshop }}{% else %} {% endif %}</span>
                                 <select class="form-select item-workshop-select hidden" data-id="{{ item.id }}">
                                     <option value="1" {% if item.workshop == 1 %} selected {% endif %}>1</option>
                                     <option value="3" {% if item.workshop == 3 %} selected {% endif %}>3</option>
@@ -161,6 +161,7 @@ editButton.onclick = function() {
             const newWorkshop = select.value;
             updates[id] = updates[id] || {};
             updates[id].workshop = newWorkshop; // Сохраняем цех
+            updates[id].path = 'order_detail'
         });
 
         // Выполняем запрос на сохранение
