@@ -15,19 +15,21 @@
         vertical-align: middle;
         border-bottom: none; /* Нижняя граница для заголовка */
         border-top: none;
-        background-color: #37b1de; /* Цвет фона заголовков */
-        border-radius: 8px;
+        background: linear-gradient(135deg, #37b1de, whitesmoke); /* Цвет фона заголовков */
+        border-radius: 7px;
         border-left: none; /* Убираем левую границу */
         border-right: none; /* Убираем правую границу */
+
     }
     td {
         padding: 4px; /* Уменьшаем padding для уменьшения высоты строк */
         text-align: center;
         vertical-align: middle;
-        border-top: 2px solid #dee2e6; /* Верхняя граница */
-        border-bottom: 2px solid #dee2e6; /* Нижняя граница */
+        border-top: 1px solid grey; /* Верхняя граница */
+        border-bottom: 1px solid grey; /* Нижняя граница */
         border-left: none; /* Убираем левую границу */
         border-right: none; /* Убираем правую границу */
+        font-weight: bold;
 
     }
     tbody tr {
@@ -37,8 +39,8 @@
         background-color: #e6e6fa !important; /* Цвет строки при наведении с переопределением */
     }
     td.visible-border {
-        border-left: 2px solid #dee2e6; /* Левый край ячейки */
-        border-right: 2px solid #dee2e6; /* Правый край ячейки */
+        border-left: 1px solid #dee2e6; /* Левый край ячейки */
+        border-right: 1px solid #dee2e6; /* Правый край ячейки */
     }
 </style>
 
@@ -46,7 +48,7 @@
     <thead>
         <tr class="bold-border;">
             <th rowspan="2">№ заказа</th>
-            <th rowspan="2">Цех</th>
+            <th rowspan="2">Цех / <br>Статус</th>
             <th rowspan="2">Организация</th>
             <th rowspan="2">Счет</th>
             <th colspan="3">Новый конструктив</th>
@@ -126,31 +128,36 @@
                         </div>
                     </div>
                 </td>
-                <td>
+                <td style="font-family: 'Times New Roman', sans-serif;">
                     <a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a>
                 </td>
                 <td>
                     <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a>
                 </td>
-                <td class="visible-border"> {% if order.doors_1_nk != 0 %}{{ order.doors_1_nk }}{% else %} {% endif %}</td>
-                <td class="visible-border">{% if order.doors_2_nk != 0 %}{{ order.doors_2_nk }}{% else %} {% endif %}</td>
+                <td class="visible-border" style="border-left: 2px solid #dee2e6;"> {% if order.doors_1_nk != 0 %}{{ order.doors_1_nk }}{% else %} {% endif %}</td>
+                <td class="visible-border" >{% if order.doors_2_nk != 0 %}{{ order.doors_2_nk }}{% else %} {% endif %}</td>
                 <td class="visible-border">{% if order.hatch_nk != 0 %}{{ order.hatch_nk }}{% else %} {% endif %}</td>
-                <td class="visible-border">{% if order.doors_1_sk != 0 %}{{ order.doors_1_sk }}{% else %} {% endif %}</td>
+                <td class="visible-border" style="border-left: 2px solid #dee2e6;">{% if order.doors_1_sk != 0 %}{{ order.doors_1_sk }}{% else %} {% endif %}</td>
                 <td class="visible-border">{% if order.doors_2_sk != 0 %}{{ order.doors_2_sk }}{% else %} {% endif %}</td>
                 <td class="visible-border">{% if order.hatch_sk != 0 %}{{ order.hatch_sk }}{% else %} {% endif %}</td>
-                <td class="visible-border">{% if order.transom != 0 %}{{ order.transom }}{% else %} {% endif %}</td>
+                <td class="visible-border" style="border-left: 2px solid #dee2e6;">{% if order.transom != 0 %}{{ order.transom }}{% else %} {% endif %}</td>
                 <td class="visible-border">{% if order.gate != 0 %}{{ order.gate }}{% else %} {% endif %}</td>
                 <td class="visible-border">{% if order.gate_3000 != 0 %}{{ order.gate_3000 }}{% else %} {% endif %}</td>
-                <td class="visible-border">
+                <td class="visible-border" style="border-left: 2px solid #dee2e6; border-right: 2px solid #dee2e6;">
                     {% if order.glass != 0 %}
-                        <a href="{% url 'glass_info' order.id %}">{{ order.glass }}</a>
+                        <a href="{% url 'glass_info' order.id %}" style="position: relative; display: inline-block;">
+                        <img id="iconPlay{{ order.id }}" src="{% static 'erp_main/images/mirror.png' %}" style="width: 35px; height: auto; opacity: 0.8;" alt="">
+                            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: blue; font-weight: bold; font-size: 12px; text-decoration: underline;">
+                        {{ order.glass }}
+                         </span>
+                        </a>
                     {% else %} {% endif %}
                 </td>
-                <td class="visible-border"></td>
-                <td>{{ order.created_at|date:"d.m.Y" }}</td>
-                <td>{{ order.invoice.organization.user.get_full_name }}</td>
-                <td>{{ order.due_date|date:"d.m.Y" }}</td>
-                <td>{{ order.comment }}</td>
+                <td class="visible-border" style="border-right: 2px solid #dee2e6;"></td>
+                <td style="font-size: 12px;">{{ order.created_at|date:"d.m.Y" }}</td>
+                <td style="font-size: 12px; ">{{ order.invoice.organization.user.get_full_name }}</td>
+                <td style="font-size: 12px;">{{ order.due_date|date:"d.m.Y" }}</td>
+                <td style="font-size: 12px;">{{ order.comment }}</td>
             </tr>
         {% endfor %}
     </tbody>

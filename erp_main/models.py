@@ -213,8 +213,6 @@ class Order(models.Model):
         stopped = self.get_items_filtered().filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0
         canceled = self.get_items_filtered().filter(p_status='canceled').aggregate(total=Sum('p_quantity'))['total'] or 0
 
-        print(product, ready, shipped, stopped, canceled)
-
         if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'в очереди'
         elif in_query == 0 and product > 0 and ready == 0 and shipped == 0:

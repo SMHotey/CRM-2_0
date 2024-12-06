@@ -27,6 +27,28 @@
             border-radius: 25px;
             transition: background-color 0.8s;
         }
+        #first-block {
+            background: linear-gradient(135deg, #494949, #37b1de); /* Градиентный фон */
+            border-radius: 15px; /* Закругленные углы */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Тень для выделения */
+            transition: transform 0.3s, box-shadow 0.3s; /* Плавный переход для эффектов */
+        }
+        
+        #first-block:hover {
+            transform: translateY(-5px); /* Подъем при наведении */
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4); /* Увеличение тени при наведении */
+        }
+        
+        .card-header {
+            font-size: 1.2rem; /* Увеличенный размер шрифта заголовка */
+            text-align: center; /* Центрирование текста */
+            font-weight: bold; /* Жирный шрифт */
+        }
+        
+        .card-body {
+            padding: 20px; /* Увеличенные отступы внутри блока */
+            text-align: center; /* Центрирование текста в карточке */
+        }
         .custom-button:hover {
             background-color: #45a049;
         }
@@ -199,7 +221,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card text-white bg-success mb-3">
-                        <div class="card-header">Готовность на завтра</div>
+                        <div class="card-header">Отгрузки на сегодня</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5>
                             <p class="card-text"></p>
@@ -208,7 +230,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="card text-white bg-danger mb-3">
-                        <div class="card-header">Отгрузки на сегодня</div>
+                        <div class="card-header">Просроченные заявки</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5>
                             <p class="card-text"></p>
