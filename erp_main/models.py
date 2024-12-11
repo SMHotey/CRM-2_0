@@ -365,6 +365,11 @@ class GlassInfo(models.Model):
     comment = models.TextField(max_length=255, blank=True, null=True, default='')
 
 
+class Passport(models.Model):
+    number = models.IntegerField(blank=True, null=True)
+
+
+
 
 
 

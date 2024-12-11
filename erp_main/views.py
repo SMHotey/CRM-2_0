@@ -535,3 +535,6 @@ def update_workshop(request, order_id):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 
+def make_passport(self):
+    pass
+

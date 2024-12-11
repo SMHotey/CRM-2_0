@@ -9,100 +9,147 @@
     <style>
         .alert-info {
             background: none;
-            padding-top: 0;
-            padding-bottom: 0;
+            padding: 0;
             border: none;
         }
-        .custom-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 1px 12px;
-            text-align: center;
-            text-decoration: none;
-            display: inline;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border: none;
-            border-radius: 25px;
-            transition: background-color 0.8s;
+        body {
+            background-image: url("{% static 'erp_main/images/back.png' %}"); /* Укажите путь к вашему изображению */
+            background-size: cover; /* Для растянуть изображение на всю страницу */
+            background-position: center; /* Центрируйте изображение */
+            background-repeat: repeat; /* Не повторять изображение */
+            height: 100vh; /* Высота 100% от высоты окна */
+            margin: 0; /* Убираем отступы */
         }
+
+        .card, #first-block, #readiness, #shipment, #delay {
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        {#             font-family: "Monotype Corsiva", fantasy; #}
+
+        }
+        .card .card-header {
+            font-size: 20px; /* Размер шрифта для заголовка карточки */
+        }
+
         #first-block {
-            background: linear-gradient(135deg, #494949, #37b1de); /* Градиентный фон */
-            border-radius: 15px; /* Закругленные углы */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Тень для выделения */
-            transition: transform 0.3s, box-shadow 0.3s; /* Плавный переход для эффектов */
+            background: linear-gradient(135deg, #494949, #37b1de);
         }
-        
+
         #first-block:hover {
-            transform: translateY(-5px); /* Подъем при наведении */
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4); /* Увеличение тени при наведении */
+            background: linear-gradient(135deg, #37b1de, #494949);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        #readiness {
+            background: linear-gradient(25deg, grey, blue);
+        }
+
+        #readiness:hover {
+            background: linear-gradient(25deg, blue, grey);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        #shipment {
+            background: linear-gradient(25deg, grey, green);
+        }
+
+        #shipment:hover {
+            background: linear-gradient(25deg, green, grey);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        #delay {
+            background: linear-gradient(25deg, grey, red);
+        }
+
+        #delay:hover {
+            background: linear-gradient(25deg, red, grey);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
         }
         
+        #logo {
+            transition: transform 0.6s ease; /* Плавный переход для трансформации */
+            width: 200px; /* Задайте ширину по необходимости */
+            height: auto; /* Автоматическая высота */
+        }
+        
+        #logo:hover {
+            transform: rotateY(180deg); /* Поворот на 360 градусов по оси Z при наведении */
+        }
+
         .card-header {
-            font-size: 1.2rem; /* Увеличенный размер шрифта заголовка */
-            text-align: center; /* Центрирование текста */
-            font-weight: bold; /* Жирный шрифт */
+            font-size: 1.2rem;
+            text-align: center;
+            font-weight: bold;
         }
-        
+
         .card-body {
-            padding: 20px; /* Увеличенные отступы внутри блока */
-            text-align: center; /* Центрирование текста в карточке */
+            padding: 20px;
+            text-align: center;
+            background-color: white;
         }
-        .custom-button:hover {
-            background-color: #45a049;
-        }
+
         .nav-item {
             position: relative;
             list-style: none;
         }
+
         .nav-link {
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
             border-radius: 5px;
+            padding: 10px 15px 10px 45px;
         }
+
         .nav-link:hover {
             background-color: #1164b4;
             color: white;
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
+
         .sidebar {
-            width: 200px;
+            width: 240px;
             padding-top: 20px;
             position: fixed;
             height: 100%;
             overflow-y: auto;
-            background-color: #f8f9fa !important;
+ 
+            background-color: #f8f9fa;
+            transition: 0.5s;
+            box-shadow: 4px 0 5px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            font-family: "Monotype Corsiva", fantasy;
+            font-size: 22px;
         }
+
+        .sidebar.show {
+            left: 0;
+        }
+
         .main-content {
-            margin-left: 220px;
+            margin-left: 240px;
             padding: 20px;
-            flex-grow: 1;
+            transition: margin-left 0.5s;
+
         }
-        table {
-            border-collapse: collapse; 
-            width: 100%; 
+
+        .dropdown-menu {
+            background-color: deepskyblue;
+            font-size: 20px;
         }
-        th, td {
-            border: 1px solid #dee2e6; 
-            padding: 8px; 
-            text-align: left; 
+
+        .dropdown-item:hover {
+            background-color: #4ea1e0;
+            font-size: 25px;
+            color: gold;
         }
-        tr:nth-child(odd) {
-            background-color: #f9f9f9; 
-        }
-        tr:nth-child(even) {
-            background-color: #ffffff; 
-        }
-        tbody tr:hover {
-            background-color: #e6e6fa; 
-        }
-        .card-body {
-            text-align: center; 
-            background-color: white;
-        }
-        #first-block {
-            border: 1px solid #37b1de;
-            background-color: #37b1de;
-        }
+        
+        
     </style>
     <title>CRM Система</title>
 </head>
@@ -110,15 +157,15 @@
 
 <div class="container-fluid">
     <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <nav class="sidebar" id="sidebar">
             <div style="text-align: center;">
                 <a href="{% url 'index' %}">
-                    <img src="{% static 'erp_main/images/logo.png' %}" style="width: 120px; height: auto;" alt="Главная">
+                    <img src="{% static 'erp_main/images/logo.png' %}" style="width: 120px; height: auto;" alt="Главная" id="logo">
                 </a>
             </div>
             <br>
             <div class="sidebar-sticky">
-                <ul class="nav flex-column text-center">
+                <ul class="nav flex-column text-left">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Заказы</a>
                         <ul class="dropdown-menu">
@@ -175,9 +222,9 @@
             <div class="row my-1">
                 <div class="col-md-12">
                     <div class="row mb-0">
-                        <div class="col-md-10 text-center" style="visibility: hidden;">
-                            <div class="alert alert-info" role="alert">
-                                <strong> ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ </strong>
+                        <div class="col-md-10 text-center">
+                            <div class="alert alert-info" role="alert" style="font-family: 'Antique Olive Roman'; font-size: 38px">
+    {#                            <strong>ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ</strong> #}
                             </div>
                         </div>
                         <div class="col-md-2 text-center" style="background: none;">
@@ -211,7 +258,7 @@
 
             <div class="row my-3">
                 <div class="col-md-4">
-                    <div class="card text-white bg-primary mb-3">
+                    <div class="card text-white bg-primary mb-3" id="readiness">
                         <div class="card-header">Готовность на сегодня</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5>
@@ -220,7 +267,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card text-white bg-success mb-3">
+                    <div class="card text-white bg-success mb-3" id="shipment">
                         <div class="card-header">Отгрузки на сегодня</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5>
@@ -229,7 +276,7 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card text-white bg-danger mb-3">
+                    <div class="card text-white bg-danger mb-3" id="delay">
                         <div class="card-header">Просроченные заявки</div>
                         <div class="card-body">
                             <h5 class="card-title"></h5>
@@ -240,11 +287,24 @@
             </div>
 
         {% block content %}
-        {% endblock %}    
+        {% endblock %}
         </main>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    function toggleMenu() {
+        sidebar.classList.toggle('show');
+        mainContent.classList.toggle('shifted');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        sidebar.classList.add('show');
+    });
+</script>
 </body>
 </html>
