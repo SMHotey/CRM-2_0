@@ -318,7 +318,7 @@ class OrderItem(models.Model):
     p_comment = models.TextField(max_length=255, blank=True, null=True, default='')
     firm_plate = models.BooleanField(default=True)  # фирменный шильд
     mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True)  # монтажные уши: размер, кол-во
-    workshop = models.IntegerField(default=0)
+    workshop = models.IntegerField(default=0) # цех
 
     @property
     def d_glass(self):
@@ -364,9 +364,25 @@ class GlassInfo(models.Model):
     status = models.CharField(max_length=100, blank=True, null=True, choices=GLASS_STATUS_CHOICE)
     comment = models.TextField(max_length=255, blank=True, null=True, default='')
 
+    def __eq__(self, other):
+        if not isinstance(other, GlassInfo):
+            return NotImplemented
+        return (
+                self.kind == other.kind and
+                self.option == other.option and
+                self.height == other.height and
+                self.width == other.width and
+                self.depth == other.depth and
+                self.quantity == other.quantity and
+                self.comment == other.comment
+        )
+
 
 class Passport(models.Model):
     number = models.IntegerField(blank=True, null=True)
+
+
+
 
 
 

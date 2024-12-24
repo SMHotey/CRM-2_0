@@ -23,23 +23,25 @@
 
         .card, #first-block, #readiness, #shipment, #delay {
             border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: none;
+            box-shadow: 0 20px 20px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s, box-shadow 0.3s;
-        {#             font-family: "Monotype Corsiva", fantasy; #}
-
+            background-color:whitesmoke;
         }
         .card .card-header {
             font-size: 20px; /* Размер шрифта для заголовка карточки */
         }
 
         #first-block {
-            background: linear-gradient(135deg, #494949, #37b1de);
+            background: linear-gradient(135deg, #37b1de, #494949);
+           
         }
 
         #first-block:hover {
-            background: linear-gradient(135deg, #37b1de, #494949);
+            background: linear-gradient(135deg, #494949, #37b1de);
             transform: translateY(-5px);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+            
         }
 
         #readiness {
@@ -79,7 +81,7 @@
         }
         
         #logo:hover {
-            transform: rotateY(180deg); /* Поворот на 360 градусов по оси Z при наведении */
+            transform: rotateY(180deg); 
         }
 
         .card-header {
@@ -91,48 +93,58 @@
         .card-body {
             padding: 20px;
             text-align: center;
-            background-color: white;
+            background-color: aliceblue;
+            
         }
-
+         
         .nav-item {
             position: relative;
             list-style: none;
+
         }
 
         .nav-link {
-            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.5s, box-shadow 0.3s;
+            border-radius: 25px;
             padding: 10px 15px 10px 45px;
+            color: #494949;
+            font-weight: bold;
+
+            
         }
 
         .nav-link:hover {
-            background-color: #1164b4;
-            color: white;
+            background-color: #37b1de;
+            color: #494949;
             transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.75);
+            margin-left: 20px;
+            border-color: white;
+            
         }
 
         .sidebar {
-            width: 240px;
+            width: 260px;
             padding-top: 20px;
             position: fixed;
             height: 100%;
             overflow-y: auto;
  
-            background-color: #f8f9fa;
+            background-color: aliceblue;
             transition: 0.5s;
             box-shadow: 4px 0 5px rgba(0, 0, 0, 0.5);
             z-index: 2;
             font-family: "Monotype Corsiva", fantasy;
-            font-size: 22px;
+            font-size: 21px;
         }
 
-        .sidebar.show {
-            left: 0;
+        .sidebar:hover {
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5);
+            transition: 0.5s;
         }
 
         .main-content {
-            margin-left: 240px;
+            margin-left: 270px;
             padding: 20px;
             transition: margin-left 0.5s;
 
@@ -140,17 +152,24 @@
 
         .dropdown-menu {
             background-color: deepskyblue;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .dropdown-item:hover {
             background-color: #4ea1e0;
-            font-size: 25px;
-            color: gold;
+            font-size: 22px;
+            color: aliceblue;
         }
         
-        
+        .gradient-line {
+            height: 2px; /* Высота линии */
+            background-color: white;
+            width: 100%; /* Ширина линии */
+            margin: 20px 0; /* Отступы сверху и снизу */
+        }
     </style>
+        
+        
     <title>CRM Система</title>
 </head>
 <body>
@@ -163,7 +182,8 @@
                     <img src="{% static 'erp_main/images/logo.png' %}" style="width: 120px; height: auto;" alt="Главная" id="logo">
                 </a>
             </div>
-            <br>
+            <div class="gradient-line"></div>
+         
             <div class="sidebar-sticky">
                 <ul class="nav flex-column text-left">
                     <li class="nav-item dropdown">
@@ -216,6 +236,7 @@
                     </li>
                 </ul>
             </div>
+            <div class="gradient-line"></div>
         </nav>
 
         <main role="main" class="col-md-10 main-content">

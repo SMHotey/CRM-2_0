@@ -2,24 +2,24 @@ import json
 import os
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from datetime import datetime
-from collections import Counter
-import re
-from django.urls import reverse, reverse_lazy
-from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
-from openpyxl import load_workbook
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
 from docx import Document
+from datetime import datetime
+from collections import Counter
+from django.shortcuts import redirect, get_object_or_404, render
+from django.urls import reverse
+from openpyxl import load_workbook
+from django.contrib.auth.mixins import LoginRequiredMixin
+import re
+
 
 logger = logging.getLogger(__name__)
 
@@ -100,55 +100,71 @@ class OrderUploadView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['organizations'] = Organization.objects.all()
-        context['legal_entities'] = LegalEntity.objects.all()
+        if self.request.user.is_superuser:
+            context['organizations'] = Organization.objects.all()
+        else:
+            context['organizations'] = Organization.objects.filter(user=self.request.user)
         return context
 
     def get_form_kwargs(self):
-        """ Передаем текущего пользователя в форму """
+        """Передаем текущего пользователя в форму"""
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
         uploaded_file = form.cleaned_data.get('order_file')
-        if not uploaded_file:
+        order_id = self.kwargs.get('order_id')
+
+        if order_id:
+            # Извлечение существующего заказа из базы
+            order = get_object_or_404(Order, pk=order_id)
+            is_update = True
+        else:
+            # Создание нового заказа на основе данных из формы
+            order = Order()
+            is_update = False
+
+        # Устанавливаем значения полей из формы
+        order.invoice = form.cleaned_data.get('invoice')  # Извлекаем счёт из формы
+        order.due_date = form.cleaned_data.get('due_date')  # Извлекаем дату готовности
+        order.comment = form.cleaned_data.get('comment', '')  # Извлекаем комментарий
+
+        # Обновление поля order_file только если файл был загружен
+        if uploaded_file:
+            order.order_file = uploaded_file  # Загружаем файл, если он был загружен
+
+        # Проверка на наличие файла, если это новый заказ
+        if not uploaded_file and not is_update:
             form.add_error('order_file', 'Пожалуйста, загрузите файл.')
             return self._render_form_with_context(form)
 
-        order = self._create_order(form)
+        # Сохраняем объект Order
+        order.save()
 
-        comment = form.cleaned_data.get('comment', '')
-        order.comment = comment
+        # Обработка загрузки файла и обновление позиций заказа
+        if uploaded_file:  # Обработка файла только если он был загружен
+            try:
+                wb = load_workbook(uploaded_file)
+            except Exception as e:
+                form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
+                return self._render_form_with_context(form)
 
-        try:
-            wb = load_workbook(uploaded_file)
-        except Exception as e:
-            form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
-            return self._render_form_with_context(form)
+            if not self._check_header(wb.active):
+                form.add_error('order_file', 'Выберите правильный файл заказа')
+                return self._render_form_with_context(form)
 
-        if not self._check_header(wb.active):
-            form.add_error('order_file', 'Выберите правильный файл заказа')
-            return self._render_form_with_context(form)
+            new_positions = self._process_file(wb.active)
+            if is_update:
+                self._update_order_items(order, new_positions)  # Обновление позиций для существующего заказа
+            else:
+                self._create_order_items(order, new_positions)  # Создание новых позиций для нового заказа
 
-        position = self._process_file(wb.active)
-        self._save_order_items(order, position)
-
-        return redirect('orders_list')
+        return redirect(reverse('order_detail', args=[order.id]))
 
     def _render_form_with_context(self, form):
         organizations = Organization.objects.all()
         return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
-
-    def _create_order(self, form):
-        order = form.save(commit=False)
-        if self.request.POST.get('due_date'):
-            due_date = self.request.POST.get('due_date')
-        else:
-            due_date = datetime.now().strftime('%Y-%m-%d')
-        order.due_date = datetime.strptime(due_date, '%Y-%m-%d')
-        order.save()
-        return order
 
     def _check_header(self, sheet):
         return sheet.cell(row=1, column=3).value == "Бланк №"
@@ -160,64 +176,129 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         max_row = cur_row
 
         seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
-        position, line = [], []
+        positions = []
+        line = []
 
         for row in range(8, max_row):
             if sheet.cell(row=row, column=2).value:
                 if line:
-                    position.append(line)
+                    positions.append(line)
                 line = [sheet.cell(row=row, column=column).value for column in seq]
             else:
                 line.extend([sheet.cell(row=row, column=7).value, sheet.cell(row=row, column=8).value])
 
         if line:
-            position.append(line)
+            positions.append(line)
 
-        return position
+        return positions
 
-    def _save_order_items(self, order, position):
+    def _update_order_items(self, order, new_positions):
+        current_items = {item.position_num: item for item in OrderItem.objects.filter(order=order)}
+
+        current_date = datetime.now().strftime('%d.%m.%Y')
+        changes_made = []
+
+        for data in new_positions:
+            n_num = data[0]
+            name = data[1]
+            n_kind = self._get_kind(name)
+            n_type = self._get_type(name)
+            n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
+
+            new_item_data = {
+                'p_kind': n_kind,
+                'p_type': n_type,
+                'p_construction': n_construction,
+                'p_width': data[2],
+                'p_height': data[3],
+                'p_active_trim': data[4],
+                'p_open': data[5],
+                'p_platband': data[6],
+                'p_furniture': data[7],
+                'p_door_closer': data[8],
+                'p_step': data[9],
+                'p_ral': data[10],
+                'p_quantity': data[11],
+                'p_comment': data[12],
+                'p_glass': self._count_glass(data[13:]),
+            }
+
+            if n_num in current_items:
+                current_item = current_items[n_num]
+                for field, new_value in new_item_data.items():
+                    old_value = getattr(current_item, field, None)
+                    if old_value != new_value:
+                        changes_made.append(
+                            f"Изменения от {current_date}: поз. {n_num} {field} с {old_value} на {new_value}")
+                        setattr(current_item, field, new_value)
+                current_item.p_status = 'changed'
+                current_item.save()  # сохраняем обновленный объект
+            else:
+                new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
+                new_item.p_status = 'in_query'
+                new_item.save()  # Сохраняем новый объект OrderItem
+
+                # Сохраняем информацию о стеклах
+                self._save_glass_info(new_item, new_item_data['p_glass'])
+
+        if changes_made:
+            order.comment += "\n" + "\n".join(changes_made)
+            order.save()  # Сохраняем изменения в заказе
+
+    def _create_order_items(self, order, new_positions):
+        for data in new_positions:
+            n_num = data[0]
+            name = data[1]
+            n_kind = self._get_kind(name)
+            n_type = self._get_type(name)
+            n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
+
+            new_item_data = {
+                'p_kind': n_kind,
+                'p_type': n_type,
+                'p_construction': n_construction,
+                'p_width': data[2],
+                'p_height': data[3],
+                'p_active_trim': data[4],
+                'p_open': data[5],
+                'p_platband': data[6],
+                'p_furniture': data[7],
+                'p_door_closer': data[8],
+                'p_step': data[9],
+                'p_ral': data[10],
+                'p_quantity': data[11],
+                'p_comment': data[12],
+                'p_glass': self._count_glass(data[13:]),
+            }
+
+            new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
+            new_item.p_status = 'in_query'
+            new_item.save()  # Сохраняем новый объект
+
+            # Сохраняем информацию о стеклах
+            self._save_glass_info(new_item, new_item_data['p_glass'])
+
+    def _get_kind(self, name):
         kind_mapping = {
             'дверь': 'door', 'люк': 'hatch', 'ворота': 'gate',
             'калитка': 'door', 'фрамуга': 'transom'
         }
+        return next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
+
+    def _get_type(self, name):
         type_mapping = {
             'ei-60': 'ei-60', 'eis-60': 'eis-60', 'eiws-60': 'eiws-60',
             'тех': 'tech', 'ревиз': 'revision'
         }
+        return next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
 
-        for data in position:
-            n_num = data[0]
-            name = data[1]
-            n_kind = next((value for key, value in kind_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
-            n_type = next((value for key, value in type_mapping.items() if re.search(key, name, re.IGNORECASE)), None)
-            n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
-
-            counted_glass = self._count_glass(data[13:])  # Получаем данные стекол
-
-            new_item = OrderItem(
-                order=order,
-                position_num=n_num,
-                p_kind=n_kind,
-                p_type=n_type,
-                p_construction=n_construction,
-                p_width=data[2],
-                p_height=data[3],
-                p_active_trim=data[4],
-                p_open=data[5],
-                p_platband=data[6],
-                p_furniture=data[7],
-                p_door_closer=data[8],
-                p_step=data[9],
-                p_ral=data[10],
-                p_quantity=data[11],
-                p_comment=data[12],
-                p_glass=counted_glass,
-            )
-            new_item.save()
-
-            for (height, width), quantity in counted_glass.items():
+    def _save_glass_info(self, new_item, counted_glass):
+        """Сохраняет информацию о стеклах для нового элемента заказа."""
+        for (height, width), quantity in counted_glass.items():
+            if height and width:  # Проверяем, что высота и ширина заданы
+                # Создаем новый объект GlassInfo, который содержит внешний ключ к OrderItem
                 new_glass = GlassInfo(height=height, width=width, quantity=quantity, order_items=new_item)
-                new_glass.save()
+                new_glass.save()  # Сохраняем объект GlassInfo
 
     def _count_glass(self, glass_data):
         counted_glass = dict(Counter(list(zip(glass_data[::2], glass_data[1::2]))))

@@ -4,16 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="правки по дизайну2 orders_list">
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/back.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/blue-scratched-jeans.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/grey-tissue.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/icons8.png" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="правки по дизайну">
+      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/pallani.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/Безымянный.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_05-06-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_06-02-24.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515_oOrBPa3.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515экз.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515экз_GOKSu27.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_экз.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_экз_6o9ek0K.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_экз_s6MSQuc.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_доп.заказ.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/static/erp_main/images/logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/logo.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
@@ -159,8 +168,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Django Server.Journal_4_0" />
       <item itemvalue="Python.crm" />
+      <item itemvalue="Django Server.Journal_4_0" />
     </list>
   </component>
   <component name="SharedIndexes">
@@ -258,7 +267,14 @@
       <workItem from="1733466467138" duration="11250000" />
       <workItem from="1733727568811" duration="5376000" />
       <workItem from="1733811415649" duration="16446000" />
-      <workItem from="1733899478762" duration="16421000" />
+      <workItem from="1733899478762" duration="17063000" />
+      <workItem from="1733984579154" duration="17309000" />
+      <workItem from="1734332924705" duration="20811000" />
+      <workItem from="1734420873134" duration="14737000" />
+      <workItem from="1734503703405" duration="17552000" />
+      <workItem from="1734608422594" duration="4868000" />
+      <workItem from="1734680061501" duration="3189000" />
+      <workItem from="1734938615207" duration="14524000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -572,7 +588,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733490819253</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="правки по дизайну">
+      <option name="closed" value="true" />
+      <created>1733927476133</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1733927476133</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -591,7 +615,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="03-09-24" />
     <MESSAGE value="начинает работать" />
     <MESSAGE value="начинает работать уже лучше" />
     <MESSAGE value="процесс идет" />
@@ -616,9 +639,10 @@
     <MESSAGE value="корректировка отображения значков и статусов" />
     <MESSAGE value="правки по дизайну orders_list" />
     <MESSAGE value="правки по дизайну2 orders_list" />
-    <option name="LAST_COMMIT_MESSAGE" value="правки по дизайну2 orders_list" />
+    <MESSAGE value="правки по дизайну" />
+    <option name="LAST_COMMIT_MESSAGE" value="правки по дизайну" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1733909148995" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1734962061268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>

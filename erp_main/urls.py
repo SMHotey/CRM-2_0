@@ -11,6 +11,7 @@ from .views import OrderUploadView, create_legal_entity, create_contract, glass_
 urlpatterns = [
     path('update-order-item-status/', views.update_order_item_status, name='update_order_item_status'),
     path('update_workshop/<int:order_id>/', update_workshop, name='update_workshop'),
+    path('order/upload/<int:order_id>/', OrderUploadView.as_view(), name='order_upload'),
     path('order/upload/', OrderUploadView.as_view(), name='order_upload'),
     path('orders_list/', views.orders_list, name='orders_list'),
     path('organization/<int:pk>/edit/', OrganizationUpdateView.as_view(), name='organization_edit'),
