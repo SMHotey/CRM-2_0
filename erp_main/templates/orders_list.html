@@ -15,14 +15,14 @@
         vertical-align: middle;
         border-bottom: none; /* Нижняя граница для заголовка */
         border-top: none;
-        background: linear-gradient(135deg, lightgrey, cornflowerblue); /* Цвет фона заголовков */
-        border-radius: 7px;
+        background: linear-gradient(135deg, lightsteelblue, #d7e4ed); /* Цвет фона заголовков */
+        border-radius: 1px;
         border-left: none; /* Убираем левую границу */
         border-right: none; /* Убираем правую границу */
 
     }
     th:hover {
-        background: linear-gradient(135deg, cornflowerblue, lightgrey);
+        background: linear-gradient(135deg, #d7e4ed, lightsteelblue);
     }
     td {
         padding: 4px; /* Уменьшаем padding для уменьшения высоты строк */
@@ -160,7 +160,7 @@
                 <td style="font-size: 12px;">{{ order.created_at|date:"d.m.Y" }}</td>
                 <td style="font-size: 12px; ">{{ order.invoice.organization.user.get_full_name }}</td>
                 <td style="font-size: 12px;">{{ order.due_date|date:"d.m.Y" }}</td>
-                <td style="font-size: 12px;">{{ order.comment }}</td>
+                <td style="font-size: 12px; text-align: left;">{{ order.comment|safe }}</td>
             </tr>
         {% endfor %}
     </tbody>

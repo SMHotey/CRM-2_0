@@ -27,7 +27,7 @@
             <h5 class="card-title">Дата создания: {{ order.created_at }}</h5>
 
             <p class="card-text">Файл заказа: <a class="btn btn-link" href="{{ order.order_file.url }}">Скачать</a></p>
-            <form method="post" enctype="multipart/form-data" class="mt-3" id="replaceFileForm" action="{% url 'order_upload' %}"> <!-- Убедитесь, что это правильный URL -->
+            <form method="post" enctype="multipart/form-data" class="mt-3" id="replaceFileForm" action="{% url 'order_upload' order_id=order.pk %}"> <!-- Убедитесь, что это правильный URL -->
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="order_file" class="form-label">Заменить файл заказа:</label>
@@ -59,7 +59,46 @@
             </div>
         </div>
     </div>
-
+    <div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        История изменений
+        <button id="toggleChanges" class="btn btn-primary">Развернуть</button>
+    </div>
+    {% if changes %}
+    <div id="changeItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr style="background-color: #37b1de">
+                        <th style="text-align: center;">Дата изменения</th>
+                        <th style="text-align: center;">Изменивший</th>
+                        <th style="text-align: center;">Комментарий</th>
+                        <th style="text-align: center;">Файл до изменения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for change in changes %}
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">{{ change.changed_at|date:"Y-m-d H:i:s" }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ change.changed_by.get_full_name }}</td>
+                            <td style="text-align: left; vertical-align: middle;">{{ change.comment|default_if_none:''|safe }}</td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                {% if change.order_file %}
+                                    <a href="{{ change.order_file.url }}" class="btn btn-link">Скачать</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card-body">
+        <p>Нет изменений для этого заказа.</p>
+    </div>
+    {% endif %}
+</div>
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             Содержимое заказа
@@ -73,8 +112,8 @@
                             <th style="text-align: center; vertical-align: middle;">№</th>
                             <th style="text-align: center; vertical-align: middle;">Наименование</th>
                             <th style="text-align: center; vertical-align: middle;">Тип</th>
-                            <th style="text-align: center; vertical-align: middle;">Ширина</th>
                             <th style="text-align: center; vertical-align: middle;">Высота</th>
+                            <th style="text-align: center; vertical-align: middle;">Ширина</th>
                             <th style="text-align: center; vertical-align: middle;">Откр.</th>
                             <th style="text-align: center; vertical-align: middle; width: 120px">Стекло</th>
                             <th style="text-align: center; vertical-align: middle; width: 120px">Фурнитура</th>
@@ -90,8 +129,8 @@
                                 <td style="text-align: center; vertical-align: middle;">{{ item.position_num }}</td>
                                 <td style="text-align: center; vertical-align: middle;">{{ item.get_p_kind_display }}</td>
                                 <td style="text-align: center; vertical-align: middle; white-space: nowrap;">{{ item.get_p_type_display }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
                                 <td style="text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
+                                <td style="text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
                                 <td style="text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
                                 <td style="text-align: center; vertical-align: middle;">{{ item.d_glass|safe }}</td>
                                 <td style="text-align: center; vertical-align: middle;">{{ item.p_furniture }}</td>
@@ -233,6 +272,11 @@ document.getElementById("toggleInvoices").addEventListener("click", function() {
 document.getElementById("toggleButton").addEventListener("click", function() {
     toggleSection("toggleButton", "orderItems");
 });
+
+document.getElementById("toggleChanges").addEventListener("click", function() {
+    toggleSection("toggleChanges", "changeItems");
+});
+
 
 function toggleSection(buttonId, sectionId) {
     const button = document.getElementById(buttonId);

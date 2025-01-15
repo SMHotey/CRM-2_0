@@ -4,27 +4,80 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="правки по дизайну">
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/pallani.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/Безымянный.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_05-06-24.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_06-02-24.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515_oOrBPa3.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515экз.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_515экз_GOKSu27.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_экз.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_экз_6o9ek0K.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_экз_s6MSQuc.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_доп.заказ.xlsx" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="работа с обновлением заявки">
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0005_passport_alter_orderitem_p_height_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0006_alter_orderitem_firm_plate_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0007_order_comment_changes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0008_remove_order_comment_changes_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_1934.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_2233.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_2233_2Ne6JTU.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_6VifXO6.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_80iGZjo.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_CMaRAn4.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_CaKtW3G.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_EgL4Gtt.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_HA1Goej.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_U7sTR8s.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_cNpMMvQ.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_j1oYJXX.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_khX4XJs.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_oYqjJjT.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_9к_-_Партия_2_1_p6KwgwQ.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_Инком_1051.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_08Pv78m.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_13jOvKd.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_1N43YVx.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_1VJHHcG.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_1qppY66.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_1wcyR4e.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_1ykoni0.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_2lozrwz.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_3XwZ6AM.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_3vMJOW3.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_68j2YiO.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_8rlO1yW.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_9tGoAQl.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_ABf2lUW.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_AY5vlvK.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_BorEZLN.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_CtPINuE.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_D49K7Go.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_DNo27zY.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_FK6dR92.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_GkDxXkw.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_GvCIxa5.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_Jo2CQZF.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_KtbQG1r.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_LVOMmFV.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_O4LMu8A.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_ODl4C6w.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_QcHNAwo.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_T88SoiJ.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_VS8qh6W.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_WR3oM6U.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_YIfEUaH.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_YoiqzWL.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_arLy4AK.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_b8Mj2gs.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_bwBTH5X.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_fseatoP.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_hhKpX3T.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_nkBgB3P.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_sFIecbR.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_tvHfde7.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_vCcmbkQ.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_whrvWHW.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_yH7sJV7.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_17_yg4h5uA.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/static/erp_main/images/logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/static/erp_main/images/logo.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/orders_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/orders_list.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,29 +136,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Django Server.Journal_4_0.executor&quot;: &quot;Run&quot;,
-    &quot;Python.crm.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/User01/PycharmProjects/Journal_4_0/erp_main/static/erp_main/images&quot;,
-    &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editing.templates&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_ADD_EXTERNAL_FILES": "true",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.Journal_4_0.executor": "Run",
+    "Python.crm.executor": "Run",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/User01/PycharmProjects/Journal_4_0/erp_main/static/erp_main/images",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editing.templates",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\static\erp_main\images" />
@@ -168,8 +222,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.crm" />
       <item itemvalue="Django Server.Journal_4_0" />
+      <item itemvalue="Python.crm" />
     </list>
   </component>
   <component name="SharedIndexes">
@@ -275,6 +329,12 @@
       <workItem from="1734608422594" duration="4868000" />
       <workItem from="1734680061501" duration="3189000" />
       <workItem from="1734938615207" duration="14524000" />
+      <workItem from="1735022667624" duration="646000" />
+      <workItem from="1735288688733" duration="4162000" />
+      <workItem from="1736490231249" duration="5855000" />
+      <workItem from="1736751016108" duration="20262000" />
+      <workItem from="1736837154809" duration="20361000" />
+      <workItem from="1736924251657" duration="16677000" />
     </task>
     <task id="LOCAL-00001" summary="29-08-24">
       <option name="closed" value="true" />
@@ -596,7 +656,15 @@
       <option name="project" value="LOCAL" />
       <updated>1733927476133</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="работа с обновлением заявки">
+      <option name="closed" value="true" />
+      <created>1735022711287</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1735022711287</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -615,7 +683,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="начинает работать" />
     <MESSAGE value="начинает работать уже лучше" />
     <MESSAGE value="процесс идет" />
     <MESSAGE value="добавлена дата последнего заказа" />
@@ -640,9 +707,10 @@
     <MESSAGE value="правки по дизайну orders_list" />
     <MESSAGE value="правки по дизайну2 orders_list" />
     <MESSAGE value="правки по дизайну" />
-    <option name="LAST_COMMIT_MESSAGE" value="правки по дизайну" />
+    <MESSAGE value="работа с обновлением заявки" />
+    <option name="LAST_COMMIT_MESSAGE" value="работа с обновлением заявки" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1734962061268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1736948865546" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
   </component>
 </project>

@@ -245,21 +245,23 @@ class Order(models.Model):
 
         return icon_path
 
-    def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
-        if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
-            self.internal_order_number = self.generate_internal_order_number()
-        super().save(*args, **kwargs)
+#    def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
+#        if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
+#            self.internal_order_number = self.generate_internal_order_number()
+#        super().save(*args, **kwargs)
 
-    @staticmethod
-    def generate_internal_order_number():
-        return datetime.now().strftime('%Y%m%d%H%M%S')
+#    @staticmethod
+#    def generate_internal_order_number():
+#        return datetime.now().strftime('%Y%m%d%H%M%S')
 
 
 class OrderChangeHistory(models.Model):
     order = models.ForeignKey(Order, related_name='changes', on_delete=models.CASCADE)
-    previous_internal_order_number = models.CharField(max_length=255)  # Старый внутренний номер
+    order_file = models.FileField(upload_to='uploads/')
     changed_at = models.DateTimeField(auto_now_add=True)
     changed_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField(blank=True, null=True)
+
 
 
 class OrderItem(models.Model):
@@ -294,31 +296,31 @@ class OrderItem(models.Model):
         ('changed', 'изменен'),
     )
 
-    p_kind = models.CharField(max_length=100, null=True, choices=KIND_CHOICE)
-    p_type = models.CharField(max_length=100, choices=TYPE_CHOICE)
-    p_construction = models.CharField(max_length=100, choices=CONSTRUCTION_CHOICE, blank=True, null=True)
-    p_width = models.DecimalField(max_digits=10, decimal_places=0)
-    p_height = models.DecimalField(max_digits=10, decimal_places=0)
-    p_open = models.CharField(max_length=2, blank=True, null=True) # открывание
-    p_active_trim = models.CharField(max_length=5, blank=True, null=True) # активная створка
-    p_furniture = models.CharField(max_length=100, blank=True, null=True) # словарь: код - количество по замку, ручке и ц/м
-    p_ral = models.CharField(max_length=100, blank=True, null=True) # расписать по элементам (возможные вариации, опции цвета)
-    p_platband = models.CharField(max_length=100, blank=True, null=True) # наличники: размер с каждой стороны
-    p_door_closer = models.CharField(max_length=100, blank=True, null=True) # доводчик
-    p_step = models.CharField(max_length=100, blank=True, null=True) # порог
-    p_metal = models.CharField(max_length=100, blank=True, null=True) # возможные компановки толщины металла изделия
-    p_vent_grate = models.CharField(max_length=100, blank=True, null=True) # вент. решетки (тип, размер, толщина, кол-во)
-    p_plate = models.CharField(max_length=100, blank=True, null=True) # отбойная пластина (высота, отступ от низа, сторонность)
-    p_glass = models.CharField(max_length=100, blank=True, null=True)
-    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE)
-    position_num = models.CharField(max_length=5)
-    nameplate_range = models.CharField(max_length=100, blank=True, null=True)  # номерной диапзон шильдов для позиции
-    p_quantity = models.IntegerField(default=1)
-    p_comment = models.TextField(max_length=255, blank=True, null=True, default='')
-    firm_plate = models.BooleanField(default=True)  # фирменный шильд
-    mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True)  # монтажные уши: размер, кол-во
-    workshop = models.IntegerField(default=0) # цех
+    p_kind = models.CharField(max_length=100, null=True, choices=KIND_CHOICE, verbose_name='вид изделия')
+    p_type = models.CharField(max_length=100, choices=TYPE_CHOICE, verbose_name='тип изделия')
+    p_construction = models.CharField(max_length=100, choices=CONSTRUCTION_CHOICE, blank=True, null=True, verbose_name='конструктив изделия')
+    p_width = models.IntegerField(default=0, verbose_name='ширина изделия')
+    p_height = models.IntegerField(default=0, verbose_name='высота изделия')
+    p_open = models.CharField(max_length=2, blank=True, null=True, verbose_name='открывание') # открывание
+    p_active_trim = models.CharField(max_length=5, blank=True, null=True, verbose_name='ширина активной створки') # активная створка
+    p_furniture = models.CharField(max_length=100, blank=True, null=True, verbose_name='фурнитура') # словарь: код - количество по замку, ручке и ц/м
+    p_ral = models.CharField(max_length=100, blank=True, null=True, verbose_name='RAL') # расписать по элементам (возможные вариации, опции цвета)
+    p_platband = models.CharField(max_length=100, blank=True, null=True, verbose_name='наличник') # наличники: размер с каждой стороны
+    p_door_closer = models.CharField(max_length=100, blank=True, null=True, verbose_name='доводчик') # доводчик
+    p_step = models.CharField(max_length=100, blank=True, null=True, verbose_name='порог') # порог
+    p_metal = models.CharField(max_length=100, blank=True, null=True, verbose_name='толщина металла') # возможные компановки толщины металла изделия
+    p_vent_grate = models.CharField(max_length=100, blank=True, null=True, verbose_name='вент.решетка') # вент. решетки (тип, размер, толщина, кол-во)
+    p_plate = models.CharField(max_length=100, blank=True, null=True, verbose_name='отбойная пластина') # отбойная пластина (высота, отступ от низа, сторонность)
+    p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
+    p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE, verbose_name='статус')
+    position_num = models.CharField(max_length=5, verbose_name='номер позиции')
+    nameplate_range = models.CharField(max_length=100, blank=True, null=True, verbose_name='номера шильдов')  # номерной диапзон шильдов для позиции
+    p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
+    p_comment = models.TextField(max_length=255, blank=True, null=True, default='', verbose_name='комментарий')
+    firm_plate = models.BooleanField(default=True, verbose_name='фирменный шильд')  # фирменный шильд
+    mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True, verbose_name='монтажные уши')  # монтажные уши: размер, кол-во
+    workshop = models.IntegerField(default=0, verbose_name='цех') # цех
 
     @property
     def d_glass(self):

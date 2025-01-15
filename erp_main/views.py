@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
-from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo
+from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
 from docx import Document
@@ -104,6 +104,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
             context['organizations'] = Organization.objects.all()
         else:
             context['organizations'] = Organization.objects.filter(user=self.request.user)
+
         return context
 
     def get_form_kwargs(self):
@@ -119,16 +120,17 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         if order_id:
             # Извлечение существующего заказа из базы
             order = get_object_or_404(Order, pk=order_id)
+            old_file = order.order_file # старый файл заказа для сохранения в истории изменений
             is_update = True
         else:
             # Создание нового заказа на основе данных из формы
             order = Order()
             is_update = False
+            order.invoice = form.cleaned_data.get('invoice')  # Извлекаем счёт из формы
+            order.due_date = form.cleaned_data.get('due_date')  # Извлекаем дату готовности
+            order.comment = form.cleaned_data.get('comment', '')  # Извлекаем комментарий
 
-        # Устанавливаем значения полей из формы
-        order.invoice = form.cleaned_data.get('invoice')  # Извлекаем счёт из формы
-        order.due_date = form.cleaned_data.get('due_date')  # Извлекаем дату готовности
-        order.comment = form.cleaned_data.get('comment', '')  # Извлекаем комментарий
+
 
         # Обновление поля order_file только если файл был загружен
         if uploaded_file:
@@ -156,7 +158,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
 
             new_positions = self._process_file(wb.active)
             if is_update:
-                self._update_order_items(order, new_positions)  # Обновление позиций для существующего заказа
+                self._update_order_items(order, new_positions, old_file)  # Обновление позиций для существующего заказа
             else:
                 self._create_order_items(order, new_positions)  # Создание новых позиций для нового заказа
 
@@ -192,14 +194,15 @@ class OrderUploadView(LoginRequiredMixin, FormView):
 
         return positions
 
-    def _update_order_items(self, order, new_positions):
+    def _update_order_items(self, order, new_positions, old_file):
         current_items = {item.position_num: item for item in OrderItem.objects.filter(order=order)}
+        print(current_items)
 
         current_date = datetime.now().strftime('%d.%m.%Y')
         changes_made = []
 
         for data in new_positions:
-            n_num = data[0]
+            n_num = str(data[0])
             name = data[1]
             n_kind = self._get_kind(name)
             n_type = self._get_type(name)
@@ -209,30 +212,44 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 'p_kind': n_kind,
                 'p_type': n_type,
                 'p_construction': n_construction,
-                'p_width': data[2],
-                'p_height': data[3],
+                'p_height': data[2],
+                'p_width': data[3],
                 'p_active_trim': data[4],
                 'p_open': data[5],
                 'p_platband': data[6],
                 'p_furniture': data[7],
                 'p_door_closer': data[8],
                 'p_step': data[9],
-                'p_ral': data[10],
+                'p_ral': str(data[10]),
                 'p_quantity': data[11],
                 'p_comment': data[12],
                 'p_glass': self._count_glass(data[13:]),
             }
 
             if n_num in current_items:
+                first = 0
                 current_item = current_items[n_num]
+                print(current_item)
                 for field, new_value in new_item_data.items():
                     old_value = getattr(current_item, field, None)
-                    if old_value != new_value:
-                        changes_made.append(
-                            f"Изменения от {current_date}: поз. {n_num} {field} с {old_value} на {new_value}")
+                    if old_value != new_value and field != 'p_glass':
+                        field_name = OrderItem._meta.get_field(field).verbose_name
+                        if old_value:
+                            if first == 0:
+                                changes_made.append(f'поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
+                                first = 1
+                            else:
+                                changes_made.append(f'{field_name} с "{old_value}" на "{new_value}";')
+                        else:
+                            changes_made.append(f'поз. {n_num}: добавлен {field_name} "{new_value}";')
                         setattr(current_item, field, new_value)
-                current_item.p_status = 'changed'
-                current_item.save()  # сохраняем обновленный объект
+                        changes_made.append('<br>')
+
+                if changes_made:
+                    current_item.p_status = 'changed'
+                    current_item.save()
+                    new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
+                    new_item.save()  # сохраняем обновленный объект
             else:
                 new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
                 new_item.p_status = 'in_query'
@@ -242,8 +259,11 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 self._save_glass_info(new_item, new_item_data['p_glass'])
 
         if changes_made:
-            order.comment += "\n" + "\n".join(changes_made)
+#            changes_made = ('Изменения от ' + str(current_date) + ': <br>' + str(changes_made))
+            comment = str(changes_made).replace('[', '').replace(']', '').replace("'", "").replace(",", "").strip()
             order.save()  # Сохраняем изменения в заказе
+            add_changes = OrderChangeHistory(order=order, order_file=old_file, changed_by=self.request.user, comment=comment)
+            add_changes.save()
 
     def _create_order_items(self, order, new_positions):
         for data in new_positions:
@@ -257,8 +277,8 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 'p_kind': n_kind,
                 'p_type': n_type,
                 'p_construction': n_construction,
-                'p_width': data[2],
-                'p_height': data[3],
+                'p_height': data[2],
+                'p_width': data[3],
                 'p_active_trim': data[4],
                 'p_open': data[5],
                 'p_platband': data[6],
@@ -345,7 +365,6 @@ def invoice_add(request):
     return render(request, 'invoice_add.html', {'form': form})  # Возвращаем шаблон с формой
 
 
-
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
@@ -375,6 +394,7 @@ def orders_list(request):
 @login_required(login_url='login')
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
+    changes = order.changes.all()
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
     filtered_items = order.items.exclude(p_status__in=['changed',])  #фильтрация по активным позициям
@@ -386,7 +406,13 @@ def order_detail(request, order_id):
             order.save()
             return redirect('order_detail', order_id=order.id)  # Ссылаемся на order_id
 
-    return render(request, 'order_detail.html', {'order': order, 'filtered_items': filtered_items})
+    context = {
+        'order': order,
+        'filtered_items': filtered_items,
+        'changes': changes,
+    }
+
+    return render(request, 'order_detail.html', context)
 
 
 
