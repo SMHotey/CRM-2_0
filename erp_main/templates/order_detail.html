@@ -60,11 +60,13 @@
         </div>
     </div>
     <div class="card shadow-sm mb-4">
+
+    {% if changes %}
     <div class="card-header d-flex justify-content-between align-items-center">
         История изменений
         <button id="toggleChanges" class="btn btn-primary">Развернуть</button>
     </div>
-    {% if changes %}
+
     <div id="changeItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
         <div class="card-body">
             <table class="table table-bordered">
@@ -92,10 +94,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-    {% else %}
-    <div class="card-body">
-        <p>Нет изменений для этого заказа.</p>
     </div>
     {% endif %}
 </div>
