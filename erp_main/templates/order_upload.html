@@ -7,6 +7,18 @@
 {% endblock %}
 
 {% block content %}
+    <style>
+    .custom-button {
+    border: 1px solid black; /* Установка зеленого цвета для внешней линии */
+    background-color: lightgrey; /* Делаем фон прозрачным, чтобы линия была видна */
+    color: black; /* Установка цвета текста кнопки (по желанию) */
+    }
+
+    .custom-button:hover {
+    background-color: lightgreen; /* Изменение цвета фона при наведении */
+    }
+    </style>
+
 <div class="container mt-5" style="width: 30%;">
     <h2 class="mb-4">Загрузка заказа</h2>
     <form method="post" enctype="multipart/form-data" id="orderForm">

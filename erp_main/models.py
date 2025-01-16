@@ -119,7 +119,7 @@ class Invoice(models.Model):
 
 
 class Order(models.Model):
-    internal_order_number = models.CharField(max_length=255, unique=True)
+#    internal_order_number = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey(Invoice, related_name='invoice',blank=True, null=True, on_delete=models.CASCADE)

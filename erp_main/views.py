@@ -226,24 +226,24 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 'p_glass': self._count_glass(data[13:]),
             }
 
-            if n_num in current_items:
+            if n_num in current_items: # если номер позиции есть в новом бланке заказа
                 first = 0
                 current_item = current_items[n_num]
                 print(current_item)
                 for field, new_value in new_item_data.items():
                     old_value = getattr(current_item, field, None)
-                    if old_value != new_value and field != 'p_glass':
+                    if str(old_value) != str(new_value) and field != 'p_glass':
+
                         field_name = OrderItem._meta.get_field(field).verbose_name
                         if old_value:
                             if first == 0:
-                                changes_made.append(f'поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
+                                changes_made.append(f'<br> поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
                                 first = 1
                             else:
                                 changes_made.append(f'{field_name} с "{old_value}" на "{new_value}";')
                         else:
                             changes_made.append(f'поз. {n_num}: добавлен {field_name} "{new_value}";')
                         setattr(current_item, field, new_value)
-                        changes_made.append('<br>')
 
                 if changes_made:
                     current_item.p_status = 'changed'
@@ -260,7 +260,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
 
         if changes_made:
 #            changes_made = ('Изменения от ' + str(current_date) + ': <br>' + str(changes_made))
-            comment = str(changes_made).replace('[', '').replace(']', '').replace("'", "").replace(",", "").strip()
+            comment = str(changes_made).replace('[', '').replace(']', '').replace("'", "").replace(",", "").strip()[5::]
             order.save()  # Сохраняем изменения в заказе
             add_changes = OrderChangeHistory(order=order, order_file=old_file, changed_by=self.request.user, comment=comment)
             add_changes.save()
