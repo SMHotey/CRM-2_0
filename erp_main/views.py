@@ -246,8 +246,8 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                         setattr(current_item, field, new_value)
 
                 if changes_made:
-                    current_item.p_status = 'changed'
-                    current_item.save()
+                    current_item.delete()
+
                     new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
                     new_item.save()  # сохраняем обновленный объект
             else:

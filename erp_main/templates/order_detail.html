@@ -98,69 +98,72 @@
     {% endif %}
 </div>
     <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            Содержимое заказа
-            <button id="toggleButton" class="btn btn-primary">Развернуть</button>
-        </div>
-        <div id="orderItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
-            <div class="card-body">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        Содержимое заказа
+        <button id="toggleButton" class="btn btn-primary">Развернуть</button>
+    </div>
+    <div id="orderItems" style="max-height: 0; overflow: hidden; transition: max-height 0.5s ease;">
+        <div class="card-body">
+            <div style="max-height: calc(15 * 1.5em); overflow-y:auto; overflow-x:auto;">
                 <table class="table table-bordered">
                     <thead>
-                        <tr style="background-color: #37b1de">
-                            <th style="text-align: center; vertical-align: middle;">№</th>
-                            <th style="text-align: center; vertical-align: middle;">Наименование</th>
-                            <th style="text-align: center; vertical-align: middle;">Тип</th>
-                            <th style="text-align: center; vertical-align: middle;">Высота</th>
-                            <th style="text-align: center; vertical-align: middle;">Ширина</th>
-                            <th style="text-align: center; vertical-align: middle;">Откр.</th>
-                            <th style="text-align: center; vertical-align: middle; width: 120px">Стекло</th>
-                            <th style="text-align: center; vertical-align: middle; width: 120px">Фурнитура</th>
-                            <th style="text-align: center; vertical-align: middle;">Кол-во</th>
-                            <th style="text-align: center; vertical-align: middle;">Комментарий</th>
-                            <th style="text-align: center; vertical-align: middle;">Статус</th>
-                            <th style="text-align: center; vertical-align: middle;">Цех</th>
+                        <tr style="background-color: #37b1de; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);">
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">№</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Наименование</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Тип</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Высота</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Ширина</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Откр.</th>
+                            <th style="text-align: center; vertical-align: middle; width: 120px; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Стекло</th>
+                            <th style="text-align: center; vertical-align: middle; width: 120px; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Фурнитура</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Кол-во</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Комментарий</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Статус</th>
+                            <th style="text-align: center; vertical-align: middle; position: sticky; top: 0; z-index: 3; height: 50px; background-color: #37b1de;">Цех</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for item in filtered_items %}
-                            <tr>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.position_num }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.get_p_kind_display }}</td>
-                                <td style="text-align: center; vertical-align: middle; white-space: nowrap;">{{ item.get_p_type_display }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.d_glass|safe }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.p_furniture }}</td>
-                                <td style="text-align: center; vertical-align: middle;">{{ item.p_quantity }}</td>
-                                <td style="text-align: left; vertical-align: middle;">{{ item.p_comment|default_if_none:'' }}</td>
-                                <td style="width:120px; text-align: center; vertical-align: middle;">
-                                    <span class="current-status">{{ item.get_p_status_display }}</span>
-                                    <select class="form-select order-status-select hidden" data-id="{{ item.id }}">
-                                        <option value="in_query" {% if item.p_status == 'in_query' %} selected {% endif %}>в очереди</option>
-                                        <option value="product" {% if item.p_status == 'product' %} selected {% endif %}>запущен</option>
-                                        <option value="ready" {% if item.p_status == 'ready' %} selected {% endif %}>готов</option>
-                                        <option value="shipped" {% if item.p_status == 'shipped' %} selected {% endif %}>отгружен</option>
-                                        <option value="canceled" {% if item.p_status == 'canceled' %} selected {% endif %}>отменен</option>
-                                        <option value="stopped" {% if item.p_status == 'stopped' %} selected {% endif %}>остановлен</option>
-                                    </select>
-                                </td>
-                                <td style="width:120px; text-align: center; vertical-align: middle;">
-                                    <span class="current-workshop">{% if item.workshop != 2 %} {{ item.workshop }}{% else %} {% endif %}</span>
-                                    <select class="form-select item-workshop-select hidden" data-id="{{ item.id }}">
-                                        <option value="1" {% if item.workshop == 1 %} selected {% endif %}>1</option>
-                                        <option value="3" {% if item.workshop == 3 %} selected {% endif %}>3</option>
-                                        <option value="2" {% if item.workshop == 2 %} selected {% endif %}>стоп</option>
-                                    </select>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.position_num }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.get_p_kind_display }}</td>
+                            <td style="text-align: center; vertical-align: middle; white-space: nowrap;">{{ item.get_p_type_display }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.p_height }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.p_width }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.p_open }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.d_glass|safe }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.p_furniture }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ item.p_quantity }}</td>
+                            <td style="text-align: left; vertical-align: middle;">{{ item.p_comment|default_if_none:'' }}</td>
+                            <td style="width:120px; text-align: center; vertical-align: middle;">
+                                <span class="current-status">{{ item.get_p_status_display }}</span>
+                                <select class="form-select order-status-select hidden" data-id="{{ item.id }}">
+                                    <option value="in_query" {% if item.p_status == 'in_query' %} selected {% endif %}>в очереди</option>
+                                    <option value="product" {% if item.p_status == 'product' %} selected {% endif %}>запущен</option>
+                                    <option value="ready" {% if item.p_status == 'ready' %} selected {% endif %}>готов</option>
+                                    <option value="shipped" {% if item.p_status == 'shipped' %} selected {% endif %}>отгружен</option>
+                                    <option value="canceled" {% if item.p_status == 'canceled' %} selected {% endif %}>отменен</option>
+                                    <option value="stopped" {% if item.p_status == 'stopped' %} selected {% endif %}>остановлен</option>
+                                </select>
+                            </td>
+                            <td style="width:120px; text-align: center; vertical-align: middle;">
+                                <span class="current-workshop">{% if item.workshop != 2 %} {{ item.workshop }}{% else %} {% endif %}</span>
+                                <select class="form-select item-workshop-select hidden" data-id="{{ item.id }}">
+                                    <option value="1" {% if item.workshop == 1 %} selected {% endif %}>1</option>
+                                    <option value="3" {% if item.workshop == 3 %} selected {% endif %}>3</option>
+                                    <option value="2" {% if item.workshop == 2 %} selected {% endif %}>стоп</option>
+                                </select>
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <button type="button" class="btn btn-primary" id="editButton" style="margin: 15px;">Внести изменения</button>
             </div>
+            <button type="button" class="btn btn-primary" id="editButton" style="margin: 15px;">Внести изменения</button>
         </div>
     </div>
+</div>
+
 </div>
 
 <script>
