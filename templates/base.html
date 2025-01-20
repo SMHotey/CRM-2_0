@@ -278,24 +278,26 @@
                     <div class="card mb-3 text-white" id="first-block">
                         <div class="card-header">Информация</div>
                         <div class="card-body">
-                            <h5 class="card-title"></h5>
-                            <p class="card-text"></p>
+                            <p class="card-text">Текст информационного блока</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row my-3">
-                <div class="col-md-4">
+                    <div class="row my-3">
+                       <div class="col-md-4">
                     <div class="card text-white bg-primary mb-3" id="readiness">
                         <div class="card-header">Готовность на сегодня</div>
                         <div class="card-body">
-                            <h5 class="card-title"></h5>
-                            <p class="card-text"></p>
+                            <p class="card-text">
+                                {% for num, link in today.items %}
+                                    <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a><br>
+                                {% endfor %}
+                            </p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                        <div class="col-md-4">
                     <div class="card text-white bg-success mb-3" id="shipment">
                         <div class="card-header">Отгрузки на сегодня</div>
                         <div class="card-body">
@@ -307,9 +309,13 @@
                 <div class="col-md-4">
                     <div class="card text-white bg-danger mb-3" id="delay">
                         <div class="card-header">Просроченные заявки</div>
-                        <div class="card-body">
-                            <h5 class="card-title"></h5>
-                            <p class="card-text"></p>
+                        <div class="card-body text-black">
+                            <p class="card-text">
+                                {% for num, link in overdue.items %}
+                                    <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
+                                    {% if forloop.last != True%},{% endif %}
+                                {% endfor %}
+                            </p>
                         </div>
                     </div>
                 </div>

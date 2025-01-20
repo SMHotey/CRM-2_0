@@ -429,7 +429,7 @@ def invoice_detail(request, pk):
             return JsonResponse({
                 'success': True,
                 'file_url': file_url,
-                'redirect_url': reverse('invoice_detail', args=[invoice.id])  # using args here
+                'redirect_url': reverse('invoice_detail', args=[invoice.id])
             })
         else:
             error_messages = form.errors.as_json()

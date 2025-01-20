@@ -111,6 +111,10 @@ class Invoice(models.Model):
             models.UniqueConstraint(fields=['number', 'legal_entity', 'year'], name='unique_field_combination')
         ]
 
+    @property
+    def percent(self):
+        return int(self.payed_amount * 100 / self.amount)
+
 
 
 #def order_file_upload_to(instance, filename):

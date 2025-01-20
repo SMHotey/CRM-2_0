@@ -136,6 +136,13 @@
                 </td>
                 <td>
                     <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a>
+                                        <br>
+                    <span style="font-size: 9px; font-style: italic;
+                            color:
+                            {% if order.invoice.percent < 100 %} grey
+                            {% else %} green
+                            {% endif %};">
+                        {{ order.invoice.percent }}%</span>
                 </td>
                 <td class="visible-border" style="border-left: 2px solid #dee2e6;"> {% if order.doors_1_nk != 0 %}{{ order.doors_1_nk }}{% else %} {% endif %}</td>
                 <td class="visible-border" >{% if order.doors_2_nk != 0 %}{{ order.doors_2_nk }}{% else %} {% endif %}</td>
