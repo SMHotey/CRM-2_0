@@ -29,7 +29,7 @@ class OrderForm(forms.ModelForm):
         self.user = user
 
         if not user.is_superuser:
-            self.fields['invoice'].queryset = Invoice.objects.filter(user=user)
+            self.fields['invoice'].queryset = Invoice.objects.filter(organization__user=user)
         else:
             self.fields['invoice'].queryset = Invoice.objects.all()
 

@@ -75,6 +75,7 @@
             <th>Л</th>
         </tr>
     </thead>
+    {% if orders %}
     <tbody>
         {% for order in orders %}
             <tr style="background-color: {% if order.status == 'готов' %} #BFEEC6 {% endif %}
@@ -170,6 +171,7 @@
                 <td style="font-size: 12px; text-align: left;">{{ order.comment|safe }}</td>
             </tr>
         {% endfor %}
+        {% endif %}
     </tbody>
 </table>
 

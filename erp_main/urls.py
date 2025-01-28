@@ -25,11 +25,6 @@ urlpatterns = [
     path('invoices_list/', views.invoices_list, name='invoices_list'),
     path('organizations/', OrganizationListView.as_view(), name='organization_list'),
     path('index/', views.index, name='index'),
-    path('password_reset/',
-         auth_views.PasswordResetView.as_view(template_name='registration/password_reset_form.html'),
-         name='password_reset'),
-    path('register/', views.register, name='register'),
-
     path('legal-entity/create/', create_legal_entity, name='create_legal_entity'),
     path('organization/contract/<int:pk>', create_contract, name='create_contract'),
     path('glass_info/<int:pk>/', glass_info, name='glass_info'),

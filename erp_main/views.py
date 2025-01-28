@@ -99,6 +99,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
     form_class = OrderForm
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
         if self.request.user.is_superuser:
             context['organizations'] = Organization.objects.all()
@@ -365,26 +366,17 @@ def invoice_add(request):
     return render(request, 'invoice_add.html', {'form': form})  # Возвращаем шаблон с формой
 
 
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            return redirect('login')  # замените 'login' на имя вашего URL входа
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
 
 
-@login_required(login_url='login')
 def orders_list(request):
+    orders = []
     if request.user.is_staff:
-        orders_queryset = Order.objects.all().order_by('-id')
+        orders = Order.objects.all().order_by('-id')
     else:
-        orders_queryset = Order.objects.filter(user=request.user).order_by('-id')
+        if Order.objects.filter(invoice__organization__user=request.user):
+            orders = Order.objects.filter(invoice__organization__user=request.user).order_by('-id')
 
-    paginator = Paginator(orders_queryset, 20)  # Создаем пагинатор
+    paginator = Paginator(orders, 20)  # Создаем пагинатор
     page_number = request.GET.get('page')  # Получаем номер страницы из GET параметров
     orders = paginator.get_page(page_number)  # Получаем заказы для текущей страницы
 
@@ -452,7 +444,7 @@ def invoices_list(request):
     if request.user.is_staff:
         invoices = Invoice.objects.all()
     else:
-        invoices = Invoice.objects.filter(user=request.user)
+        invoices = Invoice.objects.filter(organization__user=request.user)
 
     # Фильтрация по поисковому запросу
     if search_query:
@@ -645,3 +637,5 @@ def update_workshop(request, order_id):
 def make_passport(self):
     pass
 
+def calculate(self: OrderItem):
+    pass
