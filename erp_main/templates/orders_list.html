@@ -19,7 +19,6 @@
         border-radius: 1px;
         border-left: none; /* Убираем левую границу */
         border-right: none; /* Убираем правую границу */
-
     }
     th:hover {
         background: linear-gradient(135deg, #d7e4ed, lightsteelblue);
@@ -33,7 +32,6 @@
         border-left: none; /* Убираем левую границу */
         border-right: none; /* Убираем правую границу */
         font-weight: bold;
-
     }
     tbody tr {
         transition: background-color 0.3s ease; /* Плавный переход при изменении цвета */
@@ -100,33 +98,32 @@
                         {% endif %}
                     </button>
 
-    <!-- Модальное окно -->
+                    <!-- Модальное окно -->
                     <div class="modal fade" id="workshopModal{{ order.id }}" tabindex="-1" aria-labelledby="workshopModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-sm">
                             <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="workshopModalLabel">Выберите номер цеха:</h5>
+                                <div class="modal-header bg-light">
+                                    <h5 class="modal-title" id="workshopModalLabel">
+                                        {% if order.status != 'в очереди' and order.status != 'остановлен' %}
+                                        Измените цех или статус заявки:
+                                        {% else %}
+                                        Выберите цех для запуска заявки:
+                                        {% endif %}
+                                    </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p>
-                                        <input type="radio" id="workshop1{{ order.id }}" name="workshop{{ order.id }}" value="1">
-                                        <label for="workshop1{{ order.id }}">1 цех</label>
-                                    </p>
-                                    <p>
-                                        <input type="radio" id="workshop3{{ order.id }}" name="workshop{{ order.id }}" value="3">
-                                        <label for="workshop3{{ order.id }}">3 цех</label>
-                                    </p>
-                                    {% if order.status != 'в очереди' and order.status != 'остановлен' %}
-                                    <p>
-                                        <input type="radio" id="workshop2{{ order.id }}" name="workshop{{ order.id }}" value="2">
-                                        <label for="stopped{{ order.id }}">Остановить</label>
-                                    </p>
-                                    {% endif %}
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-primary btn-block" onclick="selectWorkshop({{ order.id }}, 1)">1 цех</button>
+                                        <button type="button" class="btn btn-outline-primary btn-block" onclick="selectWorkshop({{ order.id }}, 3)">3 цех</button>
+                                        {% if order.status != 'в очереди' and order.status != 'остановлен' %}
+                                        <button type="button" class="btn btn-outline-warning btn-block" onclick="selectWorkshop({{ order.id }}, 2)">Остановить</button>
+                                        <button type="button" class="btn btn-outline-success btn-block" onclick="selectWorkshop({{ order.id }}, 4)">Заявка готова</button>
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                    <button type="button" class="btn btn-primary" onclick="saveWorkshop({{ order.id }})">Сохранить</button>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +134,7 @@
                 </td>
                 <td>
                     <a href="{% url 'invoice_detail' order.invoice.id %}">{{ order.invoice.number }}</a>
-                                        <br>
+                    <br>
                     <span style="font-size: 9px; font-style: italic;
                             color:
                             {% if order.invoice.percent < 100 %} grey
@@ -175,14 +172,13 @@
     </tbody>
 </table>
 
-    <div class="pagination text-center mt-4">
+<div class="pagination text-center mt-4">
     {% if orders.has_previous %}
         <a href="?page=1" class="btn btn-primary">&laquo; Первая</a>
         &nbsp
         <a href="?page={{ orders.previous_page_number }}" class="btn btn-primary">Предыдущая</a>
         &nbsp &nbsp
     {% endif %}
-
 
     {% for i in orders.paginator.page_range %}
         {% if orders.number == i %}
@@ -201,68 +197,73 @@
         <a href="?page={{ orders.paginator.num_pages }}" class="btn btn-primary">Последняя &raquo;</a>
     {% endif %}
 </div>
+
 <script>
-function saveWorkshop(orderId) {
-    const selectedWorkshop = document.querySelector('input[name="workshop' + orderId + '"]:checked');
 
-    if (selectedWorkshop) {
-        const workshopValue = selectedWorkshop.value;
-
-        fetch(`/erp_main/update_workshop/${orderId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ workshop: workshopValue })
-        })
-        .then(response => {
-            if (response.ok) {
-                // Обновляем иконку в зависимости от выбранного значения
-                const iconElement = document.getElementById(`iconPlay${orderId}`);
-                if (workshopValue === "1") {
-                    iconElement.src = "{% static 'erp_main/images/icon_play1.png' %}";
-                } else if (workshopValue === "3") {
-                    iconElement.src = "{% static 'erp_main/images/icon_play3.png' %}";
-                } else if (workshopValue === "2") {
-                    iconElement.src = "{% static 'erp_main/images/pause.png' %}";
+function selectWorkshop(orderId, workshopValue) {
+    // Добавляем обработку CSRF токена для Django
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
                 }
-
-                // Закрыть модальное окно
-                const modalElement = document.getElementById(`workshopModal${orderId}`);
-                const bsModalElement = bootstrap.Modal.getInstance(modalElement);
-                bsModalElement.hide();
-
-                // Управление атрибутами доступности
-                modalElement.setAttribute('aria-hidden', 'true');
-                modalElement.setAttribute('inert', 'true');
-            } else {
-                alert('Ошибка при обновлении цеха.');
             }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-        });
-    } else {
-        alert('Пожалуйста, выберите номер цеха.');
+        }
+        return cookieValue;
     }
-}
 
-function openWorkshopModal(orderId) {
-    const modalElement = document.getElementById(`workshopModal${orderId}`);
-    modalElement.removeAttribute('aria-hidden');
-    modalElement.removeAttribute('inert');
-}
+    const csrftoken = getCookie('csrftoken');
 
-// Привязываем функцию открытия модального окна к событию открытия
-document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll("button[data-bs-toggle='modal']");
-    buttons.forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-bs-target').replace('#workshopModal', '');
-            openWorkshopModal(orderId);
-        });
+    fetch(`/erp_main/update_workshop/${orderId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken  // Используем полученный токен
+        },
+        body: JSON.stringify({ workshop: workshopValue.toString() })  // Преобразуем значение в строку
+    })
+    .then(response => {
+        if (response.ok) {
+            const iconElement = document.getElementById(`iconPlay${orderId}`);
+            // Обновляем иконки для всех возможных статусов
+            switch(workshopValue) {
+                case 1:
+                    iconElement.src = "{% static 'erp_main/images/icon_play1.png' %}";
+                    break;
+                case 3:
+                    iconElement.src = "{% static 'erp_main/images/icon_play3.png' %}";
+                    break;
+                case 2:
+                    iconElement.src = "{% static 'erp_main/images/pause.png' %}";
+                    break;
+                case 4:
+                    break;
+            }
+
+            // Добавляем принудительное обновление страницы для отображения изменений
+            setTimeout(() => {
+                window.location.reload();
+            }, 300);
+
+            const modalElement = document.getElementById(`workshopModal${orderId}`);
+            const bsModal = bootstrap.Modal.getInstance(modalElement);
+            if (bsModal) bsModal.hide();
+
+        } else {
+            response.text().then(text => {
+                alert('Ошибка: ' + text);
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Сетевая ошибка: ' + error.message);
     });
-});
+}
 </script>
 {% endblock %}

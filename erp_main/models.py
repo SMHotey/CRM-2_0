@@ -230,7 +230,7 @@ class Order(models.Model):
         elif canceled > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'отменен'
         else:
-            return f'всё сложно'
+            return f'всё сложно' # дополнительная логика обработки заявок со смешанным статусом позиций
 
     @property
     def workshop(self):
@@ -387,30 +387,7 @@ class Passport(models.Model):
     number = models.IntegerField(blank=True, null=True)
 
 
-class StandardPrice(models.Model):
-    door_1 = models.JSONField()         # {tech: price, ei60: price, eis60: price} стандартная одностворка
-    door_2 = models.JSONField()         # {tech: price, ei60: price, eis60: price} стандартная двухстворка
-    wide_door_1 = models.JSONField()    # {tech: price, ei60: price, eis60: price} широкая одностворка
-    hatch_1 = models.JSONField()        # {tech: price, ei60: price} стандартный люк
-    wide_hatch_1 = models.JSONField()   # {tech: price, ei60: price} стандартный широкий люк
-    not_standard = models.JSONField()   # {tech: price, ei60: price, eis60: price} нестандартные двери
-    gate = models.JSONField()           # {tech: price, ei60: price, ei60_78mm: price} ворота до 3*3
-    wide_gate = models.JSONField()      # {tech: price, ei60: price, ei60_78mm: price} ворота более 3*3
-    transom = models.JSONField()        # фрамуги
-    dobor = models.JSONField()          # добор
 
-    lock = models.JSONField()           # замки
-    handle = models.JSONField()         # ручки
-    c_m = models.JSONField()            # цилиндровый механизм
-    door_closer = models.JSONField()    # доводчики; возможность внесения характеристик и добавление новых видов
-
-    metal = models.JSONField()          # компановки металла
-    ral = models.JSONField()            # цвет и опции
-
-    vent_grate = models.JSONField()     # вент.решетки
-    plate = models.JSONField()          # отбойная пластина
-
-    glass = models.JSONField()          # стекла плюс опции
 
 
 

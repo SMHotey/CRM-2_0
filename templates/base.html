@@ -197,17 +197,21 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Заказы</a>
                         <ul class="dropdown-menu">
+                            {% if user.is_superuser %}
                             <li><a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a></li>
                             <li><a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a></li>
-                            <li><a class="dropdown-item" href="#">Умный поиск</a></li>
+ {#                            <li><a class="dropdown-item" href="#">Умный поиск</a></li>   #}
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Организации</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все организации</a></li>
+                             {% if user.is_superuser %}
                             <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">Добавить юр. лицо</a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="{% url 'organization_add' %}">Добавить клиента</a></li>
                         </ul>
                     </li>
@@ -240,6 +244,8 @@
                             <li><a class="dropdown-item" href="#">Регламенты</a></li>
                             <li><a class="dropdown-item" href="#">Служебные записки</a></li>
                             <li><a class="dropdown-item" href="#">Ответы на претензии</a></li>
+                            <li><a class="dropdown-item" href="#">Договоры</a></li>
+                            <li><a class="dropdown-item" href="#">Выставленные КП</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -290,9 +296,11 @@
                         <div class="card-header">Готовность на сегодня</div>
                         <div class="card-body">
                             <p class="card-text">
+                            {% if today %}
                                 {% for num, link in today.items %}
                                     <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a><br>
                                 {% endfor %}
+                            {% endif %}
                             </p>
                         </div>
                     </div>
@@ -301,7 +309,6 @@
                     <div class="card text-white bg-success mb-3" id="shipment">
                         <div class="card-header">Отгрузки на сегодня</div>
                         <div class="card-body">
-                            <h5 class="card-title"></h5>
                             <p class="card-text"></p>
                         </div>
                     </div>

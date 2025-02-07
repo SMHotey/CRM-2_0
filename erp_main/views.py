@@ -1,9 +1,11 @@
 import json
 import os
 from django.conf import settings
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -19,9 +21,22 @@ from django.urls import reverse
 from openpyxl import load_workbook
 from django.contrib.auth.mixins import LoginRequiredMixin
 import re
+from django.contrib import messages
 
 
 logger = logging.getLogger(__name__)
+
+def custom_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('index')  # Перенаправление на главную страницу
+        else:
+            messages.error(request, 'Неверный логин или пароль.')
+    return render(request, 'registration/login.html')
 
 
 def index(request):
@@ -74,11 +89,11 @@ class OrganizationDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['legal_entities'] = LegalEntity.objects.all()  # Или другой способ получить нужные данные
+        context['legal_entities'] = LegalEntity.objects.all()
         return context
 
 
-class OrganizationUpdateView(UpdateView):
+class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
     model = Organization
     form_class = OrganizationForm
     template_name = 'organization_edit.html'
@@ -330,7 +345,6 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         organizations = Organization.objects.all()
         return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
 
-
 def glass(request):
     return render(request, 'glass_info.html')
 
@@ -364,8 +378,6 @@ def invoice_add(request):
 
     form = InvoiceForm(request.user)  # Создание экземпляра формы
     return render(request, 'invoice_add.html', {'form': form})  # Возвращаем шаблон с формой
-
-
 
 
 def orders_list(request):
@@ -481,7 +493,6 @@ def invoices_list(request):
     })
 
 
-@csrf_exempt  # Используйте его только если CSRF токены не применяются, исправьте позже.
 def update_order_item_status(request):
     if request.method == 'POST':
         try:
@@ -620,7 +631,6 @@ def update_glass_status(request, glass_id):
         glass.save()
     return redirect('glass_info')  # Перенаправление обратно на страницу с заказами
 
-@csrf_exempt
 def update_workshop(request, order_id):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -631,6 +641,8 @@ def update_workshop(request, order_id):
         elif workshop_value == '2':
             OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
             OrderItem.objects.filter(order_id=order_id).update(p_status='stopped')
+        elif workshop_value == '4':
+            OrderItem.objects.filter(order_id=order_id).update(p_status='ready')
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 

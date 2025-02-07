@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'erp_main',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
+    'calculation',
+    'rest_framework',
 ]
 
 LOGIN_REDIRECT_URL = '/index'  # URL после успешного входа
