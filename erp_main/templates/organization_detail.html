@@ -10,31 +10,32 @@
             физическому лицу: {{ organization.name_fl }} ({{ organization.phone_number }})
         {% endif %}
     <br><br>
-    Заказы <br>
-    Выставленные счета <br>
+    <a href="{% url 'orders_list' %}?source={{ organization.pk }}">Список заказов</a> <br>
+    <a href="{% url 'invoices_list' %}?source={{ organization.pk }}">Выставленные счета</a> <br>
     Текущий прайс <br>
     Предыдущие прайсы <br>
-    Отгруженные заказы <br>
     Задолженность по готовым заказам <br>
     Аванс по заказам в работе <br>
     Ожидаемые доплаты <br>
     Ожидаемые оплаты <br>
 
-    <form method="POST" action="{% url 'create_contract' organization.pk %}">
-        {% csrf_token %}
-        <label for="legal_entity">Выберите юридическое лицо:</label>
-        <select name="legal_entity" id="legal_entity">
-            {% for entity in legal_entities %}
-                <option value="{{ entity.pk }}">{{ entity.name }}</option>
-            {% endfor %}
-        </select>
+    {% if organization.name %}
+        <form method="POST" action="{% url 'create_contract' organization.pk %}">
+            {% csrf_token %}
+            <label for="legal_entity">Выберите юридическое лицо:</label>
+            <select name="legal_entity" id="legal_entity">
+                {% for entity in legal_entities %}
+                    <option value="{{ entity.pk }}">{{ entity.name }}</option>
+                {% endfor %}
+            </select>
 
-        <button type="submit">Создать договор</button>
-    </form>
+            <button type="submit">Создать договор</button>
+        </form>
 
-    <br>
+        <br>
 
-    {% if new_contract_url %}
-        <a href="{{ new_contract_url }}">Скачать договор</a>
+        {% if new_contract_url %}
+            <a href="{{ new_contract_url }}">Скачать договор</a>
+        {% endif %}
     {% endif %}
 {% endblock %}

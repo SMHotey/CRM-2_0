@@ -1,5 +1,6 @@
 import json
 import os
+import pymorphy3
 from django.conf import settings
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -26,23 +27,28 @@ from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 
+
 def custom_login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get('username')  # Используем get для безопасного получения данных
+        password = request.POST.get('password')  # Используем get для безопасного получения данных
+
         user = authenticate(request, username=username, password=password)
+
         if user is not None:
             login(request, user)
-            return redirect('index')  # Перенаправление на главную страницу
+            return redirect('index')
         else:
-            messages.error(request, 'Неверный логин или пароль.')
+            # Возвращаем ошибку, если аутентификация не удалась
+            return render(request, 'registration/login.html', {'error': 'Неверные данные для входа'})
+
+    # Если метод не POST, просто отображаем страницу входа
     return render(request, 'registration/login.html')
 
 
+@login_required  # Декоратор для проверки аутентификации пользователя
 def index(request):
-    if request.user.is_authenticated:
-        return render(request, 'index.html')
-    return render(request, 'registration/login.html')
+    return render(request, 'index.html')
 
 
 class OrganizationCreateView(LoginRequiredMixin, CreateView):
@@ -112,6 +118,9 @@ class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
 class OrderUploadView(LoginRequiredMixin, FormView):
     template_name = 'order_upload.html'
     form_class = OrderForm
+
+    def __setattr__(self, name, value):
+        change = OrderChangeHistory(order=self.order.pk)
 
     def get_context_data(self, **kwargs):
 
@@ -382,11 +391,14 @@ def invoice_add(request):
 
 def orders_list(request):
     orders = []
+    source = request.GET.get('source')
     if request.user.is_staff:
         orders = Order.objects.all().order_by('-id')
-    else:
-        if Order.objects.filter(invoice__organization__user=request.user):
-            orders = Order.objects.filter(invoice__organization__user=request.user).order_by('-id')
+    elif Order.objects.filter(invoice__organization__user=request.user):
+        orders = Order.objects.filter(invoice__organization__user=request.user).order_by('-id')
+
+    if source:
+        orders = Order.objects.filter(invoice__organization=source).order_by('-id')
 
     paginator = Paginator(orders, 20)  # Создаем пагинатор
     page_number = request.GET.get('page')  # Получаем номер страницы из GET параметров
@@ -451,6 +463,7 @@ def invoices_list(request):
     selected_legal_entity_id = request.GET.get('legal_entity', None)
     sort_by = request.GET.get('sort', 'id')
     direction = request.GET.get('direction', 'desc')
+    source = request.GET.get('source')
 
     # Начальное значение для queryset
     if request.user.is_staff:
@@ -476,6 +489,10 @@ def invoices_list(request):
         invoices = invoices.order_by(f"{'-' if direction == 'desc' else ''}id")
     else:
         invoices = invoices.order_by('-id')  # Сортировка по умолчанию
+
+    if source:
+        organization = Organization.objects.filter(id=source).first()
+        invoices = invoices.filter(organization=organization)
 
     # Пагинация
     paginator = Paginator(invoices, 10)
@@ -510,17 +527,16 @@ def update_order_item_status(request):
                     order_item.workshop = '2'
                 order_item.save()
 
-            return JsonResponse({'status': 'success', 'message': 'Statuses updated successfully!'})
+            return JsonResponse({'status': 'success', 'message': 'Информация обновлена'})
 
         except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format.'}, status=400)
+            return JsonResponse({'status': 'error', 'message': 'Неверный формат'}, status=400)
         except Exception as e:
             logger.exception("Error updating order items' statuses")
             return JsonResponse({'status': 'error', 'message': 'An error occurred while processing your request.'},
                                 status=500)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-
 
 
 def create_legal_entity(request):
@@ -536,18 +552,90 @@ def create_legal_entity(request):
 
 
 def create_contract(request, pk):
+    timeframe = 21
+    now = datetime.now()
+    months_ru = [
+        "января", "февраля", "марта", "апреля", "мая", "июня",
+        "июля", "августа", "сентября", "октября", "ноября", "декабря"
+    ]
+    day_of_month = now.day
+    month_num = now.month
+    month_name = months_ru[month_num-1]
+
+    def genitive_case(word):
+        if not word:  # Если слово пустое, возвращаем пустую строку
+            return ""
+        morph = pymorphy3.MorphAnalyzer()
+        try:
+            words = word.split()  # Разделяем словосочетание на отдельные слова
+            modified_words = []  # Список для измененных слов
+
+            for w in words:
+                parsed_word = morph.parse(w)[0]  # Анализируем каждое слово
+                if "NOUN" in parsed_word.tag or "ADJF" in parsed_word.tag:  # Если это существительное или прилагательное
+                    genitive = parsed_word.inflect({"gent"}).word  # Склоняем в родительный падеж
+                    modified_words.append(genitive)  # Добавляем в список
+                else:
+                    modified_words.append(w)  # Если это не существительное или прилагательное, добавляем исходное слово
+
+            # Проверяем, состоит ли словосочетание из трех слов (например, ФИО)
+            if len(words) == 3:
+                if 'уляшва' in modified_words:
+                    modified_words[0] = 'уляшова'
+                capitalized_words = [word.capitalize() for word in modified_words]  # Капитализируем каждое слово
+                return " ".join(capitalized_words)  # Соединяем слова обратно в строку
+            else:
+                return " ".join(modified_words)  # Возвращаем без изменений в регистре
+
+        except Exception as e:
+            print(f"Ошибка при склонении слова '{word}': {e}")
+            return word  # В случае ошибки возвращаем исходное слово
+
+    def format_full_name(surname, name, patronymic):
+        # Преобразование в формат "Фамилия И. О."
+        formatted_name = f"{surname.capitalize()} {name[0].upper()}. {patronymic[0].upper()}."
+        return formatted_name
+
+    def get_workday_phrase(number):
+        # Инициализация морфологического анализатора
+        morph = pymorphy3.MorphAnalyzer()
+
+        # Определение формы слова "рабочий"
+        if number % 10 == 1 and number % 100 != 11:
+            workday_form = morph.parse('рабочий')[0].inflect(
+                {'nomn', 'sing'}).word  # Именительный падеж, единственное число
+        elif number % 10 in [2, 3, 4] and not (number % 100 in [12, 13, 14]):
+            workday_form = morph.parse('рабочий')[0].inflect(
+                {'gent', 'plur'}).word  # Родительный падеж, множественное число
+        else:
+            workday_form = morph.parse('рабочий')[0].inflect(
+                {'gent', 'plur'}).word  # Родительный падеж, множественное число
+
+        # Определение формы слова "день"
+        if number % 10 == 1 and number % 100 != 11:
+            day_form = 'день'  # 1, 21
+        elif number % 10 in [2, 3, 4] and not (number % 100 in [12, 13, 14]):
+            day_form = 'дня'  # 2, 3, 4, 22, 23, 24
+        else:
+            day_form = 'дней'  # 5-20, 25-31
+
+        # Формируем строку
+        return f"{number} {workday_form} {day_form}"
+
     if request.method == 'POST':
         legal_entity_id = request.POST.get('legal_entity')
         legal_entity = get_object_or_404(LegalEntity, pk=legal_entity_id)
-        num_of = 123
         organization = get_object_or_404(Organization, pk=pk)
 
         data = {
-            'юл': legal_entity.name,
+            'юл': legal_entity.name.upper(),
             'юл_огрн': legal_entity.ogrn,
             'юл_инн': legal_entity.inn,
             'юл_должность': legal_entity.ceo_title,
+            'юл_должность_рп': genitive_case(legal_entity.ceo_title),
             'юл_фио': legal_entity.ceo_name,
+            'юл_фио_рп': genitive_case(legal_entity.ceo_name),
+            'юл_фио_кратко': format_full_name(*legal_entity.ceo_name.split()),
             'юл_кпп': legal_entity.kpp,
             'юл_рс': legal_entity.r_s,
             'юл_банк': legal_entity.bank,
@@ -555,31 +643,43 @@ def create_contract(request, pk):
             'юл_корс': legal_entity.k_s,
             'юл_адрес': legal_entity.address,
             'юл_email': legal_entity.email,
-            'орг': organization.name,
+            'орг': organization.name.upper(),
             'орг_огрн': organization.ogrn,
             'орг_инн': organization.inn,
+            'инн_4': organization.inn[-4:],
             'орг_должность': organization.ceo_title,
+            'орг_должность_рп': genitive_case(organization.ceo_title),
             'орг_фио': organization.ceo_name,
+            'орг_фио_рп': genitive_case(organization.ceo_name),
+            'орг_фио_кратко': format_full_name(*organization.ceo_name.split()),
             'основание': organization.ceo_footing,
             'орг_кпп': organization.kpp,
             'орг_рс': organization.r_s,
-            'орг_банк': organization.bank,
+            'орг_банк': organization.bank.upper(),
             'орг_бик': organization.bik,
             'орг_счет': organization.k_s,
             'орг_адрес': organization.address,
             'орг_email': organization.email,
+            'год': str(datetime.now().year)[2::],
+            'раб_дни': get_workday_phrase(timeframe),
+            'дни': timeframe,
+            'число': day_of_month,
+            'месяц': month_num,
+            'месяц_назв': month_name,
         }
+
         # Полный путь к шаблону
         file_path = os.path.join(settings.BASE_DIR, 'media/contracts/contract.docx')
         doc = Document(file_path)
 
-        # Проходим по всем параграфам и заменяем метки
+        # Функция для замены меток в параграфах
         def replace_in_paragraphs(paragraphs, data):
             for paragraph in paragraphs:
                 for key, value in data.items():
                     if f'{{{key}}}' in paragraph.text or f'[[{key}]]' in paragraph.text:
-                        paragraph.text = paragraph.text.replace(f'{{{key}}}', value)
-                        paragraph.text = paragraph.text.replace(f'[[{key}]]', value)
+                        paragraph.text = paragraph.text.replace(f'{{{key}}}', str(value))
+                        paragraph.text = paragraph.text.replace(f'[[{key}]]', str(value))
+
 
         # Заменяем метки в главных параграфах
         replace_in_paragraphs(doc.paragraphs, data)
@@ -592,19 +692,20 @@ def create_contract(request, pk):
 
         # Определяем путь, по которому будет сохраняться новый документ
         new_file_path = os.path.join(settings.MEDIA_ROOT, 'contracts/new_contract.docx')
-        # Создаем директорию, если ее нет
-        os.makedirs(os.path.dirname(new_file_path), exist_ok=True)
+        os.makedirs(os.path.dirname(new_file_path), exist_ok=True)  # Создаем директорию, если её нет
 
         # Сохраняем изменённый документ
         doc.save(new_file_path)
 
         # URL к новому файлу
         new_contract_url = os.path.join(settings.MEDIA_URL, 'contracts/new_contract.docx')
-        legal_entity = LegalEntity.objects.all()
+        legal_entities = LegalEntity.objects.all()
 
-        return render(request, 'organization_detail.html',
-                      {'organization': organization, 'new_contract_url': new_contract_url,
-                       'legal_entities': legal_entity})
+        return render(request, 'organization_detail.html', {
+            'organization': organization,
+            'new_contract_url': new_contract_url,
+            'legal_entities': legal_entities,
+        })
 
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -621,7 +722,6 @@ def glass_info(request, pk=''):
                                                'glass_status': GlassInfo.GLASS_STATUS_CHOICE})
 
 
-
 @require_POST
 def update_glass_status(request, glass_id):
     glass = get_object_or_404(GlassInfo, id=glass_id)
@@ -630,6 +730,7 @@ def update_glass_status(request, glass_id):
         glass.status = new_status
         glass.save()
     return redirect('glass_info')  # Перенаправление обратно на страницу с заказами
+
 
 def update_workshop(request, order_id):
     if request.method == 'POST':

@@ -42,7 +42,7 @@ class Organization(models.Model):
     email = models.EmailField(blank=True, null=True)
     ceo_title = models.CharField(max_length=30, blank=True, null=True)
     ceo_name = models.CharField(max_length=150, blank=True, null=True)
-    contracts = models.FileField(upload_to='contracts/', blank=True, null=True)
+
 
     def __str__(self):
         if self.name_fl:
@@ -230,7 +230,7 @@ class Order(models.Model):
         elif canceled > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'отменен'
         else:
-            return f'всё сложно' # дополнительная логика обработки заявок со смешанным статусом позиций
+            return f'частично не готов' # дополнительная логика обработки заявок со смешанным статусом позиций
 
     @property
     def workshop(self):
@@ -385,6 +385,15 @@ class GlassInfo(models.Model):
 
 class Passport(models.Model):
     number = models.IntegerField(blank=True, null=True)
+
+
+class Contract(models.Model):
+    number = models.CharField(unique=True, max_length=100, blank=True, null=True)
+    organization = models.ForeignKey(Organization, related_name='contracts', on_delete=models.CASCADE)
+    legal_entity = models.ForeignKey(LegalEntity, related_name='contracts', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='contracts/')
+    days = models.IntegerField(blank=True, null=True)
+
 
 
 

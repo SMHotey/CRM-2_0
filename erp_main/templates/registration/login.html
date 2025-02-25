@@ -15,8 +15,9 @@
                     <label for="password">Пароль</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                <!-- Отображение ошибки аутентификации -->
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
                 {% endif %}
                 <button type="submit" class="btn btn-primary btn-block">Войти</button>
             </form>
