@@ -60,6 +60,26 @@ class Organization(models.Model):
             .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
         )
 
+    @property
+    def ready_for_contract(self):
+        fields = [
+            self.ceo_footing,
+            self.name,
+            self.inn,
+            self.ogrn,
+            self.kpp,
+            self.r_s,
+            self.bank,
+            self.bik,
+            self.k_s,
+            self.address,
+            self.email,
+            self.ceo_title,
+            self.ceo_name
+        ]
+        print(*fields)
+        return all(field not in (None, '') for field in fields)
+
 
 class LegalEntity(models.Model):
     name = models.CharField(max_length=255)
@@ -95,6 +115,8 @@ class Invoice(models.Model):
     year = models.PositiveIntegerField(editable=False)
     is_paid = models.BooleanField(default=False, blank=True, null=True)
     change_date = models.DateField(blank=True, null=True)
+    closing_document = models.FileField(upload_to='closing_documents/', blank=True, null=True)
+
 
     def save(self, *args, **kwargs):
         self.is_paid = self.payed_amount >= self.amount
@@ -126,9 +148,10 @@ class Order(models.Model):
 #    internal_order_number = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
-    invoice = models.ForeignKey(Invoice, related_name='invoice',blank=True, null=True, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, related_name='invoice', blank=True, null=True, on_delete=models.CASCADE)
     due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
+
 
     def get_items_filtered(self):
         return self.items.exclude(p_status__in=['changed',])
@@ -393,6 +416,20 @@ class Contract(models.Model):
     legal_entity = models.ForeignKey(LegalEntity, related_name='contracts', on_delete=models.CASCADE)
     file = models.FileField(upload_to='contracts/')
     days = models.IntegerField(blank=True, null=True)
+
+
+class Shipment(models.Model):
+    user = models.ForeignKey(User, related_name='shipments', on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, related_name='shipments', on_delete=models.CASCADE)
+    workshop = models.IntegerField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    time = models.TimeField(blank=True, null=True)
+    address = models.CharField(max_length=100, blank=True, null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    price = models.IntegerField(blank=True, null=True)
+    order_items = models.JSONField(blank=True, null=True)
+    car_info = models.JSONField(blank=True, null=True)
+    driver_info = models.JSONField(blank=True, null=True)
 
 
 

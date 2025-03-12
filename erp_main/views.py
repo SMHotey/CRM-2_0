@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
-from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory
+from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory, Contract
 from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
 import logging
 from docx import Document
@@ -30,20 +30,20 @@ logger = logging.getLogger(__name__)
 
 def custom_login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')  # Используем get для безопасного получения данных
-        password = request.POST.get('password')  # Используем get для безопасного получения данных
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        next_url = request.POST.get('next', 'index')  # Получаем параметр next
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
-            return redirect('index')
+            return redirect(next_url)  # Перенаправляем на next_url
         else:
-            # Возвращаем ошибку, если аутентификация не удалась
             return render(request, 'registration/login.html', {'error': 'Неверные данные для входа'})
 
-    # Если метод не POST, просто отображаем страницу входа
-    return render(request, 'registration/login.html')
+    next_url = request.GET.get('next', 'index')  # Получаем параметр next из GET-запроса
+    return render(request, 'registration/login.html', {'next': next_url})
 
 
 @login_required  # Декоратор для проверки аутентификации пользователя
@@ -119,8 +119,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
     template_name = 'order_upload.html'
     form_class = OrderForm
 
-    def __setattr__(self, name, value):
-        change = OrderChangeHistory(order=self.order.pk)
+
 
     def get_context_data(self, **kwargs):
 
@@ -221,7 +220,6 @@ class OrderUploadView(LoginRequiredMixin, FormView):
 
     def _update_order_items(self, order, new_positions, old_file):
         current_items = {item.position_num: item for item in OrderItem.objects.filter(order=order)}
-        print(current_items)
 
         current_date = datetime.now().strftime('%d.%m.%Y')
         changes_made = []
@@ -254,7 +252,6 @@ class OrderUploadView(LoginRequiredMixin, FormView):
             if n_num in current_items: # если номер позиции есть в новом бланке заказа
                 first = 0
                 current_item = current_items[n_num]
-                print(current_item)
                 for field, new_value in new_item_data.items():
                     old_value = getattr(current_item, field, None)
                     if str(old_value) != str(new_value) and field != 'p_glass':
@@ -626,6 +623,8 @@ def create_contract(request, pk):
         legal_entity_id = request.POST.get('legal_entity')
         legal_entity = get_object_or_404(LegalEntity, pk=legal_entity_id)
         organization = get_object_or_404(Organization, pk=pk)
+        c_number = f'{day_of_month}/{month_num}/{str(datetime.now().year)[2::]}/36/{organization.inn[-4:]}'
+
 
         data = {
             'юл': legal_entity.name.upper(),
@@ -666,6 +665,7 @@ def create_contract(request, pk):
             'число': day_of_month,
             'месяц': month_num,
             'месяц_назв': month_name,
+            'номер_договора': c_number
         }
 
         # Полный путь к шаблону
@@ -691,16 +691,21 @@ def create_contract(request, pk):
                     replace_in_paragraphs(cell.paragraphs, data)
 
         # Определяем путь, по которому будет сохраняться новый документ
-        new_file_path = os.path.join(settings.MEDIA_ROOT, 'contracts/new_contract.docx')
+        num = c_number.replace("/", '')
+        new_file_path = os.path.join(settings.MEDIA_ROOT, f'contracts/договор_{num}.docx')
         os.makedirs(os.path.dirname(new_file_path), exist_ok=True)  # Создаем директорию, если её нет
 
         # Сохраняем изменённый документ
         doc.save(new_file_path)
 
         # URL к новому файлу
-        new_contract_url = os.path.join(settings.MEDIA_URL, 'contracts/new_contract.docx')
+
+        new_contract_url = os.path.join(settings.MEDIA_URL, f'contracts/договор_{num}.docx')
         legal_entities = LegalEntity.objects.all()
 
+        new_contract = Contract(number=num, organization=organization, legal_entity=legal_entity, days=timeframe, file=new_file_path)
+        new_contract.save()
+        
         return render(request, 'organization_detail.html', {
             'organization': organization,
             'new_contract_url': new_contract_url,
@@ -747,8 +752,10 @@ def update_workshop(request, order_id):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 
+
 def make_passport(self):
     pass
+
 
 def calculate(self: OrderItem):
     pass

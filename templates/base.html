@@ -210,7 +210,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все организации</a></li>
                              {% if user.is_superuser %}
-                            <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">Добавить юр. лицо</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">Новое ЮЛ</a></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="{% url 'organization_add' %}">Добавить клиента</a></li>
                         </ul>
@@ -236,6 +236,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#">Цех №1</a></li>
                             <li><a class="dropdown-item" href="#">Цех №3</a></li>
+                            <li><a class="dropdown-item" href="#">Добавить отгрузку</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

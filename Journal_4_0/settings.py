@@ -43,8 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
-LOGIN_REDIRECT_URL = '/index/'  # URL после успешного входа
-LOGOUT_REDIRECT_URL = '/login/'  # URL после выхода
+LOGIN_URL = '/custom-login/'  # URL после успешного входа
+LOGOUT_URL = '/custom-login/'  # URL после выхода
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
