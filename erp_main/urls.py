@@ -30,5 +30,8 @@ urlpatterns = [
     path('glass_info/<int:pk>/', glass_info, name='glass_info'),
     path('glass_info/', glass_info, name='glass_info'),
     path('update_glass_status/<int:glass_id>/', update_glass_status, name='update_glass_status'),
+    path('calendar/', views.calendar_view, name='calendar'),
+    path('shipment/<int:workshop>/<str:date>/', views.shipment_detail, name='shipment_detail'),
+    path('save_shipment/', views.save_shipment, name='save_shipment'),
 ]
 

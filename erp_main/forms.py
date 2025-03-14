@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 
 
-from erp_main.models import Organization, Invoice, Order, LegalEntity, OrderItem
+from erp_main.models import Organization, Invoice, Order, LegalEntity, OrderItem, Shipment
 
 
 class UserCreationForm(forms.ModelForm):
@@ -133,6 +133,22 @@ class InvoiceForm(forms.ModelForm):
 
 class OrderFileForm(forms.Form):
     order_file = forms.FileField()
+
+
+class ShipmentForm(forms.ModelForm):
+    class Meta:
+        model = Shipment
+        fields = [
+            'order', 'workshop', 'date', 'time', 'address', 'city', 'price',
+            'order_items', 'car_info', 'driver_info'
+        ]
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+            'time': forms.TimeInput(attrs={'type': 'time'}),
+            'order_items': forms.Textarea(attrs={'rows': 3}),
+            'car_info': forms.Textarea(attrs={'rows': 3}),
+            'driver_info': forms.Textarea(attrs={'rows': 3}),
+        }
 
 
 

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Отгрузки из цеха №{{ workshop }} на {{ date|date:"d F Y" }}</h1>
+
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Время</th>
+                <th>Номер заявки</th>
+                <th>Менеджер</th>
+                <th>Тип отгрузки</th>
+                <th>Марка автомобиля</th>
+                <th>Гос. номер</th>
+                <th>Адрес доставки</th>
+                <th>Комментарии</th>
+                <th>Отметка об отгрузке</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for time in times %}
+            <tr data-time="{{ time|time:'H:i' }}">
+                <td>{{ time|time:"H:i" }}</td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="order-pk">{{ shipment.order.pk }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="user">{{ shipment.user.username }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="order-type">{{ shipment.order_items.type }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="car-brand">{{ shipment.get_car_brand }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="car-number">{{ shipment.get_car_number }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="address">{{ shipment.address }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="comments">{{ shipment.driver_info.comments }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for shipment in shipments %}
+                        {% if shipment.time == time %}
+                            <span class="shipment-mark">{{ shipment.driver_info.shipment_mark }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-sm edit-btn" data-shipment-id="{{ shipment.id }}">Редактировать</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Вставьте обработчик здесь -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const row = this.closest('tr');
+            const shipmentId = this.getAttribute('data-shipment-id');
+            const data = {
+                shipment_id: shipmentId,
+                order: row.querySelector('.order-pk').textContent,
+                user: row.querySelector('.user').textContent,
+                order_items: { type: row.querySelector('.order-type').textContent },
+                car_info: {
+                    brand: row.querySelector('.car-brand').textContent,
+                    number: row.querySelector('.car-number').textContent,
+                },
+                address: row.querySelector('.address').textContent,
+                driver_info: {
+                    comments: row.querySelector('.comments').textContent,
+                    shipment_mark: row.querySelector('.shipment-mark').textContent,
+                },
+            };
+
+            fetch('/save_shipment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Данные успешно сохранены');
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

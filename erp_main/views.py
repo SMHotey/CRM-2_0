@@ -9,13 +9,15 @@ from django.db import IntegrityError
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
-from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory, Contract
-from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm
+from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory, Contract, \
+    Shipment
+from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm, \
+    ShipmentForm
 import logging
 from docx import Document
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import Counter
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse
@@ -759,3 +761,71 @@ def make_passport(self):
 
 def calculate(self: OrderItem):
     pass
+
+@csrf_exempt  # Временно отключаем CSRF для упрощения тестирования
+@require_http_methods(["POST"])
+def save_shipment(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        shipment_id = data.get('shipment_id')
+        if shipment_id:
+            # Редактирование существующей отгрузки
+            shipment = Shipment.objects.get(id=shipment_id)
+            if shipment.user != request.user and not request.user.is_superuser:
+                return JsonResponse({'status': 'error', 'message': 'Нет прав на редактирование'}, status=403)
+        else:
+            # Создание новой отгрузки
+            shipment = Shipment(user=request.user)
+
+        form = ShipmentForm(data, instance=shipment)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'status': 'success', 'message': 'Данные сохранены'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Ошибка валидации', 'errors': form.errors}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def shipment_detail(request, workshop, date):
+    shipments = Shipment.objects.filter(workshop=workshop, date=date).order_by('time')
+    times = [datetime.strptime(f'{i}:{j}', '%H:%M').time() for i in range(9, 18) for j in ['00', '30']]
+
+    context = {
+        'workshop': workshop,
+        'date': date,
+        'shipments': shipments,
+        'times': times,
+    }
+    return render(request, 'shipment_detail.html', context)
+
+
+def calendar_view(request):
+    # Получаем текущую дату
+    today = timezone.now().date()
+
+    # Получаем год и месяц из запроса (если они переданы)
+    year = int(request.GET.get('year', today.year))
+    month = int(request.GET.get('month', today.month))
+
+    # Создаем объект даты для текущего месяца
+    current_date = datetime(year, month, 1).date()
+
+    # Вычисляем даты для предыдущего и следующего месяца
+    prev_month = (current_date - timedelta(days=1)).replace(day=1)
+    next_month = (current_date + timedelta(days=31)).replace(day=1)
+
+    # Контекст для передачи в шаблон
+    context = {
+        'current_date': current_date,
+        'prev_month': prev_month,
+        'next_month': next_month,
+        'workshop1': 1,  # ID цеха №1
+        'workshop3': 3,  # ID цеха №3
+    }
+
+    return render(request, 'calendar.html', context)

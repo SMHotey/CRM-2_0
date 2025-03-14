@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load my_filters %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Календарь отгрузок</h1>
+
+    <!-- Кнопки для перелистывания месяцев -->
+    <div class="d-flex justify-content-between mb-4">
+        <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn btn-outline-primary">Предыдущий месяц</a>
+        <h3 class="text-center">{{ current_date|date:"F Y" }}</h3>
+        <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn btn-outline-primary">Следующий месяц</a>
+    </div>
+
+    <!-- Календари для цехов -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title text-center">Цех №1</h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Пн</th>
+                                <th>Вт</th>
+                                <th>Ср</th>
+                                <th>Чт</th>
+                                <th>Пт</th>
+                                <th>Сб</th>
+                                <th>Вс</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in current_date|month_calendar %}
+                            <tr>
+                                {% for day in week %}
+                                <td class="text-center">
+                                    {% if day != 0 %}
+                                    <a href="{% url 'shipment_detail' workshop=workshop1 date=current_date|date:'Y-m-'|format_date:day %}" class="btn btn-outline-primary btn-sm">{{ day }}</a>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h2 class="card-title text-center">Цех №3</h2>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Пн</th>
+                                <th>Вт</th>
+                                <th>Ср</th>
+                                <th>Чт</th>
+                                <th>Пт</th>
+                                <th>Сб</th>
+                                <th>Вс</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in current_date|month_calendar %}
+                            <tr>
+                                {% for day in week %}
+                                <td class="text-center">
+                                    {% if day != 0 %}
+                                    <a href="{% url 'shipment_detail' workshop=workshop3 date=current_date|date:'Y-m-'|format_date:day %}" class="btn btn-outline-success btn-sm">{{ day }}</a>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
