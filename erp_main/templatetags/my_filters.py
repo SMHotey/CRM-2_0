@@ -26,3 +26,8 @@ def month_calendar(date):
 def format_date(year_month, day):
     """Формирует дату в формате YYYY-MM-DD."""
     return f"{year_month}{day:02d}"
+
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

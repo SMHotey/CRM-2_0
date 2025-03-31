@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.db.models import Sum, Q
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
@@ -19,7 +19,7 @@ from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, O
     ShipmentForm
 import logging
 from docx import Document
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from collections import Counter
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse
@@ -777,39 +777,71 @@ def make_passport(self):
 def calculate(self: OrderItem):
     pass
 
+
+# views.py
 @csrf_exempt
 @require_http_methods(["POST"])
 def save_shipment(request):
     try:
-        data = json.loads(request.body)
+        data = request.POST
         shipment_id = data.get('shipment_id')
 
+        if not request.user.is_authenticated:
+            return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=403)
+
         if shipment_id:
-            # Редактирование существующей отгрузки
-            shipment = Shipment.objects.get(id=shipment_id)
+            shipment = get_object_or_404(Shipment, id=shipment_id)
+            if shipment.user != request.user and not request.user.is_superuser:
+                return JsonResponse({'status': 'error', 'message': 'Нет прав на редактирование'}, status=403)
         else:
-            # Создание новой отгрузки
-            shipment = Shipment()
+            shipment = Shipment(
+                user=request.user,
+                date=data.get('date'),
+                time=data.get('time'),
+                workshop=data.get('workshop')
+            )
 
-        # Обновляем данные
-        num = data.get('order')
-        shipment.order = get_object_or_404(Order, number=num)
-        shipment.user = data.get('user')
-#        shipment.order_items = {'type': data.get('order_items', {}).get('type', '')}
-        shipment.car_info = {
-            'brand': data.get('car_info', {}).get('brand', ''),
-            'number': data.get('car_info', {}).get('number', ''),
-        }
+        # Обновляем основную информацию
+        if data.get('order'):
+            try:
+                shipment.order = Order.objects.get(pk=data.get('order'))
+            except Order.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Указанный заказ не существует'}, status=400)
+
+        # Обновляем JSON-поля
+        order_items = shipment.order_items or {}
+        order_items['type'] = data.get('order_type', '')
+        shipment.order_items = order_items
+
+        car_info = shipment.car_info or {}
+        car_info.update({
+            'brand': data.get('car_brand', ''),
+            'number': data.get('car_number', '')
+        })
+        shipment.car_info = car_info
+
+        driver_info = shipment.driver_info or {}
+        driver_info.update({
+            'comments': data.get('comments', ''),
+            'shipment_mark': data.get('shipment_mark', '')
+        })
+        shipment.driver_info = driver_info
+
         shipment.address = data.get('address', '')
-        shipment.driver_info = {
-            'comments': data.get('driver_info', {}).get('comments', ''),
-            'shipment_mark': data.get('driver_info', {}).get('shipment_mark', ''),
-        }
-
-        # Сохраняем изменения
         shipment.save()
 
-        return JsonResponse({'status': 'success', 'message': 'Данные сохранены'})
+        return JsonResponse({
+            'status': 'success',
+            'shipment_id': shipment.id,
+            'order': shipment.order.pk if shipment.order else '',
+            'order_type': shipment.order_items.get('type', ''),
+            'car_brand': shipment.car_info.get('brand', ''),
+            'car_number': shipment.car_info.get('number', ''),
+            'address': shipment.address,
+            'comments': shipment.driver_info.get('comments', ''),
+            'shipment_mark': shipment.driver_info.get('shipment_mark', '')
+        })
+
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
@@ -817,31 +849,31 @@ def save_shipment(request):
 @require_http_methods(["GET"])
 def shipment_detail(request, workshop, date):
     # Преобразуем строку даты в объект date
-    date_obj = parse_date(date)
+    try:
+        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
+    except ValueError:
+        return HttpResponseBadRequest("Неверный формат даты")
 
     # Получаем отгрузки для указанного цеха и даты
     shipments = Shipment.objects.filter(workshop=workshop, date=date_obj).order_by('time')
 
-    # Получаем список всех неотгруженных заказов для текущего пользователя (готовых и в производстве)
-    filtered_items = OrderItem.objects.filter(p_status__in=['product', 'ready'])
-    orders = Order.objects.filter(items__in=filtered_items).distinct()
-
-    # Преобразуем orders в список словарей с необходимыми полями
-    orders_list = [{'pk': order.pk, 'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S')} for order in orders]
+    # Создаем словарь отгрузок по времени для удобного доступа в шаблоне
+    shipments_dict = {shipment.time: shipment for shipment in shipments}
 
     # Генерируем список времен для отображения в таблице
-    times = [datetime.strptime(f'{i}:{j}', '%H:%M').time() for i in range(9, 18) for j in ['00', '30']]
+    times = [time(hour, minute) for hour in range(9, 18) for minute in [0, 30]]
 
-    # Исключаем уже занятое время для отгрузок
-    occupied_times = [shipment.time for shipment in shipments]
-    available_times = [time for time in times if time not in occupied_times]
+    # Получаем список всех неотгруженных заказов
+    filtered_items = OrderItem.objects.filter(p_status__in=['product', 'ready'])
+    orders = Order.objects.filter(items__in=filtered_items).distinct()
+    orders_list = [{'pk': order.pk, 'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S')} for order in orders]
 
     context = {
         'workshop': workshop,
-        'date': date_obj.strftime('%Y-%m-%d'),  # Передаем дату в формате строки
-        'shipments': shipments,
-        'times': available_times,  # Используем только доступное время
-        'orders': orders_list,  # Передаем orders в виде списка словарей
+        'date': date_obj,
+        'shipments': shipments_dict,  # Используем словарь вместо QuerySet
+        'times': times,
+        'orders': orders_list,
     }
     return render(request, 'shipment_detail.html', context)
 

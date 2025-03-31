@@ -1,22 +1,48 @@
 {% extends "base.html" %}
 {% load my_filters %}
+
 {% block content %}
     <style>
-        .editing td {
-            padding: 0 !important;
-        }
         .editing input, .editing select {
             width: 100%;
-            border: none;
-            background: transparent;
-            text-align: center; /* Центрируем текст */
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
         }
         table td {
-            text-align: center; /* Центрируем текст во всех ячейках */
+            text-align: center;
+            vertical-align: middle;
+        }
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        .empty-row {
+            background-color: #f8f9fa;
+        }
+        .spinner-border {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            vertical-align: text-bottom;
+            border: .2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+        }
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
         }
     </style>
+
     <div class="container mt-5">
         <h1 class="text-center mb-4">Отгрузки из цеха №{{ workshop }} на {{ date|date:"d F Y" }}</h1>
+
+        <div id="orders-data" style="display:none;">
+            {% for order in orders %}
+                {{ order.pk }}||{{ order.created_at|date:"Y-m-d H:i:s" }}##
+            {% endfor %}
+        </div>
 
         <table class="table table-striped table-bordered">
             <thead class="table-dark">
@@ -35,68 +61,49 @@
             </thead>
             <tbody>
                 {% for time in times %}
-                <tr data-time="{{ time|time:'H:i' }}">
+                {% with shipment=shipments|get_item:time %}
+                <tr data-time="{{ time|time:'H:i' }}" {% if not shipment %}class="empty-row"{% endif %}>
                     <td>{{ time|time:"H:i" }}</td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="order-pk">{{ shipment.order.pk }}</span>
+
+                    {% if shipment %}
+                        <td class="order-pk">{{ shipment.order.pk }}</td>
+                        <td class="user">{{ shipment.user.username }}</td>
+                        <td class="order-type">{{ shipment.order_items.type|default:"" }}</td>
+                        <td class="car-brand">{{ shipment.car_info.brand|default:"" }}</td>
+                        <td class="car-number">{{ shipment.car_info.number|default:"" }}</td>
+                        <td class="address">{{ shipment.address|default:"" }}</td>
+                        <td class="comments">{{ shipment.driver_info.comments|default:"" }}</td>
+                        <td class="shipment-mark">{{ shipment.driver_info.shipment_mark|default:"" }}</td>
+                        <td>
+                            {% if shipment.user == request.user or request.user.is_superuser %}
+                                <button class="btn btn-warning btn-sm edit-btn"
+                                        data-shipment-id="{{ shipment.id }}">
+                                    Редактировать
+                                </button>
+                            {% else %}
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    Только для создателя
+                                </button>
                             {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="user">{{ shipment.user.username }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="order-type">{{ shipment.order_items.type }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="car-brand">{{ shipment.get_car_brand }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="car-number">{{ shipment.get_car_number }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="address">{{ shipment.address }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="comments">{{ shipment.driver_info.comments }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for shipment in shipments %}
-                            {% if shipment.time == time %}
-                                <span class="shipment-mark">{{ shipment.driver_info.shipment_mark }}</span>
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <button class="btn btn-warning btn-sm edit-btn" data-shipment-id="{{ shipment.id }}">Редактировать</button>
-                    </td>
+                        </td>
+                    {% else %}
+                        <td class="order-pk"></td>
+                        <td class="user"></td>
+                        <td class="order-type"></td>
+                        <td class="car-brand"></td>
+                        <td class="car-number"></td>
+                        <td class="address"></td>
+                        <td class="comments"></td>
+                        <td class="shipment-mark"></td>
+                        <td>
+                            <button class="btn btn-success btn-sm create-btn"
+                                    data-time="{{ time|time:'H:i' }}">
+                                Создать
+                            </button>
+                        </td>
+                    {% endif %}
                 </tr>
+                {% endwith %}
                 {% endfor %}
             </tbody>
         </table>
@@ -104,105 +111,215 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const editButtons = document.querySelectorAll('.edit-btn');
+            const shipmentTypes = ['самовывоз', 'наша', 'ТК'];
 
-            editButtons.forEach(button => {
+            // Функция для получения данных заказов
+            function getOrdersData() {
+                const dataElement = document.getElementById('orders-data');
+                const dataText = dataElement.textContent.trim();
+                const orders = [];
+
+                if (dataText) {
+                    const items = dataText.split('##').filter(i => i);
+                    items.forEach(item => {
+                        const parts = item.split('||');
+                        if (parts.length === 2) {
+                            orders.push({
+                                pk: parts[0],
+                                created_at: parts[1]
+                            });
+                        }
+                    });
+                }
+
+                return orders;
+            }
+
+            // Функция создания выпадающего списка заказов
+            function createOrderSelect(currentValue) {
+                const orders = getOrdersData();
+                const select = document.createElement('select');
+                select.className = 'form-control';
+
+                const emptyOption = document.createElement('option');
+                emptyOption.value = '';
+                emptyOption.textContent = '-- Выберите заявку --';
+                select.appendChild(emptyOption);
+
+                orders.forEach(order => {
+                    const option = document.createElement('option');
+                    option.value = order.pk;
+                    option.textContent = order.pk;
+                    if (order.pk === currentValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                return select;
+            }
+
+            // Функция создания выпадающего списка типов отгрузки
+            function createTypeSelect(currentValue) {
+                const select = document.createElement('select');
+                select.className = 'form-control';
+
+                shipmentTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    if (type === currentValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                return select;
+            }
+
+            // Функция входа в режим редактирования
+            function enterEditMode(row, button, isNew) {
+                row.classList.add('editing');
+                button.textContent = 'Сохранить';
+                button.classList.toggle('btn-warning', !isNew);
+                button.classList.toggle('btn-primary', true);
+
+                // Номер заявки
+                const orderPkCell = row.querySelector('.order-pk');
+                orderPkCell.innerHTML = '';
+                orderPkCell.appendChild(createOrderSelect(orderPkCell.textContent.trim()));
+
+                // Тип отгрузки
+                const orderTypeCell = row.querySelector('.order-type');
+                const typeSelect = createTypeSelect(orderTypeCell.textContent.trim());
+                orderTypeCell.innerHTML = '';
+                orderTypeCell.appendChild(typeSelect);
+
+                // Остальные поля
+                ['car-brand', 'car-number', 'address', 'comments', 'shipment-mark'].forEach(cls => {
+                    const cell = row.querySelector(`.${cls}`);
+                    const value = isNew ? '' : cell.textContent.trim();
+                    cell.innerHTML = `<input type="text" value="${value}" class="form-control">`;
+                });
+
+                // Менеджер
+                const userCell = row.querySelector('.user');
+                userCell.innerHTML = `<input type="text" value="{{ request.user.username }}" readonly>`;
+            }
+
+            // Функция выхода из режима редактирования
+            function exitEditMode(row) {
+                row.classList.remove('editing');
+            }
+
+            // Функция обновления строки после сохранения
+            function updateRowAfterSave(row, data, isNew) {
+                row.querySelector('.order-pk').textContent = data.order || '';
+                row.querySelector('.user').textContent = '{{ request.user.username }}';
+                row.querySelector('.order-type').textContent = data.order_type || '';
+                row.querySelector('.car-brand').textContent = data.car_brand || '';
+                row.querySelector('.car-number').textContent = data.car_number || '';
+                row.querySelector('.address').textContent = data.address || '';
+                row.querySelector('.comments').textContent = data.comments || '';
+                row.querySelector('.shipment-mark').textContent = data.shipment_mark || '';
+
+                if (isNew) {
+                    row.classList.remove('empty-row');
+                }
+            }
+
+            // Функция сохранения отгрузки
+            function saveShipment(row, button, isNew) {
+                const formData = new FormData();
+                const shipmentId = button.getAttribute('data-shipment-id') || '';
+
+                // Собираем данные формы
+                formData.append('shipment_id', shipmentId);
+                formData.append('order', row.querySelector('.order-pk select').value);
+                formData.append('order_type', row.querySelector('.order-type select').value);
+                formData.append('car_brand', row.querySelector('.car-brand input').value);
+                formData.append('car_number', row.querySelector('.car-number input').value);
+                formData.append('address', row.querySelector('.address input').value);
+                formData.append('comments', row.querySelector('.comments input').value);
+                formData.append('shipment_mark', row.querySelector('.shipment-mark input').value);
+
+                // Только для новых отгрузок
+                if (isNew) {
+                    formData.append('date', '{{ date|date:"Y-m-d" }}');
+                    formData.append('time', row.getAttribute('data-time'));
+                    formData.append('workshop', '{{ workshop }}');
+                }
+
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                // Показываем индикатор загрузки
+                button.disabled = true;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+
+                fetch('/erp_main/save_shipment/', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Обновляем данные в таблице
+                        updateRowAfterSave(row, data, isNew);
+
+                        // Обновляем кнопку если это новая запись
+                        if (isNew) {
+                            button.classList.remove('create-btn', 'btn-primary');
+                            button.classList.add('edit-btn', 'btn-warning');
+                            button.setAttribute('data-shipment-id', data.shipment_id);
+                        }
+                        button.textContent = 'Редактировать';
+                        button.disabled = false;
+
+                        // Выходим из режима редактирования
+                        exitEditMode(row);
+                    } else {
+                        throw new Error(data.message || 'Неизвестная ошибка сервера');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    button.disabled = false;
+                    button.textContent = isNew ? 'Создать' : 'Редактировать';
+                    alert(`Ошибка сохранения: ${error.message}`);
+                });
+            }
+
+            // Обработчик для кнопок редактирования
+            document.querySelectorAll('.edit-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const row = this.closest('tr');
-                    const isEditing = row.classList.toggle('editing');
 
-                    if (isEditing) {
-                        // Включаем редактирование
-                        this.textContent = 'Сохранить';
-
-                        // Автоматически подставляем имя текущего пользователя
-                        const userCell = row.querySelector('.user');
-                        if (userCell) {
-                            const currentUser = '{{ request.user.username }}';
-                            userCell.innerHTML = `<input type="text" value="${currentUser}" class="form-control" readonly>`;
-                        }
-
-                        // Создаем выпадающий список для номера заявки
-                        const orderPkCell = row.querySelector('.order-pk');
-                        if (orderPkCell) {
-                            const currentOrderPk = orderPkCell.textContent;
-
-                            const orders = JSON.parse('{{ orders|escapejs }}');  // Получаем список заказов из шаблона
-                            const select = document.createElement('select');
-                            select.className = 'form-control';
-                            orders.forEach(order => {
-                                const option = document.createElement('option');
-                                option.value = order.pk;
-                                option.textContent = order.pk;
-                                if (order.pk == currentOrderPk) {
-                                    option.selected = true;
-                                }
-                                select.appendChild(option);
-                            });
-                            orderPkCell.innerHTML = '';
-                            orderPkCell.appendChild(select);
-                        }
-
-                        // Делаем остальные ячейки редактируемыми
-                        row.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(cell => {
-                            if (!cell.querySelector('input') && !cell.querySelector('select')) {
-                                const text = cell.textContent;
-                                cell.innerHTML = `<input type="text" value="${text}" class="form-control">`;
-                            }
-                        });
+                    if (row.classList.contains('editing')) {
+                        // Если уже в режиме редактирования - сохраняем
+                        saveShipment(row, this, false);
                     } else {
-                        // Отключаем редактирование и сохраняем данные
-                        this.textContent = 'Редактировать';
+                        // Включаем режим редактирования
+                        enterEditMode(row, this, false);
+                    }
+                });
+            });
 
-                        // Собираем данные из ячеек
-                        const data = {
-                            shipment_id: this.getAttribute('data-shipment-id'),
-                            order: row.querySelector('.order-pk select')?.value || row.querySelector('.order-pk input')?.value || '',
-                            user: row.querySelector('.user input')?.value || '',
-                            order_items: { type: row.querySelector('.order-type input')?.value || '' },
-                            car_info: {
-                                brand: row.querySelector('.car-brand input')?.value || '',
-                                number: row.querySelector('.car-number input')?.value || '',
-                            },
-                            address: row.querySelector('.address input')?.value || '',
-                            driver_info: {
-                                comments: row.querySelector('.comments input')?.value || '',
-                                shipment_mark: row.querySelector('.shipment-mark input')?.value || '',
-                            },
-                        };
+            // Обработчик для кнопок создания
+            document.querySelectorAll('.create-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
 
-                        // Отправляем данные на сервер
-                        fetch('/erp_main/save_shipment/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}',
-                            },
-                            body: JSON.stringify(data),
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                alert('Данные успешно сохранены');
-                                // Обновляем текст ячеек
-                                row.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(cell => {
-                                    const input = cell.querySelector('input');
-                                    const select = cell.querySelector('select');
-                                    if (input) {
-                                        cell.textContent = input.value;
-                                    } else if (select) {
-                                        cell.textContent = select.value;
-                                    }
-                                });
-                                // Отключаем редактирование
-                                row.classList.remove('editing');
-                            } else {
-                                alert('Ошибка: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка:', error);
-                        });
+                    if (row.classList.contains('editing')) {
+                        // Если уже в режиме редактирования - сохраняем
+                        saveShipment(row, this, true);
+                    } else {
+                        // Включаем режим создания
+                        enterEditMode(row, this, true);
                     }
                 });
             });

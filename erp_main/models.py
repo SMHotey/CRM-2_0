@@ -419,6 +419,11 @@ class Contract(models.Model):
 
 
 class Shipment(models.Model):
+    SHIPMENT_TYPES = [
+        ('pickup', 'самовывоз'),
+        ('our', 'наша'),
+        ('tk', 'ТК'),
+    ]
     user = models.ForeignKey(User, related_name='shipments', on_delete=models.CASCADE)
     order = models.ForeignKey(Order, related_name='shipments', on_delete=models.CASCADE)
     workshop = models.IntegerField(blank=True, null=True)
@@ -430,6 +435,10 @@ class Shipment(models.Model):
     order_items = models.JSONField(blank=True, null=True)
     car_info = models.JSONField(blank=True, null=True)
     driver_info = models.JSONField(blank=True, null=True)
+    shipment_type = models.CharField(max_length=20, choices=SHIPMENT_TYPES, default='pickup')
+
+    def can_edit(self, user):
+        return user.is_superuser or self.user == user
 
 
 
