@@ -6,8 +6,10 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.db.models import Sum, Q
 from django.utils import timezone
 from django.http import JsonResponse
+from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
@@ -59,23 +61,41 @@ class OrganizationCreateView(LoginRequiredMixin, CreateView):
     template_name = 'organization_add.html'
 
     def form_valid(self, form):
-        type_ = self.request.POST.get('type')
-
         organization = form.save(commit=False)
-        if type_ == 'organization':
-            organization.inn = form.cleaned_data.get('inn')
-            organization.name = form.cleaned_data.get('name')
-            organization.phone_number = None
-            organization.name_fl = None
-        elif type_ == 'individual':
-            organization.name_fl = form.cleaned_data.get('name_fl')
-            organization.phone_number = form.cleaned_data.get('phone_number')
-            organization.inn = None
-            organization.name = None
-
         organization.user = self.request.user
         organization.save()
         return redirect('organization_list')
+
+
+class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
+    model = Organization
+    form_class = OrganizationForm
+    template_name = 'organization_edit.html'
+    context_object_name = 'organization'
+
+    def get_success_url(self):
+        return reverse('organization_detail', kwargs={'pk': self.object.pk})
+
+    def form_valid(self, form):
+        organization = form.save(commit=False)
+        type_ = form.cleaned_data.get('type')
+
+        if type_ == 'organization':
+            organization.name_fl = None
+            organization.phone_number = None
+        elif type_ == 'individual':
+            organization.name = None
+            organization.inn = None
+            organization.ogrn = None
+            organization.kpp = None
+            organization.r_s = None
+            organization.bank = None
+            organization.bik = None
+            organization.k_s = None
+            organization.ceo_title = None
+
+        organization.save()
+        return super().form_valid(form)
 
 
 class OrganizationListView(LoginRequiredMixin, ListView):
@@ -99,22 +119,6 @@ class OrganizationDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
         context['legal_entities'] = LegalEntity.objects.all()
         return context
-
-
-class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
-    model = Organization
-    form_class = OrganizationForm
-    template_name = 'organization_edit.html'
-    context_object_name = 'organization'
-
-    def get_object(self, queryset=None):
-        return get_object_or_404(Organization, pk=self.kwargs['pk'])
-
-    def get_success_url(self):
-        return reverse('organization_detail', kwargs={'pk': self.object.pk})
-
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 
 class OrderUploadView(LoginRequiredMixin, FormView):
@@ -273,6 +277,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                     current_item.delete()
 
                     new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
+
                     new_item.save()  # сохраняем обновленный объект
             else:
                 new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
@@ -288,6 +293,16 @@ class OrderUploadView(LoginRequiredMixin, FormView):
             order.save()  # Сохраняем изменения в заказе
             add_changes = OrderChangeHistory(order=order, order_file=old_file, changed_by=self.request.user, comment=comment)
             add_changes.save()
+            #Добавление комментария в файл измененного заказа
+            if order.order_file:
+                try:
+                    wb = load_workbook(order.order_file.path)
+                    sheet = wb.active
+                    sheet['K3'] = comment.replace('<br>','')
+                    wb.save(order.order_file.path)
+                except Exception as e:
+                    # Обработка ошибки, если не удалось открыть или сохранить файл
+                    print(f"Ошибка при записи комментария в файл: {e}")
 
     def _create_order_items(self, order, new_positions):
         for data in new_positions:
@@ -762,44 +777,71 @@ def make_passport(self):
 def calculate(self: OrderItem):
     pass
 
-@csrf_exempt  # Временно отключаем CSRF для упрощения тестирования
+@csrf_exempt
 @require_http_methods(["POST"])
 def save_shipment(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=403)
-
     try:
         data = json.loads(request.body)
         shipment_id = data.get('shipment_id')
+
         if shipment_id:
             # Редактирование существующей отгрузки
             shipment = Shipment.objects.get(id=shipment_id)
-            if shipment.user != request.user and not request.user.is_superuser:
-                return JsonResponse({'status': 'error', 'message': 'Нет прав на редактирование'}, status=403)
         else:
             # Создание новой отгрузки
-            shipment = Shipment(user=request.user)
+            shipment = Shipment()
 
-        form = ShipmentForm(data, instance=shipment)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'status': 'success', 'message': 'Данные сохранены'})
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Ошибка валидации', 'errors': form.errors}, status=400)
+        # Обновляем данные
+        num = data.get('order')
+        shipment.order = get_object_or_404(Order, number=num)
+        shipment.user = data.get('user')
+#        shipment.order_items = {'type': data.get('order_items', {}).get('type', '')}
+        shipment.car_info = {
+            'brand': data.get('car_info', {}).get('brand', ''),
+            'number': data.get('car_info', {}).get('number', ''),
+        }
+        shipment.address = data.get('address', '')
+        shipment.driver_info = {
+            'comments': data.get('driver_info', {}).get('comments', ''),
+            'shipment_mark': data.get('driver_info', {}).get('shipment_mark', ''),
+        }
+
+        # Сохраняем изменения
+        shipment.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Данные сохранены'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 @require_http_methods(["GET"])
 def shipment_detail(request, workshop, date):
-    shipments = Shipment.objects.filter(workshop=workshop, date=date).order_by('time')
+    # Преобразуем строку даты в объект date
+    date_obj = parse_date(date)
+
+    # Получаем отгрузки для указанного цеха и даты
+    shipments = Shipment.objects.filter(workshop=workshop, date=date_obj).order_by('time')
+
+    # Получаем список всех неотгруженных заказов для текущего пользователя (готовых и в производстве)
+    filtered_items = OrderItem.objects.filter(p_status__in=['product', 'ready'])
+    orders = Order.objects.filter(items__in=filtered_items).distinct()
+
+    # Преобразуем orders в список словарей с необходимыми полями
+    orders_list = [{'pk': order.pk, 'created_at': order.created_at.strftime('%Y-%m-%d %H:%M:%S')} for order in orders]
+
+    # Генерируем список времен для отображения в таблице
     times = [datetime.strptime(f'{i}:{j}', '%H:%M').time() for i in range(9, 18) for j in ['00', '30']]
+
+    # Исключаем уже занятое время для отгрузок
+    occupied_times = [shipment.time for shipment in shipments]
+    available_times = [time for time in times if time not in occupied_times]
 
     context = {
         'workshop': workshop,
-        'date': date,
+        'date': date_obj.strftime('%Y-%m-%d'),  # Передаем дату в формате строки
         'shipments': shipments,
-        'times': times,
+        'times': available_times,  # Используем только доступное время
+        'orders': orders_list,  # Передаем orders в виде списка словарей
     }
     return render(request, 'shipment_detail.html', context)
 
@@ -829,3 +871,5 @@ def calendar_view(request):
     }
 
     return render(request, 'calendar.html', context)
+
+

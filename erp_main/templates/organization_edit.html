@@ -7,9 +7,10 @@
         {% csrf_token %}
         {{ form.non_field_errors }}
 
+        <!-- Основные поля формы -->
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="{{ form.name.id_for_label }}" class="form-label" >Наименование</label>
+                <label for="{{ form.name.id_for_label }}" class="form-label">Наименование</label>
                 {{ form.name }}
                 {{ form.name.errors }}
             </div>
@@ -21,84 +22,101 @@
             </div>
         </div>
 
+        {% if organization.name_fl %}
+            <!-- Поля для физического лица -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">Номер телефона</label>
+                    {{ form.phone_number }}
+                    {{ form.phone_number.errors }}
+                </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.ceo_footing.id_for_label }}" class="form-label">Подписант действует на основании</label>
-                {{ form.ceo_footing }}
-                {{ form.ceo_footing.errors }}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.name_fl.id_for_label }}" class="form-label">Имя, фамилия</label>
+                    {{ form.name_fl }}
+                    {{ form.name_fl.errors }}
+                </div>
+            </div>
+        {% else %}
+            <!-- Поля для юридического лица -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.ceo_footing.id_for_label }}" class="form-label">Подписант действует на основании</label>
+                    {{ form.ceo_footing }}
+                    {{ form.ceo_footing.errors }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.ogrn.id_for_label }}" class="form-label">ОГРН</label>
+                    {{ form.ogrn }}
+                    {{ form.ogrn.errors }}
+                </div>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.ogrn.id_for_label }}" class="form-label">ОГРН</label>
-                {{ form.ogrn }}
-                {{ form.ogrn.errors }}
-            </div>
-        </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.kpp.id_for_label }}" class="form-label">КПП</label>
+                    {{ form.kpp }}
+                    {{ form.kpp.errors }}
+                </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.kpp.id_for_label }}" class="form-label">КПП</label>
-                {{ form.kpp }}
-                {{ form.kpp.errors }}
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.r_s.id_for_label }}" class="form-label">Р/с</label>
-                {{ form.r_s }}
-                {{ form.r_s.errors }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.bank.id_for_label }}" class="form-label">Банк</label>
-                {{ form.bank }}
-                {{ form.bank.errors }}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.r_s.id_for_label }}" class="form-label">Р/с</label>
+                    {{ form.r_s }}
+                    {{ form.r_s.errors }}
+                </div>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.bik.id_for_label }}" class="form-label">БИК</label>
-                {{ form.bik }}
-                {{ form.bik.errors }}
-            </div>
-        </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.bank.id_for_label }}" class="form-label">Банк</label>
+                    {{ form.bank }}
+                    {{ form.bank.errors }}
+                </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.k_s.id_for_label }}" class="form-label">К/с</label>
-                {{ form.k_s }}
-                {{ form.k_s.errors }}
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.address.id_for_label }}" class="form-label">Адрес</label>
-                {{ form.address }}
-                {{ form.address.errors }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                {{ form.email }}
-                {{ form.email.errors }}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.bik.id_for_label }}" class="form-label">БИК</label>
+                    {{ form.bik }}
+                    {{ form.bik.errors }}
+                </div>
             </div>
 
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.ceo_title.id_for_label }}" class="form-label">Должность</label>
-                {{ form.ceo_title }}
-                {{ form.ceo_title.errors }}
-            </div>
-        </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.k_s.id_for_label }}" class="form-label">К/с</label>
+                    {{ form.k_s }}
+                    {{ form.k_s.errors }}
+                </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.ceo_name.id_for_label }}" class="form-label">ФИО</label>
-                {{ form.ceo_name }}
-                {{ form.ceo_name.errors }}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.address.id_for_label }}" class="form-label">Адрес</label>
+                    {{ form.address }}
+                    {{ form.address.errors }}
+                </div>
             </div>
-        </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.ceo_title.id_for_label }}" class="form-label">Должность</label>
+                    {{ form.ceo_title }}
+                    {{ form.ceo_title.errors }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.ceo_name.id_for_label }}" class="form-label">ФИО</label>
+                    {{ form.ceo_name }}
+                    {{ form.ceo_name.errors }}
+                </div>
+            </div>
+        {% endif %}
 
         <div class="text-center mb-4">
             <button type="submit" class="btn btn-primary">Сохранить изменения</button>

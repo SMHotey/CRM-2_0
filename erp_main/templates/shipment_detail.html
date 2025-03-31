@@ -1,138 +1,211 @@
 {% extends "base.html" %}
-
+{% load my_filters %}
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Отгрузки из цеха №{{ workshop }} на {{ date|date:"d F Y" }}</h1>
+    <style>
+        .editing td {
+            padding: 0 !important;
+        }
+        .editing input, .editing select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center; /* Центрируем текст */
+        }
+        table td {
+            text-align: center; /* Центрируем текст во всех ячейках */
+        }
+    </style>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Отгрузки из цеха №{{ workshop }} на {{ date|date:"d F Y" }}</h1>
 
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>Время</th>
-                <th>Номер заявки</th>
-                <th>Менеджер</th>
-                <th>Тип отгрузки</th>
-                <th>Марка автомобиля</th>
-                <th>Гос. номер</th>
-                <th>Адрес доставки</th>
-                <th>Комментарии</th>
-                <th>Отметка об отгрузке</th>
-                <th>Действия</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for time in times %}
-            <tr data-time="{{ time|time:'H:i' }}">
-                <td>{{ time|time:"H:i" }}</td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="order-pk">{{ shipment.order.pk }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="user">{{ shipment.user.username }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="order-type">{{ shipment.order_items.type }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="car-brand">{{ shipment.get_car_brand }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="car-number">{{ shipment.get_car_number }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="address">{{ shipment.address }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="comments">{{ shipment.driver_info.comments }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for shipment in shipments %}
-                        {% if shipment.time == time %}
-                            <span class="shipment-mark">{{ shipment.driver_info.shipment_mark }}</span>
-                        {% endif %}
-                    {% endfor %}
-                </td>
-                <td>
-                    <button class="btn btn-warning btn-sm edit-btn" data-shipment-id="{{ shipment.id }}">Редактировать</button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Время</th>
+                    <th>Номер заявки</th>
+                    <th>Менеджер</th>
+                    <th>Тип отгрузки</th>
+                    <th>Марка автомобиля</th>
+                    <th>Гос. номер</th>
+                    <th>Адрес доставки</th>
+                    <th>Комментарии</th>
+                    <th>Отметка об отгрузке</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for time in times %}
+                <tr data-time="{{ time|time:'H:i' }}">
+                    <td>{{ time|time:"H:i" }}</td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="order-pk">{{ shipment.order.pk }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="user">{{ shipment.user.username }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="order-type">{{ shipment.order_items.type }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="car-brand">{{ shipment.get_car_brand }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="car-number">{{ shipment.get_car_number }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="address">{{ shipment.address }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="comments">{{ shipment.driver_info.comments }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for shipment in shipments %}
+                            {% if shipment.time == time %}
+                                <span class="shipment-mark">{{ shipment.driver_info.shipment_mark }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm edit-btn" data-shipment-id="{{ shipment.id }}">Редактировать</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<!-- Вставьте обработчик здесь -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const editButtons = document.querySelectorAll('.edit-btn');
-    editButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const row = this.closest('tr');
-            const shipmentId = this.getAttribute('data-shipment-id');
-            const data = {
-                shipment_id: shipmentId,
-                order: row.querySelector('.order-pk').textContent,
-                user: row.querySelector('.user').textContent,
-                order_items: { type: row.querySelector('.order-type').textContent },
-                car_info: {
-                    brand: row.querySelector('.car-brand').textContent,
-                    number: row.querySelector('.car-number').textContent,
-                },
-                address: row.querySelector('.address').textContent,
-                driver_info: {
-                    comments: row.querySelector('.comments').textContent,
-                    shipment_mark: row.querySelector('.shipment-mark').textContent,
-                },
-            };
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButtons = document.querySelectorAll('.edit-btn');
 
-            fetch('/save_shipment/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Данные успешно сохранены');
-                } else {
-                    alert('Ошибка: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const isEditing = row.classList.toggle('editing');
+
+                    if (isEditing) {
+                        // Включаем редактирование
+                        this.textContent = 'Сохранить';
+
+                        // Автоматически подставляем имя текущего пользователя
+                        const userCell = row.querySelector('.user');
+                        if (userCell) {
+                            const currentUser = '{{ request.user.username }}';
+                            userCell.innerHTML = `<input type="text" value="${currentUser}" class="form-control" readonly>`;
+                        }
+
+                        // Создаем выпадающий список для номера заявки
+                        const orderPkCell = row.querySelector('.order-pk');
+                        if (orderPkCell) {
+                            const currentOrderPk = orderPkCell.textContent;
+
+                            const orders = JSON.parse('{{ orders|escapejs }}');  // Получаем список заказов из шаблона
+                            const select = document.createElement('select');
+                            select.className = 'form-control';
+                            orders.forEach(order => {
+                                const option = document.createElement('option');
+                                option.value = order.pk;
+                                option.textContent = order.pk;
+                                if (order.pk == currentOrderPk) {
+                                    option.selected = true;
+                                }
+                                select.appendChild(option);
+                            });
+                            orderPkCell.innerHTML = '';
+                            orderPkCell.appendChild(select);
+                        }
+
+                        // Делаем остальные ячейки редактируемыми
+                        row.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(cell => {
+                            if (!cell.querySelector('input') && !cell.querySelector('select')) {
+                                const text = cell.textContent;
+                                cell.innerHTML = `<input type="text" value="${text}" class="form-control">`;
+                            }
+                        });
+                    } else {
+                        // Отключаем редактирование и сохраняем данные
+                        this.textContent = 'Редактировать';
+
+                        // Собираем данные из ячеек
+                        const data = {
+                            shipment_id: this.getAttribute('data-shipment-id'),
+                            order: row.querySelector('.order-pk select')?.value || row.querySelector('.order-pk input')?.value || '',
+                            user: row.querySelector('.user input')?.value || '',
+                            order_items: { type: row.querySelector('.order-type input')?.value || '' },
+                            car_info: {
+                                brand: row.querySelector('.car-brand input')?.value || '',
+                                number: row.querySelector('.car-number input')?.value || '',
+                            },
+                            address: row.querySelector('.address input')?.value || '',
+                            driver_info: {
+                                comments: row.querySelector('.comments input')?.value || '',
+                                shipment_mark: row.querySelector('.shipment-mark input')?.value || '',
+                            },
+                        };
+
+                        // Отправляем данные на сервер
+                        fetch('/erp_main/save_shipment/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify(data),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                alert('Данные успешно сохранены');
+                                // Обновляем текст ячеек
+                                row.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(cell => {
+                                    const input = cell.querySelector('input');
+                                    const select = cell.querySelector('select');
+                                    if (input) {
+                                        cell.textContent = input.value;
+                                    } else if (select) {
+                                        cell.textContent = select.value;
+                                    }
+                                });
+                                // Отключаем редактирование
+                                row.classList.remove('editing');
+                            } else {
+                                alert('Ошибка: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка:', error);
+                        });
+                    }
+                });
             });
         });
-    });
-});
-</script>
+    </script>
 {% endblock %}

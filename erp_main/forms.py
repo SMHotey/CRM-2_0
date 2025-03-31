@@ -53,9 +53,15 @@ class LegalEntityForm(forms.ModelForm):
 
 
 class OrganizationForm(forms.ModelForm):
+    TYPE_CHOICES = (
+        ('organization', 'Юридическое лицо'),
+        ('individual', 'Физическое лицо'),
+    )
+    type = forms.ChoiceField(choices=TYPE_CHOICES, widget=forms.RadioSelect, label='Тип организации', required=False)
+
     class Meta:
         model = Organization
-        fields = ['name', 'inn', 'phone_number', 'name_fl', 'ceo_footing', 'ogrn', 'kpp',
+        fields = ['type', 'name', 'inn', 'phone_number', 'name_fl', 'ceo_footing', 'ogrn', 'kpp',
                   'r_s', 'bank', 'bik', 'k_s', 'address', 'email', 'ceo_title', 'ceo_name']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Наименование'}),
@@ -77,27 +83,36 @@ class OrganizationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name_fl'].label = 'Имя, фамилия'
-        self.fields['phone_number'].label = 'Номер телефона'
+        if self.instance and self.instance.pk:
+            # Скрываем поле type при редактировании
+            self.fields['type'].widget = forms.HiddenInput()
+            self.fields['type'].required = False
+        else:
+            # При создании новой организации делаем поле обязательным
+            self.fields['type'].required = True
+        self.fields['name_fl'].label = ''
+        self.fields['phone_number'].label = ''
         self.fields['inn'].label = ''
         self.fields['name'].label = ''
 
     def clean(self):
         cleaned_data = super().clean()
-        # Условная логика для валидации
-        type_ = self.data.get('type')  # Получаем тип из POST данных
+        # Для новой организации проверяем тип
+        if not self.instance.pk:
+            type_ = cleaned_data.get('type')
+            if not type_:
+                raise forms.ValidationError("Необходимо выбрать тип организации")
 
-        if type_ == 'organization':
-            if not cleaned_data.get('inn'):
-                self.add_error('inn', 'ИНН обязательно для юридического лица.')
-            if not cleaned_data.get('name'):
-                self.add_error('name', 'Наименование обязательно для юридического лица.')
-
-        elif type_ == 'individual':
-            if not cleaned_data.get('name_fl'):
-                self.add_error('name_fl', 'Имя обязательно для физического лица.')
-            if not cleaned_data.get('phone_number'):
-                self.add_error('phone_number', 'Номер телефона обязателен для физического лица.')
+            if type_ == 'organization':
+                if not cleaned_data.get('inn'):
+                    self.add_error('inn', 'ИНН обязательно для юридического лица.')
+                if not cleaned_data.get('name'):
+                    self.add_error('name', 'Наименование обязательно для юридического лица.')
+            elif type_ == 'individual':
+                if not cleaned_data.get('name_fl'):
+                    self.add_error('name_fl', 'Имя обязательно для физического лица.')
+                if not cleaned_data.get('phone_number'):
+                    self.add_error('phone_number', 'Номер телефона обязателен для физического лица.')
 
         return cleaned_data
 
