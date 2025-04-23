@@ -430,7 +430,7 @@ class Shipment(models.Model):
     date = models.DateField(blank=True, null=True)
     time = models.TimeField(blank=True, null=True)
     address = models.CharField(max_length=100, blank=True, null=True)
-    city = models.CharField(max_length=100, blank=True, null=True)
+    comments = models.CharField(max_length=100, blank=True, null=True)
     price = models.IntegerField(blank=True, null=True)
     order_items = models.JSONField(blank=True, null=True)
     car_info = models.JSONField(blank=True, null=True)

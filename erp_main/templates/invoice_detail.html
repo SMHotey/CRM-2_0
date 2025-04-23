@@ -25,6 +25,13 @@
         {% else %}
             <b>Загруженный файл:</b> <i>Файл не загружен.</i> <br>
         {% endif %}
+            <b>Запущенные заявки:</b>
+        {% if orders %}
+            {% for order in orders %}
+            <a href="{% url 'order_detail' order.id %}"><i>{{ order.id }}, </i></a>
+            {% endfor %}
+        {% else %}    <i> Нет </i>
+        {% endif %}
     </div>
 
     <button id="editButton" class="btn btn-warning mb-3">Редактировать</button>

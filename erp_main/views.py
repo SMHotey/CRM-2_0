@@ -28,7 +28,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 import re
 from django.contrib import messages
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -125,8 +124,6 @@ class OrderUploadView(LoginRequiredMixin, FormView):
     template_name = 'order_upload.html'
     form_class = OrderForm
 
-
-
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
@@ -150,7 +147,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         if order_id:
             # Извлечение существующего заказа из базы
             order = get_object_or_404(Order, pk=order_id)
-            old_file = order.order_file # старый файл заказа для сохранения в истории изменений
+            old_file = order.order_file  # старый файл заказа для сохранения в истории изменений
             is_update = True
         else:
             # Создание нового заказа на основе данных из формы
@@ -159,8 +156,6 @@ class OrderUploadView(LoginRequiredMixin, FormView):
             order.invoice = form.cleaned_data.get('invoice')  # Извлекаем счёт из формы
             order.due_date = form.cleaned_data.get('due_date')  # Извлекаем дату готовности
             order.comment = form.cleaned_data.get('comment', '')  # Извлекаем комментарий
-
-
 
         # Обновление поля order_file только если файл был загружен
         if uploaded_file:
@@ -255,7 +250,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 'p_glass': self._count_glass(data[13:]),
             }
 
-            if n_num in current_items: # если номер позиции есть в новом бланке заказа
+            if n_num in current_items:  # если номер позиции есть в новом бланке заказа
                 first = 0
                 current_item = current_items[n_num]
                 for field, new_value in new_item_data.items():
@@ -265,7 +260,8 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                         field_name = OrderItem._meta.get_field(field).verbose_name
                         if old_value:
                             if first == 0:
-                                changes_made.append(f'<br> поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
+                                changes_made.append(
+                                    f'<br> поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
                                 first = 1
                             else:
                                 changes_made.append(f'{field_name} с "{old_value}" на "{new_value}";')
@@ -288,17 +284,18 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 self._save_glass_info(new_item, new_item_data['p_glass'])
 
         if changes_made:
-#            changes_made = ('Изменения от ' + str(current_date) + ': <br>' + str(changes_made))
+            #            changes_made = ('Изменения от ' + str(current_date) + ': <br>' + str(changes_made))
             comment = str(changes_made).replace('[', '').replace(']', '').replace("'", "").replace(",", "").strip()[5::]
             order.save()  # Сохраняем изменения в заказе
-            add_changes = OrderChangeHistory(order=order, order_file=old_file, changed_by=self.request.user, comment=comment)
+            add_changes = OrderChangeHistory(order=order, order_file=old_file, changed_by=self.request.user,
+                                             comment=comment)
             add_changes.save()
             #Добавление комментария в файл измененного заказа
             if order.order_file:
                 try:
                     wb = load_workbook(order.order_file.path)
                     sheet = wb.active
-                    sheet['K3'] = comment.replace('<br>','')
+                    sheet['K3'] = comment.replace('<br>', '')
                     wb.save(order.order_file.path)
                 except Exception as e:
                     # Обработка ошибки, если не удалось открыть или сохранить файл
@@ -368,6 +365,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         organizations = Organization.objects.all()
         return self.render_to_response(self.get_context_data(form=form, organizations=organizations))
 
+
 def glass(request):
     return render(request, 'glass_info.html')
 
@@ -427,7 +425,7 @@ def order_detail(request, order_id):
     changes = order.changes.all()
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
-    filtered_items = order.items.exclude(p_status__in=['changed',])  #фильтрация по активным позициям
+    filtered_items = order.items.exclude(p_status__in=['changed', ])  #фильтрация по активным позициям
 
     if request.method == 'POST':
         form = OrderFileForm(request.POST, request.FILES)
@@ -445,10 +443,10 @@ def order_detail(request, order_id):
     return render(request, 'order_detail.html', context)
 
 
-
 @login_required(login_url='login')
 def invoice_detail(request, pk):
     invoice = get_object_or_404(Invoice, id=pk)
+    orders = invoice.invoice.all()
 
     if request.method == 'POST':
         form = InvoiceForm(user=request.user, data=request.POST, files=request.FILES, instance=invoice)
@@ -468,7 +466,7 @@ def invoice_detail(request, pk):
     else:
         form = InvoiceForm(user=request.user, instance=invoice)
 
-    return render(request, 'invoice_detail.html', {'invoice': invoice, 'form': form})
+    return render(request, 'invoice_detail.html', {'invoice': invoice, 'orders': orders, 'form': form})
 
 
 @login_required(login_url='login')
@@ -487,7 +485,8 @@ def invoices_list(request):
 
     # Фильтрация по поисковому запросу
     if search_query:
-        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(organization__name__icontains=search_query)
+        invoices = invoices.filter(number__icontains=search_query) | invoices.filter(
+            organization__name__icontains=search_query)
 
     # Фильтрация по выбранному юридическому лицу
     if selected_legal_entity_id:
@@ -537,7 +536,8 @@ def update_order_item_status(request):
                 order_item.workshop = new_data['workshop']
                 if order_item.workshop == '2' and new_data['path'] != 'order_detail':
                     order_item.p_status = 'stopped'
-                if (order_item.p_status == 'stopped' or order_item.p_status == 'canceled') and new_data['path'] != 'order_detail':
+                if (order_item.p_status == 'stopped' or order_item.p_status == 'canceled') and new_data[
+                    'path'] != 'order_detail':
                     order_item.workshop = '2'
                 order_item.save()
 
@@ -574,7 +574,7 @@ def create_contract(request, pk):
     ]
     day_of_month = now.day
     month_num = now.month
-    month_name = months_ru[month_num-1]
+    month_name = months_ru[month_num - 1]
 
     def genitive_case(word):
         if not word:  # Если слово пустое, возвращаем пустую строку
@@ -642,7 +642,6 @@ def create_contract(request, pk):
         organization = get_object_or_404(Organization, pk=pk)
         c_number = f'{day_of_month}/{month_num}/{str(datetime.now().year)[2::]}/36/{organization.inn[-4:]}'
 
-
         data = {
             'юл': legal_entity.name.upper(),
             'юл_огрн': legal_entity.ogrn,
@@ -697,7 +696,6 @@ def create_contract(request, pk):
                         paragraph.text = paragraph.text.replace(f'{{{key}}}', str(value))
                         paragraph.text = paragraph.text.replace(f'[[{key}]]', str(value))
 
-
         # Заменяем метки в главных параграфах
         replace_in_paragraphs(doc.paragraphs, data)
 
@@ -720,9 +718,10 @@ def create_contract(request, pk):
         new_contract_url = os.path.join(settings.MEDIA_URL, f'contracts/договор_{num}.docx')
         legal_entities = LegalEntity.objects.all()
 
-        new_contract = Contract(number=num, organization=organization, legal_entity=legal_entity, days=timeframe, file=new_file_path)
+        new_contract = Contract(number=num, organization=organization, legal_entity=legal_entity, days=timeframe,
+                                file=new_file_path)
         new_contract.save()
-        
+
         return render(request, 'organization_detail.html', {
             'organization': organization,
             'new_contract_url': new_contract_url,
@@ -878,6 +877,29 @@ def shipment_detail(request, workshop, date):
     return render(request, 'shipment_detail.html', context)
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def delete_shipment(request, shipment_id):
+    try:
+        if not request.user.is_authenticated:
+            return JsonResponse({'status': 'error', 'message': 'Требуется авторизация'}, status=403)
+
+        shipment = get_object_or_404(Shipment, id=shipment_id)
+
+        # Проверка прав (только создатель или админ)
+        if shipment.user != request.user and not request.user.is_superuser:
+            return JsonResponse({'status': 'error', 'message': 'Нет прав на удаление'}, status=403)
+
+        shipment.delete()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Отгрузка успешно удалена'
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
 def calendar_view(request):
     # Получаем текущую дату
     today = timezone.now().date()
@@ -903,5 +925,3 @@ def calendar_view(request):
     }
 
     return render(request, 'calendar.html', context)
-
-

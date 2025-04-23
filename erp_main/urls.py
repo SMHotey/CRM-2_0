@@ -33,6 +33,7 @@ urlpatterns = [
     path('calendar/', views.calendar_view, name='calendar'),
     path('shipment/<int:workshop>/<str:date>/', views.shipment_detail, name='shipment_detail'),
     path('save_shipment/', views.save_shipment, name='save_shipment'),
+    path('delete_shipment/<int:shipment_id>/', views.delete_shipment, name='delete_shipment'),
 
 ]
 

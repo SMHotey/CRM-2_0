@@ -208,25 +208,25 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Организации</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все организации</a></li>
+                            <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все клиенты</a></li>
                              {% if user.is_superuser %}
                             <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">Новое ЮЛ</a></li>
                             {% endif %}
                             <li><a class="dropdown-item" href="{% url 'organization_add' %}">Добавить клиента</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item">
+    <!--                <li class="nav-item">
                         <a class="nav-link" href="#">Стекло</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Статистика</a>
-                    </li>
+                    </li>   -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Расчеты</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Прайс общий</a></li>
+      <!--                  <li><a class="dropdown-item" href="#">Прайс общий</a></li>
                             <li><a class="dropdown-item" href="#">Прайсы клиентов</a></li>
-                            <li><a class="dropdown-item" href="#">Создать КП</a></li>
+                            <li><a class="dropdown-item" href="#">Создать КП</a></li>       -->
                             <li><a class="dropdown-item" href="{% url 'invoice_add' %}">Добавить счет</a></li>
                             <li><a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a></li>
                         </ul>
@@ -234,12 +234,12 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Отгрузки</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Цех №1</a></li>
-                            <li><a class="dropdown-item" href="#">Цех №3</a></li>
+     <!--                   <li><a class="dropdown-item" href="{% url 'calendar' %}">Цех №1</a></li>
+                            <li><a class="dropdown-item" href="{% url 'calendar' %}">Цех №3</a></li>        -->
                             <li><a class="dropdown-item" href="{% url 'calendar' %}">Календарь отгрузок</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item dropdown">
+      <!--              <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Документы</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#">Регламенты</a></li>
@@ -248,7 +248,7 @@
                             <li><a class="dropdown-item" href="#">Договоры</a></li>
                             <li><a class="dropdown-item" href="#">Выставленные КП</a></li>
                         </ul>
-                    </li>
+                    </li>   -->
                 </ul>
             </div>
             <div class="gradient-line"></div>
@@ -309,8 +309,15 @@
                         <div class="col-md-4">
                     <div class="card text-white bg-success mb-3" id="shipment">
                         <div class="card-header">Отгрузки на сегодня</div>
-                        <div class="card-body">
-                            <p class="card-text"></p>
+                        <div class="card-body text-black">
+                            <p class="card-text">
+                                {% if ships %}
+                                {% for num, link in ships.items %}
+                                    <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
+                                    {% if forloop.last != True%},{% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            </p>
                         </div>
                     </div>
                 </div>

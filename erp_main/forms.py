@@ -151,19 +151,73 @@ class OrderFileForm(forms.Form):
 
 
 class ShipmentForm(forms.ModelForm):
+    order = forms.ModelChoiceField(
+        queryset=Order.objects.none(),  # Будет установлен в __init__
+        required=False,
+        label='Номер заявки'
+    )
+    order_type = forms.ChoiceField(
+        choices=[('', '-- Выберите тип --'), ('самовывоз', 'самовывоз'), ('наша', 'наша'), ('ТК', 'ТК')],
+        required=False,
+        label='Тип отгрузки'
+    )
+    car_brand = forms.CharField(required=False, label='Марка автомобиля')
+    car_number = forms.CharField(required=False, label='Гос. номер')
+    address = forms.CharField(required=False, label='Адрес доставки')
+    comments = forms.CharField(required=False, label='Комментарии')
+    shipment_mark = forms.CharField(required=False, label='Отметка об отгрузке')
+
     class Meta:
         model = Shipment
-        fields = [
-            'order', 'workshop', 'date', 'time', 'address', 'city', 'price',
-            'order_items', 'car_info', 'driver_info'
-        ]
+        fields = ['order', 'date', 'time', 'workshop']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
             'time': forms.TimeInput(attrs={'type': 'time'}),
-            'order_items': forms.Textarea(attrs={'rows': 3}),
-            'car_info': forms.Textarea(attrs={'rows': 3}),
-            'driver_info': forms.Textarea(attrs={'rows': 3}),
+            'workshop': forms.HiddenInput(),
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        # Устанавливаем queryset для поля order
+        if user:
+            filtered_items = OrderItem.objects.filter(p_status__in=['product', 'ready'])
+            self.fields['order'].queryset = Order.objects.filter(items__in=filtered_items).distinct()
+
+        # Инициализация полей из JSON-данных
+        if self.instance.pk:
+            self.fields['order_type'].initial = self.instance.order_items.get('type', '')
+            self.fields['car_brand'].initial = self.instance.car_info.get('brand', '')
+            self.fields['car_number'].initial = self.instance.car_info.get('number', '')
+            self.fields['comments'].initial = self.instance.driver_info.get('comments', '')
+            self.fields['shipment_mark'].initial = self.instance.driver_info.get('shipment_mark', '')
+
+    def save(self, commit=True):
+        shipment = super().save(commit=False)
+
+        # Сохраняем данные в JSON-поля
+        order_items = shipment.order_items or {}
+        order_items['type'] = self.cleaned_data.get('order_type', '')
+        shipment.order_items = order_items
+
+        car_info = shipment.car_info or {}
+        car_info.update({
+            'brand': self.cleaned_data.get('car_brand', ''),
+            'number': self.cleaned_data.get('car_number', '')
+        })
+        shipment.car_info = car_info
+
+        driver_info = shipment.driver_info or {}
+        driver_info.update({
+            'comments': self.cleaned_data.get('comments', ''),
+            'shipment_mark': self.cleaned_data.get('shipment_mark', '')
+        })
+        shipment.driver_info = driver_info
+
+        if commit:
+            shipment.save()
+        return shipment
 
 
 
