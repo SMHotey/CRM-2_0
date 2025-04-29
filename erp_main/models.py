@@ -284,7 +284,7 @@ class Order(models.Model):
 
 class OrderChangeHistory(models.Model):
     order = models.ForeignKey(Order, related_name='changes', on_delete=models.CASCADE)
-    order_file = models.FileField(upload_to='uploads/')
+    order_file = models.FileField(upload_to='uploads/', blank=True, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)
     changed_by = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField(blank=True, null=True)

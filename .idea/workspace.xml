@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="убрано нефункциональное">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0016_alter_orderchangehistory_order_file.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -334,15 +337,8 @@
       <workItem from="1745304890832" duration="5024000" />
       <workItem from="1745392035983" duration="5793000" />
       <workItem from="1745477742105" duration="3828000" />
-      <workItem from="1745823872821" duration="618000" />
-    </task>
-    <task id="LOCAL-00004" summary="03-09-24">
-      <option name="closed" value="true" />
-      <created>1725374660303</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1725374660303</updated>
+      <workItem from="1745823872821" duration="9552000" />
+      <workItem from="1745909701748" duration="6532000" />
     </task>
     <task id="LOCAL-00005" summary="начинает работать">
       <option name="closed" value="true" />
@@ -728,7 +724,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745416344912</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="убрано нефункциональное">
+      <option name="closed" value="true" />
+      <created>1745825653525</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1745825653526</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -776,6 +780,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1737014151421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
-    <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745477747240" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745915090266" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
   </component>
 </project>

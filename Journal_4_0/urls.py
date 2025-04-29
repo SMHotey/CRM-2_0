@@ -19,9 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from erp_main.views import custom_login
+from erp_main.views import custom_login, index
 
 urlpatterns = [
+    path('', index, name='index'),
     path('admin/', admin.site.urls),
     path('erp_main/', include('erp_main.urls')),
     path('custom-login/', custom_login, name='custom_login'),

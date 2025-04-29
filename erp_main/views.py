@@ -536,8 +536,8 @@ def update_order_item_status(request):
                 order_item.workshop = new_data['workshop']
                 if order_item.workshop == '2' and new_data['path'] != 'order_detail':
                     order_item.p_status = 'stopped'
-                if (order_item.p_status == 'stopped' or order_item.p_status == 'canceled') and new_data[
-                    'path'] != 'order_detail':
+                if ((order_item.p_status == 'stopped' or order_item.p_status == 'canceled') and
+                        new_data['path'] != 'order_detail'):
                     order_item.workshop = '2'
                 order_item.save()
 
@@ -755,18 +755,44 @@ def update_glass_status(request, glass_id):
 
 def update_workshop(request, order_id):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        workshop_value = data.get('workshop')
-        if workshop_value in ['1', '3']:
-            OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
-            OrderItem.objects.filter(order_id=order_id).update(p_status='product')
-        elif workshop_value == '2':
-            OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
-            OrderItem.objects.filter(order_id=order_id).update(p_status='stopped')
-        elif workshop_value == '4':
-            OrderItem.objects.filter(order_id=order_id).update(p_status='ready')
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
+        try:
+            data = json.loads(request.body)
+            workshop_value = data.get('workshop')
+
+            # Проверяем существование заказа
+            if not OrderItem.objects.filter(order_id=order_id).exists():
+                return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+
+            new_status = ''
+            status_list = {'product': '"запущен"', 'stopped': '"остановлен"', 'ready': '"готов"'}
+
+            if workshop_value in ['1', '3']:
+                OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
+                new_status = 'product'
+            elif workshop_value == '2':
+                OrderItem.objects.filter(order_id=order_id).update(workshop=workshop_value)
+                new_status = 'stopped'
+            elif workshop_value == '4':
+                new_status = 'ready'
+            else:
+                return JsonResponse({'success': False, 'error': 'Invalid workshop value'}, status=400)
+
+            OrderItem.objects.filter(order_id=order_id).update(p_status=new_status)
+
+            add_changes = OrderChangeHistory(
+                order_id=order_id,
+                changed_by=request.user,
+                comment='статус заказа изменен на ' + status_list[new_status]
+            )
+            add_changes.save()
+
+            return JsonResponse({'success': True})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 
 def make_passport(self):
