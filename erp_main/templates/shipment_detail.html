@@ -73,7 +73,7 @@
 
                     {% if shipment %}
                         <td class="order-pk">{{ shipment.order.pk }}</td>
-                        <td class="user">{{ shipment.user.username }}</td>
+                        <td class="user">{{ user.first_name }} {{ user.last_name }}</td>
                         <td class="order-type">{{ shipment.order_items.type|default:"" }}</td>
                         <td class="car-brand">{{ shipment.car_info.brand|default:"" }}</td>
                         <td class="car-number">{{ shipment.car_info.number|default:"" }}</td>
@@ -216,7 +216,7 @@
 
                 // Менеджер
                 const userCell = row.querySelector('.user');
-                userCell.innerHTML = `<input type="text" value="{{ request.user.username }}" readonly>`;
+                userCell.innerHTML = `<input type="text" value="{{ user.first_name }} {{ user.last_name }}" readonly>`;
             }
 
             // Функция выхода из режима редактирования

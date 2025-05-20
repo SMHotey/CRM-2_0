@@ -27,7 +27,7 @@
     <h2 class="my-4">Список позиций со стеклами из заявки № <a href="{% url 'order_detail' order.id %}">{{ order.id }}</a></h2>
         <b>Статус заявки: </b><i>{{ order.status }} </i><br>
         <b>Планируемая дата готовности:  </b><i>{{ order.due_date }} </i><br>
-        <b>Менеджер:  </b><i>{{ user.first_name }} {{ user.last_name }} </i><br>
+        <b>Менеджер:  </b><i>{{ order.invoice.organization.user.get_full_name }} </i><br>
         <b>Контрагент:  </b><i><a href="{% url 'organization_detail' order.invoice.organization.id %}">{{ order.invoice.organization }}</a></i><br><br>
 
     {% endwith %}

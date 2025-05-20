@@ -135,6 +135,7 @@ class InvoiceForm(forms.ModelForm):
         self.fields['shipping_amount'].label = 'Стоимость доставки'
         self.fields['montage_amount'].label = 'Стоимость монтажа'
         self.fields['legal_entity'].label = 'Юридическое лицо'
+        self.fields['legal_entity'].queryset = LegalEntity.objects.all()
         self.fields['organization'].label = 'Организация'
         if not user.is_superuser:
             self.fields['organization'].queryset = Organization.objects.filter(user=user)

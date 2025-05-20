@@ -18,6 +18,7 @@ urlpatterns = [
     path('organization/add/', OrganizationCreateView.as_view(), name='organization_add'),
     path('invoice/add/', views.invoice_add, name='invoice_add'),
     path('login/', custom_login, name='login'),
+    path('custom-login/', custom_login, name='custom_login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('organization/<int:pk>/', OrganizationDetailView.as_view(), name='organization_detail'),

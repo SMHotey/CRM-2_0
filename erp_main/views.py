@@ -6,16 +6,14 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError
-from django.db.models import Sum, Q
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponseBadRequest
-from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory, Contract, \
     Shipment
-from .forms import OrderForm, OrganizationForm, InvoiceForm, UserCreationForm, OrderFileForm, LegalEntityForm, \
+from .forms import OrderForm, OrganizationForm, InvoiceForm,OrderFileForm, LegalEntityForm, \
     ShipmentForm
 import logging
 from docx import Document
@@ -26,27 +24,47 @@ from django.urls import reverse
 from openpyxl import load_workbook
 from django.contrib.auth.mixins import LoginRequiredMixin
 import re
-from django.contrib import messages
+from django.utils.http import url_has_allowed_host_and_scheme
 
 logger = logging.getLogger(__name__)
 
 
+@require_http_methods(["GET", "POST"])
 def custom_login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        next_url = request.POST.get('next', 'index')  # Получаем параметр next
+    # Обработка GET-запроса
+    if request.method == 'GET':
+        next_url = request.GET.get('next', '')  # Не устанавливаем дефолтное значение
+        return render(request, 'registration/login.html', {
+            'next': next_url,
+        })
 
-        user = authenticate(request, username=username, password=password)
+    # Обработка POST-запроса
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+    next_url = request.POST.get('next', '')  # Получаем без дефолтного значения
 
-        if user is not None:
-            login(request, user)
-            return redirect(next_url)  # Перенаправляем на next_url
-        else:
-            return render(request, 'registration/login.html', {'error': 'Неверные данные для входа'})
+    user = authenticate(request, username=username, password=password)
 
-    next_url = request.GET.get('next', 'index')  # Получаем параметр next из GET-запроса
-    return render(request, 'registration/login.html', {'next': next_url})
+    if user is None:
+        # Неверные данные
+        return render(request, 'registration/login.html', {
+            'error': 'Неверные имя пользователя или пароль',
+            'next': next_url,
+        })
+
+    if not user.is_active:
+        # Пользователь неактивен
+        return render(request, 'registration/login.html', {
+            'error': 'Ваш аккаунт деактивирован',
+            'next': next_url,
+        })
+
+    login(request, user)
+
+    # Безопасный редирект
+    if next_url and url_has_allowed_host_and_scheme(url=next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect(reverse('index'))  # Используем reverse вместо строки
 
 
 @login_required  # Декоратор для проверки аутентификации пользователя
@@ -131,6 +149,8 @@ class OrderUploadView(LoginRequiredMixin, FormView):
             context['organizations'] = Organization.objects.all()
         else:
             context['organizations'] = Organization.objects.filter(user=self.request.user)
+
+        context['legal_entities'] = LegalEntity.objects.all()
 
         return context
 
@@ -220,8 +240,8 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         return positions
 
     def _update_order_items(self, order, new_positions, old_file):
-        current_items = {item.position_num: item for item in OrderItem.objects.filter(order=order)}
-
+        current_items = {item.position_num: item for item in
+                         OrderItem.objects.filter(order=order).prefetch_related('glasses')}
         current_date = datetime.now().strftime('%d.%m.%Y')
         changes_made = []
 
@@ -250,47 +270,85 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                 'p_glass': self._count_glass(data[13:]),
             }
 
-            if n_num in current_items:  # если номер позиции есть в новом бланке заказа
+            if n_num in current_items:
                 first = 0
                 current_item = current_items[n_num]
                 for field, new_value in new_item_data.items():
                     old_value = getattr(current_item, field, None)
-                    if str(old_value) != str(new_value) and field != 'p_glass':
 
-                        field_name = OrderItem._meta.get_field(field).verbose_name
-                        if old_value:
+                    # Handle glass changes separately
+                    if field == 'p_glass':
+                        # Get existing glass info from database
+                        old_glass = {(g.height, g.width): g.quantity for g in current_item.glasses.all()}
+                        new_glass = new_value
+
+                        # Check if glass has changed
+                        if old_glass != new_glass:
                             if first == 0:
-                                changes_made.append(
-                                    f'<br> поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
+                                changes_made.append(f'<br> поз. {n_num}: изменено стекло ')
                                 first = 1
+
+                            # Format old glass info
+                            old_glass_str = ", ".join(
+                                [f"{h}x{w} ({q} шт.)" for (h, w), q in old_glass.items()]) if old_glass else "нет"
+                            # Format new glass info
+                            new_glass_str = ", ".join(
+                                [f"{h}x{w} ({q} шт.)" for (h, w), q in new_glass.items()]) if new_glass else "нет"
+
+                            changes_made.append(f"с \"{old_glass_str}\" на \"{new_glass_str}\";")
+
+                            # Update p_glass field
+                            setattr(current_item, 'p_glass', str(new_glass))
+                    else:
+                        if str(old_value) != str(new_value):
+                            field_name = OrderItem._meta.get_field(field).verbose_name
+                            if old_value:
+                                if first == 0:
+                                    changes_made.append(
+                                        f'<br> поз. {n_num}:  {field_name} с "{old_value}" на "{new_value}"; ')
+                                    first = 1
+                                else:
+                                    changes_made.append(f'{field_name} с "{old_value}" на "{new_value}";')
                             else:
-                                changes_made.append(f'{field_name} с "{old_value}" на "{new_value}";')
-                        else:
-                            changes_made.append(f'поз. {n_num}: добавлен {field_name} "{new_value}";')
-                        setattr(current_item, field, new_value)
+                                changes_made.append(f'поз. {n_num}: добавлен {field_name} "{new_value}";')
+                            setattr(current_item, field, new_value)
 
                 if changes_made:
-                    current_item.delete()
+                    # Delete existing glass info before saving new one
+                    current_item.glasses.all().delete()
+                    current_item.save()
 
-                    new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
-
-                    new_item.save()  # сохраняем обновленный объект
+                    # Save new glass info
+                    for (height, width), quantity in new_item_data['p_glass'].items():
+                        if height and width:  # Only create records for valid dimensions
+                            GlassInfo.objects.create(
+                                order_items=current_item,
+                                height=height,
+                                width=width,
+                                quantity=quantity
+                            )
             else:
                 new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
                 new_item.p_status = 'in_query'
-                new_item.save()  # Сохраняем новый объект OrderItem
+                new_item.save()
 
-                # Сохраняем информацию о стеклах
-                self._save_glass_info(new_item, new_item_data['p_glass'])
+                # Save glass info for new item
+                for (height, width), quantity in new_item_data['p_glass'].items():
+                    if height and width:  # Only create records for valid dimensions
+                        GlassInfo.objects.create(
+                            order_items=new_item,
+                            height=height,
+                            width=width,
+                            quantity=quantity
+                        )
 
         if changes_made:
-            #            changes_made = ('Изменения от ' + str(current_date) + ': <br>' + str(changes_made))
             comment = str(changes_made).replace('[', '').replace(']', '').replace("'", "").replace(",", "").strip()[5::]
-            order.save()  # Сохраняем изменения в заказе
+            order.save()
             add_changes = OrderChangeHistory(order=order, order_file=old_file, changed_by=self.request.user,
                                              comment=comment)
             add_changes.save()
-            #Добавление комментария в файл измененного заказа
+
             if order.order_file:
                 try:
                     wb = load_workbook(order.order_file.path)
@@ -298,7 +356,6 @@ class OrderUploadView(LoginRequiredMixin, FormView):
                     sheet['K3'] = comment.replace('<br>', '')
                     wb.save(order.order_file.path)
                 except Exception as e:
-                    # Обработка ошибки, если не удалось открыть или сохранить файл
                     print(f"Ошибка при записи комментария в файл: {e}")
 
     def _create_order_items(self, order, new_positions):
