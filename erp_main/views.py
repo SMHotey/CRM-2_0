@@ -164,6 +164,11 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         uploaded_file = form.cleaned_data.get('order_file')
         order_id = self.kwargs.get('order_id')
 
+        # Для нового заказа файл обязателен
+        if not order_id and not uploaded_file:
+            form.add_error('order_file', 'Пожалуйста, загрузите файл.')
+            return self.form_invalid(form)
+
         if order_id:
             # Извлечение существующего заказа из базы
             order = get_object_or_404(Order, pk=order_id)
@@ -181,27 +186,24 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         if uploaded_file:
             order.order_file = uploaded_file  # Загружаем файл, если он был загружен
 
-        # Проверка на наличие файла, если это новый заказ
-        if not uploaded_file and not is_update:
-            form.add_error('order_file', 'Пожалуйста, загрузите файл.')
-            return self._render_form_with_context(form)
+            # Проверка файла
+            try:
+                wb = load_workbook(uploaded_file)
+                if not self._check_header(wb.active):
+                    form.add_error('order_file', 'Выберите правильный файл заказа')
+                    return self.form_invalid(form)
+            except Exception as e:
+                form.add_error('order_file', 'Ошибка загрузки файла: ' + str(e))
+                return self.form_invalid(form)
 
         # Сохраняем объект Order
         order.save()
 
         # Обработка загрузки файла и обновление позиций заказа
         if uploaded_file:  # Обработка файла только если он был загружен
-            try:
-                wb = load_workbook(uploaded_file)
-            except Exception as e:
-                form.add_error(None, 'Ошибка загрузки файла: ' + str(e))
-                return self._render_form_with_context(form)
-
-            if not self._check_header(wb.active):
-                form.add_error('order_file', 'Выберите правильный файл заказа')
-                return self._render_form_with_context(form)
-
+            wb = load_workbook(uploaded_file)
             new_positions = self._process_file(wb.active)
+
             if is_update:
                 self._update_order_items(order, new_positions, old_file)  # Обновление позиций для существующего заказа
             else:

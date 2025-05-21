@@ -4,26 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="переход на MySQL">
-      <change afterPath="$PROJECT_DIR$/fix_bom.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fixed_dump.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_КУБ_11-01_4jW2zhl.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_КУБ_11-01_7zbUs5b.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_emXBHuJ_JJohGeS_HiMibZa.06.24_-_ЖК_-_14_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_emXBHuJ_JJohGeS_JkFvDE2.06.24_-_ЖК_-_14_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Фарм-Логистик_24_emXBHuJ_JJohGeS_ZsTOsne.06.24_-_ЖК_-_14_Эклипт.xlsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/new_dump.json" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="первый деплой">
+      <change afterPath="$PROJECT_DIR$/media/uploads/ПИ_чек-лист_договоров_покупатели.xls" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_ИП_Кубахова.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/справка_2023-1.pdf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/упд_540_544_545.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/glass_info.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/glass_info.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/shipment_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/shipment_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -399,15 +387,8 @@
       <workItem from="1747209538176" duration="9381000" />
       <workItem from="1747309973046" duration="4593000" />
       <workItem from="1747638000111" duration="12233000" />
-      <workItem from="1747722068038" duration="5245000" />
-    </task>
-    <task id="LOCAL-00007" summary="процесс идет">
-      <option name="closed" value="true" />
-      <created>1726233768277</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1726233768278</updated>
+      <workItem from="1747722068038" duration="5864000" />
+      <workItem from="1747811987145" duration="6680000" />
     </task>
     <task id="LOCAL-00008" summary="процесс идет">
       <option name="closed" value="true" />
@@ -793,7 +774,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746434922187</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="первый деплой">
+      <option name="closed" value="true" />
+      <created>1747751637808</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1747751637808</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -812,7 +801,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="добавлена опция изменения данных по счету и загрузки файла счета" />
     <MESSAGE value="таблица стекла" />
     <MESSAGE value="представления по организации в классы." />
     <MESSAGE value="начало работы на чистовик" />
@@ -837,12 +825,13 @@
     <MESSAGE value="убрано нефункциональное" />
     <MESSAGE value="отражение изменения статуса заявки в истории" />
     <MESSAGE value="переход на MySQL" />
-    <option name="LAST_COMMIT_MESSAGE" value="переход на MySQL" />
+    <MESSAGE value="первый деплой" />
+    <option name="LAST_COMMIT_MESSAGE" value="первый деплой" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Journal_4_0$fix_bom.coverage" NAME="fix_bom Coverage Results" MODIFIED="1746434437970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$test.coverage" NAME="test Coverage Results" MODIFIED="1746433440343" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1747732548594" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1747812013774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1737014151421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
     <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745936517854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
   </component>
