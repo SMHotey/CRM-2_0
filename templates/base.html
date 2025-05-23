@@ -4,8 +4,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .alert-info {
             background: none;
@@ -13,12 +13,12 @@
             border: none;
         }
         body {
-            background-image: url("{% static 'erp_main/images/back.png' %}"); /* Укажите путь к вашему изображению */
-            background-size: cover; /* Для растянуть изображение на всю страницу */
-            background-position: center; /* Центрируйте изображение */
-            background-repeat: repeat; /* Не повторять изображение */
-            height: 100vh; /* Высота 100% от высоты окна */
-            margin: 0; /* Убираем отступы */
+            background-image: url("{% static 'erp_main/images/back.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: repeat;
+            height: 100vh;
+            margin: 0;
         }
 
         .card, #first-block, #readiness, #shipment, #delay {
@@ -29,21 +29,19 @@
             background-color:whitesmoke;
         }
         .card .card-header {
-            font-size: 20px; /* Размер шрифта для заголовка карточки */
+            font-size: 20px;
         }
 
         #first-block {
             background: linear-gradient(135deg, #37b1de, #494949);
             box-shadow: 0 6px 5px rgba(0, 0, 0, 0.2);
             transition: box-shadow 0.3s ease, transform 0.3s ease;
-
         }
 
         #first-block:hover {
             background: linear-gradient(135deg, #494949, #37b1de);
             transform: translateY(-5px);
             box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
-
         }
 
         #readiness {
@@ -56,7 +54,7 @@
             background: linear-gradient(25deg, blue, grey);
             transform: translateY(-5px);
             box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
-}
+        }
 
         #shipment {
             background: linear-gradient(25deg, grey, green);
@@ -83,9 +81,9 @@
         }
 
         #logo {
-            transition: transform 0.6s ease; /* Плавный переход для трансформации */
-            width: 200px; /* Задайте ширину по необходимости */
-            height: auto; /* Автоматическая высота */
+            transition: transform 0.6s ease;
+            width: 200px;
+            height: auto;
         }
 
         #logo:hover {
@@ -102,13 +100,11 @@
             padding: 20px;
             text-align: center;
             background-color: aliceblue;
-
         }
 
         .nav-item {
             position: relative;
             list-style: none;
-
         }
 
         .nav-link {
@@ -117,8 +113,6 @@
             padding: 10px 15px 10px 45px;
             color: #494949;
             font-weight: bold;
-
-
         }
 
         .nav-link:hover {
@@ -128,7 +122,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.75);
             margin-left: 20px;
             border-color: white;
-
         }
 
         .sidebar {
@@ -137,12 +130,11 @@
             position: fixed;
             height: 100%;
             overflow-y: auto;
-
             background-color: aliceblue;
             transition: 0.5s;
             box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
             z-index: 2;
-            font-family: "Monotype Corsiva", fantasy;
+    <!--        font-family: "Monotype Corsiva", fantasy; -->
             font-size: 21px;
         }
 
@@ -155,35 +147,143 @@
             margin-left: 270px;
             padding: 20px;
             transition: margin-left 0.5s;
-
         }
 
         .dropdown-menu {
             background-color: deepskyblue;
-            font-size: 18px;
+            font-size: 17px;
         }
 
         .dropdown-item:hover {
             background-color: #4ea1e0;
-            font-size: 22px;
+            font-size: 20px;
             color: aliceblue;
         }
 
         .gradient-line {
-            height: 2px; /* Высота линии */
+            height: 2px;
             background-color: white;
-            width: 100%; /* Ширина линии */
-            margin: 20px 0; /* Отступы сверху и снизу */
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background: aliceblue;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Мобильные стили */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+
+            .sidebar:hover {
+                width: 260px;
+                z-index: 1000;
+            }
+
+            .sidebar .nav-link {
+                padding: 10px 15px;
+                white-space: nowrap;
+            }
+
+            .sidebar .dropdown-toggle::after {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+
+            #logo {
+                width: 50px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px;
+                position: fixed;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding-top: 60px;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .card, #first-block, #readiness, #shipment, #delay {
+                margin-bottom: 15px;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            }
+
+            .card-header {
+                font-size: 1rem;
+            }
+
+            .card-body {
+                padding: 10px;
+            }
+
+            .row.my-3 > div {
+                margin-bottom: 15px;
+            }
+
+            .alert-info {
+                font-size: 24px !important;
+            }
+
+            .row.mb-0 .col-md-10,
+            .row.mb-0 .col-md-2 {
+                width: 100%;
+                text-align: center !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                padding: 15px 10px;
+            }
+
+            #logo {
+                width: 40px;
+            }
+
+            .nav-link {
+                font-size: 16px;
+                padding: 8px 12px;
+            }
         }
     </style>
 
-
-    <title>CRM Система</title>
+    <title>Завод металлических дверей</title>
 </head>
 <body>
 
 <div class="container-fluid">
     <div class="row">
+        <button class="mobile-menu-btn d-lg-none" onclick="toggleMenu()">☰</button>
+
         <nav class="sidebar" id="sidebar">
             <div style="text-align: center;">
                 <a href="{% url 'index' %}">
@@ -200,11 +300,10 @@
                             <li><a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a></li>
                             <li><a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a></li>
                             <li><a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a></li>
- {#                            <li><a class="dropdown-item" href="#">Умный поиск</a></li>   #}
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Организации</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Клиенты</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все клиенты</a></li>
                              {% if user.is_superuser %}
@@ -213,18 +312,9 @@
                             <li><a class="dropdown-item" href="{% url 'organization_add' %}">Добавить клиента</a></li>
                         </ul>
                     </li>
-    <!--                <li class="nav-item">
-                        <a class="nav-link" href="#">Стекло</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Статистика</a>
-                    </li>   -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Расчеты</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Счета</a>
                         <ul class="dropdown-menu">
-      <!--                  <li><a class="dropdown-item" href="#">Прайс общий</a></li>
-                            <li><a class="dropdown-item" href="#">Прайсы клиентов</a></li>
-                            <li><a class="dropdown-item" href="#">Создать КП</a></li>       -->
                             <li><a class="dropdown-item" href="{% url 'invoice_add' %}">Добавить счет</a></li>
                             <li><a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a></li>
                         </ul>
@@ -232,21 +322,9 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Отгрузки</a>
                         <ul class="dropdown-menu">
-     <!--                   <li><a class="dropdown-item" href="{% url 'calendar' %}">Цех №1</a></li>
-                            <li><a class="dropdown-item" href="{% url 'calendar' %}">Цех №3</a></li>        -->
                             <li><a class="dropdown-item" href="{% url 'calendar' %}">Календарь отгрузок</a></li>
                         </ul>
                     </li>
-      <!--              <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Документы</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Регламенты</a></li>
-                            <li><a class="dropdown-item" href="#">Служебные записки</a></li>
-                            <li><a class="dropdown-item" href="#">Ответы на претензии</a></li>
-                            <li><a class="dropdown-item" href="#">Договоры</a></li>
-                            <li><a class="dropdown-item" href="#">Выставленные КП</a></li>
-                        </ul>
-                    </li>   -->
                 </ul>
             </div>
             <div class="gradient-line"></div>
@@ -289,8 +367,8 @@
                 </div>
             </div>
 
-                    <div class="row my-3">
-                       <div class="col-md-4">
+            <div class="row my-3">
+                <div class="col-md-4">
                     <div class="card text-white bg-primary mb-3" id="readiness">
                         <div class="card-header">Готовность на сегодня</div>
                         <div class="card-body">
@@ -298,14 +376,14 @@
                             {% if today %}
                                 {% for num, link in today.items %}
                                     <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
-                                    {% if forloop.last != True%},{% endif %}
+                                    {% if forloop.last != True %},{% endif %}
                                 {% endfor %}
                             {% endif %}
                             </p>
                         </div>
                     </div>
                 </div>
-                        <div class="col-md-4">
+                <div class="col-md-4">
                     <div class="card text-white bg-success mb-3" id="shipment">
                         <div class="card-header">Отгрузки на сегодня</div>
                         <div class="card-body text-black">
@@ -313,9 +391,9 @@
                                 {% if ships %}
                                 {% for num, link in ships.items %}
                                     <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
-                                    {% if forloop.last != True%},{% endif %}
+                                    {% if forloop.last != True %},{% endif %}
                                 {% endfor %}
-                            {% endif %}
+                                {% endif %}
                             </p>
                         </div>
                     </div>
@@ -328,7 +406,7 @@
                                 {% if overdue %}
                                 {% for num, link in overdue.items %}
                                     <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
-                                    {% if forloop.last != True%},{% endif %}
+                                    {% if forloop.last != True %},{% endif %}
                                 {% endfor %}
                                 {% endif %}
                             </p>
@@ -343,18 +421,35 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 
     function toggleMenu() {
         sidebar.classList.toggle('show');
-        mainContent.classList.toggle('shifted');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.textContent = sidebar.classList.contains('show') ? '✕' : '☰';
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        sidebar.classList.add('show');
+        // Прячем кнопку меню на десктопах
+        if (window.innerWidth >= 992) {
+            sidebar.classList.add('show');
+            if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
+        }
+    });
+
+    // Обработчик изменения размера окна
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 992) {
+            sidebar.classList.add('show');
+            if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
+        } else {
+            if (mobileMenuBtn) mobileMenuBtn.style.display = 'block';
+        }
     });
 </script>
 <meta name="csrf-token" content="{{ csrf_token }}">

@@ -1,7 +1,255 @@
 {% extends 'base.html' %}
 
-{% block content %}
-Текущий пользователь: {{ user.first_name }} {{ user.last_name }}
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .stat-card {
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .progress {
+            height: 1.5rem;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        @media (max-width: 768px) {
+            .date-picker {
+                flex-direction: column;
+            }
+            .date-input {
+                margin-bottom: 10px;
+            }
+            .status-filter {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+</head>
+{% block content %}
+<body>
+    <div class="container-fluid py-4">
+        <h1 class="text-center mb-4">Статистика менеджера</h1>
+
+        <!-- Фильтры -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Фильтры</h5>
+                <form>
+                    <div class="row date-picker mb-3">
+                        <div class="col-md-5 date-input">
+                            <label for="startDate" class="form-label">Начальная дата</label>
+                            <input type="date" class="form-control" id="startDate" name="startDate" value="{{ start_date }}">
+                        </div>
+                        <div class="col-md-5 date-input">
+                            <label for="endDate" class="form-label">Конечная дата</label>
+                            <input type="date" class="form-control" id="endDate" name="endDate" value="{{ end_date }}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Применить</button>
+                        </div>
+                    </div>
+
+                    <div class="row status-filter">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Статус счетов</label>
+                            <select class="form-select" name="invoice_status">
+                                <option value="">Все</option>
+                                <option value="paid" {% if invoice_status == 'paid' %}selected{% endif %}>Оплаченные</option>
+                                <option value="unpaid" {% if invoice_status == 'unpaid' %}selected{% endif %}>Неоплаченные</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Статус заказов</label>
+                            <select class="form-select" name="order_status">
+                                <option value="">Все</option>
+                                <option value="in_query" {% if order_status == 'in_query' %}selected{% endif %}>В очереди</option>
+                                <option value="product" {% if order_status == 'product' %}selected{% endif %}>Запущенные</option>
+                                <option value="ready" {% if order_status == 'ready' %}selected{% endif %}>Готовые</option>
+                                <option value="shipped" {% if order_status == 'shipped' %}selected{% endif %}>Отгруженные</option>
+                                <option value="stopped" {% if order_status == 'stopped' %}selected{% endif %}>Остановленные</option>
+                                <option value="canceled" {% if order_status == 'canceled' %}selected{% endif %}>Отмененные</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Общая статистика -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card stat-card bg-primary text-black">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Организации</h5>
+                                <h2 class="mb-0">{{ orgs_count }}</h2>
+                            </div>
+                            <i class="bi bi-building fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stat-card bg-success text-black bi-align-center">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Заказы</h5>
+                                <h2 class="mb-0">{{ orders_count }}</h2>
+                            </div>
+                            <i class="bi bi-clipboard-check fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card stat-card bg-info text-black">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Счета</h5>
+                                <h2 class="mb-0">{{ invoices_count }}</h2>
+                            </div>
+                            <i class="bi bi-receipt fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по счетам -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between align-items-center">
+                    <span>Текущие счета</span>
+                    <span class="badge bg-primary">Общая сумма: {{ total_invoices_amount }} руб.</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Организация</th>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th>Оплачено</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                            <tr>
+                                <td><a href="{% url 'invoice_detail' invoice.id %}">{{ invoice.number }}</a></td>
+                                <td><a href="{% url 'organization_detail' invoice.organization.id %}">{{ invoice.organization }}</a></td>
+                                <td>{{ invoice.date|date:"d.m.Y" }}</td>
+                                <td>{{ invoice.amount }} руб.</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-{% if invoice.percent == 100 %}success{% else %}warning{% endif %}"
+                                             role="progressbar"
+                                             style="width: {{ invoice.percent }}%"
+                                             aria-valuenow="{{ invoice.percent }}"
+                                             aria-valuemin="0"
+                                             aria-valuemax="100">
+                                            {{ invoice.percent }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if invoice.is_paid %}success{% else %}warning{% endif %}">
+                                        {% if invoice.is_paid %}Оплачен{% else %}Не оплачен{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по заказам -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Статистика по заказам</h5>
+
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Дата создания</th>
+                                <th>Срок выполнения</th>
+                                <th>Статус</th>
+                                <th>Количество изделий</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td><a href="{% url 'order_detail' order.id %}">{{ order.id }}</a></td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ order.due_date|date:"d.m.Y" }}</td>
+                                <td>
+                                    <span class="badge bg-{% if order.status == 'готов' %}success{% elif order.status == 'отгружен' %}info{% elif order.status == 'запущен' %}primary{% elif order.status == 'в очереди' %}secondary{% elif order.status == 'остановлен' %}warning{% else %}danger{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                                <td>{{ order.quantity }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Организации -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Организации</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>ИНН</th>
+                                <th>Телефон</th>
+                                <th>Email</th>
+                                <th>Последний заказ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for org in organizations %}
+                            <tr>
+
+                                <td> <a href="{% url 'organization_detail' org.id %}">{{ org.name|default:org.name_fl }}</a></td>
+                                <td>{{ org.inn }}</td>
+                                <td>{{ org.phone_number }}</td>
+                                <td>{{ org.email }}</td>
+                                <td>{{ org.last_order|date:"d.m.Y"|default:"Нет заказов" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+
 
