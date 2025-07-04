@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Расчет стоимости{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="card">
+        <div class="card-header">
+            <h4>Калькулятор стоимости</h4>
+        </div>
+        <div class="card-body">
+            <button id="calculate-btn" class="btn btn-primary mb-3">Рассчитать</button>
+            <button id="add-row" class="btn btn-success mb-3">+ Добавить строку</button>
+            <button id="save-btn" class="btn btn-info mb-3">Сохранить данные</button>
+            <div id="save-status" class="mt-2"></div> <!-- Контейнер для статуса сохранения -->
+            <div id="calculation-table" style="height: 500px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Используем надежный CDN -->
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверка загрузки Tabulator
+    if (typeof Tabulator === 'undefined') {
+        console.error('Tabulator не загружен!');
+        document.getElementById('save-status').innerHTML = `
+            <div class="alert alert-danger">
+                Ошибка загрузки Tabulator. Пожалуйста, обновите страницу.
+            </div>
+        `;
+        return;
+    }
+
+    // Кастомный редактор выпадающего списка
+    const customSelectEditor = function(cell, onRendered, success, cancel, editorParams) {
+        const input = document.createElement("select");
+
+        // Добавление опций
+        for (const [value, label] of Object.entries(editorParams.values)) {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            if (value === cell.getValue()) option.selected = true;
+            input.appendChild(option);
+        }
+
+        // Обработчики событий
+        input.addEventListener("change", function() {
+            success(input.value);
+        });
+
+        input.addEventListener("blur", function() {
+            cancel();
+        });
+
+        // Фокусировка при рендеринге
+        onRendered(function() {
+            input.focus();
+        });
+
+        return input;
+    };
+
+    // Инициализация таблицы
+    const table = new Tabulator("#calculation-table", {
+        data: [
+            {
+                id: 1,
+                product_name: "Дверь входная",
+                price: 15000,
+                quantity: 1,
+                door_type: "external",
+                status: 1
+            },
+            {
+                id: 2,
+                product_name: "Дверь межкомнатная",
+                price: 8000,
+                quantity: 2,
+                door_type: "internal",
+                status: 0
+            },
+        ],
+        columns: [
+            {title: "ID", field: "id", width: 70, frozen: true},
+            {
+                title: "Тип двери",
+                field: "door_type",
+                editor: customSelectEditor,
+                editorParams: {
+                    values: {
+                        "internal": "Межкомнатная",
+                        "external": "Входная",
+                        "fire": "Противопожарная",
+                        "armored": "Бронированная"
+                    }
+                },
+                formatter: function(cell) {
+                    const map = {
+                        "internal": "Межкомнатная",
+                        "external": "Входная",
+                        "fire": "Противопожарная",
+                        "armored": "Бронированная"
+                    };
+                    const value = cell.getValue();
+                    return map[value] || value;
+                },
+                editable: true,
+                cellClick: function(e, cell) {
+                    cell.edit();
+                }
+            },
+            {
+                title: "Изделие",
+                field: "product_name",
+                editor: "input",
+                formatter: "plaintext"
+            },
+            {
+                title: "Цена (₽)",
+                field: "price",
+                editor: "number",
+                formatter: "money",
+                formatterParams: {symbol: "₽", precision: 0},
+                validator: ["required", "numeric", "min:0"]
+            },
+            {
+                title: "Кол-во",
+                field: "quantity",
+                editor: "number",
+                validator: ["required", "integer", "min:1"]
+            },
+            {
+                title: "Сумма (₽)",
+                field: "total",
+                formatter: "money",
+                formatterParams: {symbol: "₽", precision: 0},
+                bottomCalc: "sum",
+                bottomCalcParams: {precision: 0},
+                mutator: function(value, data) {
+                    const price = parseFloat(data.price) || 0;
+                    const quantity = parseInt(data.quantity) || 0;
+                    return price * quantity;
+                }
+            },
+            {
+                title: "Статус заказа",
+                field: "status",
+                editor: customSelectEditor,
+                editorParams: {
+                    values: {
+                        0: "Черновик",
+                        1: "На производстве",
+                        2: "Готов к отгрузке",
+                        3: "Отгружен",
+                        4: "Отменен"
+                    }
+                },
+                formatter: function(cell) {
+                    const map = {
+                        0: "<span class='text-secondary'>Черновик</span>",
+                        1: "<span class='text-primary'>На производстве</span>",
+                        2: "<span class='text-success'>Готов к отгрузке</span>",
+                        3: "<span class='text-info'>Отгружен</span>",
+                        4: "<span class='text-danger'>Отменен</span>"
+                    };
+                    const value = cell.getValue();
+                    return map[value] || value;
+                },
+                editable: true,
+                cellClick: function(e, cell) {
+                    cell.edit();
+                }
+            }
+        ],
+        layout: "fitColumns",
+        cellEdited: function(cell) {
+            if (["price", "quantity"].includes(cell.getField())) {
+                const row = cell.getRow();
+                row.recalc();
+                table.recalc();
+            }
+        }
+    });
+
+    // Ручной пересчет по кнопке
+    document.getElementById("calculate-btn").addEventListener("click", function() {
+        table.getRows().forEach(row => {
+            const data = row.getData();
+            row.update({
+                total: (parseFloat(data.price) || 0) * (parseInt(data.quantity) || 0)
+            });
+        });
+        table.recalc();
+    });
+
+    // Добавление новой строки
+    document.getElementById("add-row").addEventListener("click", function() {
+        const newId = table.getData().length + 1;
+        table.addRow({
+            id: newId,
+            product_name: "Новое изделие",
+            price: 0,
+            quantity: 1,
+            door_type: "internal",
+            status: 0
+        }, true);
+    });
+
+    // Сохранение данных на сервере
+    document.getElementById("save-btn").addEventListener("click", function() {
+        const saveBtn = this;
+        const statusContainer = document.getElementById('save-status');
+        const originalBtnText = saveBtn.innerHTML;
+
+        // Показываем индикатор загрузки
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+        saveBtn.disabled = true;
+        statusContainer.innerHTML = '';
+
+        // Получаем данные таблицы
+        const tableData = table.getData();
+
+        // Получаем CSRF-токен
+        const csrftoken = getCookie('csrftoken');
+
+        // Отправляем данные на сервер
+        fetch("{% url 'save_calculation_data' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({
+                calculation_data: tableData,
+                // Дополнительные данные, если нужны
+                project_id: 123
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка сети');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Успешное сохранение
+                statusContainer.innerHTML = `
+                    <div class="alert alert-success mt-2">
+                        Данные успешно сохранены! ID: ${data.calculation_id}
+                    </div>
+                `;
+                console.log("Данные сохранены на сервере:", data);
+            } else {
+                // Ошибка на сервере
+                throw new Error(data.error || 'Неизвестная ошибка сервера');
+            }
+        })
+        .catch(error => {
+            // Обработка ошибок
+            console.error('Ошибка сохранения:', error);
+            statusContainer.innerHTML = `
+                <div class="alert alert-danger mt-2">
+                    Ошибка сохранения: ${error.message}
+                </div>
+            `;
+        })
+        .finally(() => {
+            // Восстанавливаем кнопку
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+        });
+    });
+
+    // Функция для получения CSRF-токена (уже есть в base.html)
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Проверка загрузки Tabulator
+    console.log("Tabulator version:", Tabulator.version);
+});
+</script>
+
+<style>
+    .text-secondary { color: #6c757d; }
+    .text-primary { color: #007bff; }
+    .text-success { color: #28a745; }
+    .text-info { color: #17a2b8; }
+    .text-danger { color: #dc3545; }
+</style>
+{% endblock %}

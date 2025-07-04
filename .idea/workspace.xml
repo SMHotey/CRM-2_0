@@ -4,13 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="дополнена проверка файла заказа">
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="добавлена статистика по менеджеру">
+      <change afterPath="$PROJECT_DIR$/calculation/migrations/0003_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/calculation/migrations/0004_cp_calculation_calculationitem_cpitem.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/calculation/templates/calculation_table.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/calculation/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/Journal_4_0.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Journal_4_0.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsLibraryMappings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/calculation/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/calculation/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/calculation/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/calculation/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -388,15 +394,16 @@
       <workItem from="1747638000111" duration="12233000" />
       <workItem from="1747722068038" duration="5864000" />
       <workItem from="1747811987145" duration="9217000" />
-      <workItem from="1747984904599" duration="12982000" />
-    </task>
-    <task id="LOCAL-00010" summary="процесс идет">
-      <option name="closed" value="true" />
-      <created>1727965088690</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1727965088691</updated>
+      <workItem from="1747984904599" duration="13018000" />
+      <workItem from="1748244027152" duration="2360000" />
+      <workItem from="1748328061907" duration="5458000" />
+      <workItem from="1748421103824" duration="3056000" />
+      <workItem from="1749211934535" duration="344000" />
+      <workItem from="1750933444641" duration="1856000" />
+      <workItem from="1751352337007" duration="13556000" />
+      <workItem from="1751440806154" duration="15792000" />
+      <workItem from="1751531189477" duration="6323000" />
+      <workItem from="1751617648575" duration="7321000" />
     </task>
     <task id="LOCAL-00011" summary="процесс идет">
       <option name="closed" value="true" />
@@ -782,7 +789,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747830956229</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="добавлена статистика по менеджеру">
+      <option name="closed" value="true" />
+      <created>1748007443166</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1748007443168</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -801,7 +816,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="представления по организации в классы." />
     <MESSAGE value="начало работы на чистовик" />
     <MESSAGE value="обработка добавления счета" />
     <MESSAGE value="обработка добавления счета - заработало" />
@@ -826,12 +840,13 @@
     <MESSAGE value="переход на MySQL" />
     <MESSAGE value="первый деплой" />
     <MESSAGE value="дополнена проверка файла заказа" />
-    <option name="LAST_COMMIT_MESSAGE" value="дополнена проверка файла заказа" />
+    <MESSAGE value="добавлена статистика по менеджеру" />
+    <option name="LAST_COMMIT_MESSAGE" value="добавлена статистика по менеджеру" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Journal_4_0$fix_bom.coverage" NAME="fix_bom Coverage Results" MODIFIED="1746434437970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$test.coverage" NAME="test Coverage Results" MODIFIED="1746433440343" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1747992534180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1751627625084" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1737014151421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
     <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745936517854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
   </component>

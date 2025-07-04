@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('erp_main/', include('erp_main.urls')),
     path('custom-login/', custom_login, name='custom_login'),
+    path('calculation/', include('calculation.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
     <style>
         .alert-info {
             background: none;
@@ -313,10 +314,11 @@
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Счета</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Расчеты</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'invoice_add' %}">Добавить счет</a></li>
                             <li><a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a></li>
+                            <li><a class="dropdown-item" href="{% url 'calculation_table' %}">Расчеты</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -420,8 +422,9 @@
         </main>
     </div>
 </div>
-
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 <script>
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.querySelector('.main-content');
@@ -470,5 +473,7 @@ function getCookie(name) {
 }
 const csrftoken = getCookie('csrftoken');
 </script>
+    {% block extra_scripts %}{% endblock %}
+{% endblock %}
 </body>
 </html>
