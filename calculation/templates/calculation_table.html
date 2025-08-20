@@ -9,23 +9,182 @@
             <h4>Калькулятор стоимости</h4>
         </div>
         <div class="card-body">
-            <button id="calculate-btn" class="btn btn-primary mb-3">Рассчитать</button>
-            <button id="add-row" class="btn btn-success mb-3">+ Добавить строку</button>
-            <button id="save-btn" class="btn btn-info mb-3">Сохранить данные</button>
-            <div id="save-status" class="mt-2"></div> <!-- Контейнер для статуса сохранения -->
+            <!-- Основные кнопки действий -->
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button id="calculate-btn" class="btn btn-primary">Рассчитать</button>
+                <button id="add-row" class="btn btn-success">+ Добавить строку</button>
+                <button id="save-btn" class="btn btn-info">Сохранить данные</button>
+            </div>
+
+            <!-- Блок элементов управления таблицей -->
+            <div class="table-controls-panel card mb-3">
+                <div class="card-header py-2">
+                    <h6 class="mb-0">Опции таблицы</h6>
+                </div>
+                <div class="card-body py-2">
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button id="toggle-size-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrows-expand"></i> Показать размеры
+                        </button>
+                        <button id="toggle-transom-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-layout-three-columns"></i> Показать фрамугу
+                        </button>
+                        <button id="toggle-glazing1-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-grid-3x3"></i> Остекление 1
+                        </button>
+                        <button id="toggle-glazing2-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-grid-3x3"></i> Остекление 2
+                        </button>
+                        <button id="toggle-metal-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-shield"></i> Металл
+                        </button>
+                        <button id="toggle-vent-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-grid"></i> Вентрешетка
+                        </button>
+                        <button id="toggle-bumper-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-border-all"></i> Отбойная пластина
+                        </button>
+                        <button id="toggle-extension-btn" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrows-expand-vertical"></i> Добор
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="save-status" class="mt-2"></div>
             <div id="calculation-table" style="height: 500px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для отображения информации о строке -->
+<div class="modal fade" id="rowInfoModal" tabindex="-1" aria-labelledby="rowInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rowInfoModalLabel">Информация о строке #<span id="modal-row-id"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Поле</th>
+                                <th>Значение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Изделие</strong></td>
+                                <td id="modal-product"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Тип</strong></td>
+                                <td id="modal-type"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ширина</strong></td>
+                                <td id="modal-width"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Высота</strong></td>
+                                <td id="modal-height"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Фрамуга высота</strong></td>
+                                <td id="modal-transom-height"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Фрамуга ширина</strong></td>
+                                <td id="modal-transom-width"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Фрамуга остекление</strong></td>
+                                <td id="modal-transom-glazing"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Остекление 1 вид</strong></td>
+                                <td id="modal-glazing1-type"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Остекление 1 высота</strong></td>
+                                <td id="modal-glazing1-height"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Остекление 1 ширина</strong></td>
+                                <td id="modal-glazing1-width"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Остекление 2 вид</strong></td>
+                                <td id="modal-glazing2-type"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Остекление 2 высота</strong></td>
+                                <td id="modal-glazing2-height"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Остекление 2 ширина</strong></td>
+                                <td id="modal-glazing2-width"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Металл</strong></td>
+                                <td id="modal-metal"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Вентрешетка вид</strong></td>
+                                <td id="modal-vent-type"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Вентрешетка высота</strong></td>
+                                <td id="modal-vent-height"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Вентрешетка ширина</strong></td>
+                                <td id="modal-vent-width"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Отбойная пластина высота</strong></td>
+                                <td id="modal-bumper-height"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Отбойная пластина с 2-х сторон</strong></td>
+                                <td id="modal-bumper-both-sides"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Добор (толщина стены)</strong></td>
+                                <td id="modal-extension"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Количество</strong></td>
+                                <td id="modal-quantity"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Сумма</strong></td>
+                                <td id="modal-total"></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Статус заказа</strong></td>
+                                <td id="modal-status"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<!-- Используем надежный CDN -->
 <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Проверка загрузки Tabulator
     if (typeof Tabulator === 'undefined') {
         console.error('Tabulator не загружен!');
         document.getElementById('save-status').innerHTML = `
@@ -36,11 +195,23 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Кастомный редактор выпадающего списка
+    // Переменные для отслеживания состояния столбцов
+
+    let sizeColumns = [];
+    let transomColumns = [];
+    let glazing1Columns = [];
+    let glazing2Columns = [];
+    let metalColumn = null;
+    let ventColumns = [];
+    let bumperColumns = [];
+    let extensionColumn = null;
+
+    // Инициализация модального окна Bootstrap
+    const rowInfoModal = new bootstrap.Modal(document.getElementById('rowInfoModal'));
+
     const customSelectEditor = function(cell, onRendered, success, cancel, editorParams) {
         const input = document.createElement("select");
 
-        // Добавление опций
         for (const [value, label] of Object.entries(editorParams.values)) {
             const option = document.createElement("option");
             option.value = value;
@@ -49,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
             input.appendChild(option);
         }
 
-        // Обработчики событий
         input.addEventListener("change", function() {
             success(input.value);
         });
@@ -58,7 +228,6 @@ document.addEventListener('DOMContentLoaded', function() {
             cancel();
         });
 
-        // Фокусировка при рендеринге
         onRendered(function() {
             input.focus();
         });
@@ -66,46 +235,91 @@ document.addEventListener('DOMContentLoaded', function() {
         return input;
     };
 
-    // Инициализация таблицы
     const table = new Tabulator("#calculation-table", {
         data: [
             {
                 id: 1,
-                product_name: "Дверь входная",
+                door_type: "Дверь",
                 price: 15000,
                 quantity: 1,
-                door_type: "external",
-                status: 1
+                door_kind: "EI-60",
+                status: 1,
+                width: 900,
+                height: 2100,
+                transom_height: 0,
+                transom_width: 0,
+                transom_glazing: "none",
+                glazing1_type: "none",
+                glazing1_height: 0,
+                glazing1_width: 0,
+                glazing2_type: "none",
+                glazing2_height: 0,
+                glazing2_width: 0,
+                metal: "1.2-1.4",
+                vent_type: "none",
+                vent_height: 0,
+                vent_width: 0,
+                bumper_height: 0,
+                bumper_both_sides: "no",
+                extension: 0
             },
             {
                 id: 2,
-                product_name: "Дверь межкомнатная",
+                door_type: "Дверь 2-ств.",
                 price: 8000,
                 quantity: 2,
-                door_type: "internal",
-                status: 0
+                door_kind: "EIS-60",
+                status: 0,
+                width: 800,
+                height: 2000,
+                transom_height: 400,
+                transom_width: 800,
+                transom_glazing: "single",
+                glazing1_type: "single",
+                glazing1_height: 300,
+                glazing1_width: 200,
+                glazing2_type: "none",
+                glazing2_height: 0,
+                glazing2_width: 0,
+                metal: "1.4-1.4",
+                vent_type: "tech",
+                vent_height: 100,
+                vent_width: 200,
+                bumper_height: 150,
+                bumper_both_sides: "yes",
+                extension: 120
             },
         ],
         columns: [
-            {title: "ID", field: "id", width: 70, frozen: true},
             {
-                title: "Тип двери",
+                title: "№",
+                field: "id",
+                width: 40,
+                frozen: true,
+                cellClick: function(e, cell) {
+                    // Открываем модальное окно при клике на ячейку с номером
+                    showRowInfo(cell.getRow());
+                }
+            },
+            {
+                title: "Изделие",
+                width: 100,
                 field: "door_type",
                 editor: customSelectEditor,
                 editorParams: {
                     values: {
-                        "internal": "Межкомнатная",
-                        "external": "Входная",
-                        "fire": "Противопожарная",
-                        "armored": "Бронированная"
+                        "door": "Дверь",
+                        "door_2": "Дверь 2-ств.",
+                        "hatch": "Люк",
+                        "gate": "Ворота"
                     }
                 },
                 formatter: function(cell) {
                     const map = {
-                        "internal": "Межкомнатная",
-                        "external": "Входная",
-                        "fire": "Противопожарная",
-                        "armored": "Бронированная"
+                        "door": "Дверь",
+                        "door_2": "Дверь 2-ств.",
+                        "hatch": "Люк",
+                        "gate": "Ворота"
                     };
                     const value = cell.getValue();
                     return map[value] || value;
@@ -116,18 +330,379 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             },
             {
-                title: "Изделие",
-                field: "product_name",
-                editor: "input",
-                formatter: "plaintext"
+                title: "Тип",
+                field: "door_kind",
+                width: 60,
+                editor: customSelectEditor,
+                editorParams: {
+                    values: {
+                        "tech": "тех.",
+                        "ei-60": "EI-60",
+                        "eis-60": "EIS-60",
+                        "revision": "однолист."
+                    }
+                },
+                formatter: function(cell) {
+                    const map = {
+                        "tech": "тех.",
+                        "ei-60": "EI-60",
+                        "eis-60": "EIS-60",
+                        "revision": "однолист."
+                    };
+                    const value = cell.getValue();
+                    return map[value] || value;
+                },
+                editable: true,
+                cellClick: function(e, cell) {
+                    cell.edit();
+                }
             },
             {
-                title: "Цена (₽)",
-                field: "price",
+                title: "Размеры по коробке",
+                headerTooltip: "Группа столбцов размеров",
+                columns: [
+                    {
+                        title: "Высота",
+                        width: 90,
+                        field: "height",
+                        visible: false,
+                        editor: "number",
+                        validator: ["required", "numeric", "min:100", "max:3000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "Ширина",
+                        width: 95,
+                        field: "width",
+                        visible: false,
+                        editor: "number",
+                        validator: ["required", "numeric", "min:100", "max:2000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                ]
+            },
+            {
+                title: "Фрамуга",
+                headerTooltip: "Группа столбцов фрамуги",
+                columns: [
+                    {
+                        title: "Высота",
+                        width: 90,
+                        field: "transom_height",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:1000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "Ширина",
+                        width: 95,
+                        field: "transom_width",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:2000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "Вид остекления",
+                        width: 110,
+                        field: "transom_glazing",
+                        visible: false,
+                        editor: customSelectEditor,
+                        editorParams: {
+                            values: {
+                                "none": "нет",
+                                "single": "однокамерное",
+                                "double": "двухкамерное",
+                                "triple": "трехкамерное",
+                                "laminated": "триплекс"
+                            }
+                        },
+                        formatter: function(cell) {
+                            const map = {
+                                "none": "нет",
+                                "single": "однокамерное",
+                                "double": "двухкамерное",
+                                "triple": "трехкамерное",
+                                "laminated": "триплекс"
+                            };
+                            const value = cell.getValue();
+                            return map[value] || value;
+                        },
+                        editable: true,
+                        cellClick: function(e, cell) {
+                            cell.edit();
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Остекление_1",
+                headerTooltip: "Группа столбцов остекления 1",
+                columns: [
+                    {
+                        title: "Вид",
+                        width: 100,
+                        field: "glazing1_type",
+                        visible: false,
+                        editor: customSelectEditor,
+                        editorParams: {
+                            values: {
+                                "none": "нет",
+                                "single": "однокамерное",
+                                "double": "двухкамерное",
+                                "triple": "трехкамерное",
+                                "laminated": "триплекс"
+                            }
+                        },
+                        formatter: function(cell) {
+                            const map = {
+                                "none": "нет",
+                                "single": "однокамерное",
+                                "double": "двухкамерное",
+                                "triple": "трехкамерное",
+                                "laminated": "триплекс"
+                            };
+                            const value = cell.getValue();
+                            return map[value] || value;
+                        },
+                        editable: true,
+                        cellClick: function(e, cell) {
+                            cell.edit();
+                        }
+                    },
+                    {
+                        title: "Высота",
+                        width: 90,
+                        field: "glazing1_height",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:1000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "Ширина",
+                        width: 95,
+                        field: "glazing1_width",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:2000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Остекление_2",
+                headerTooltip: "Группа столбцов остекления 2",
+                columns: [
+                    {
+                        title: "Вид",
+                        width: 100,
+                        field: "glazing2_type",
+                        visible: false,
+                        editor: customSelectEditor,
+                        editorParams: {
+                            values: {
+                                "none": "нет",
+                                "single": "однокамерное",
+                                "double": "двухкамерное",
+                                "triple": "трехкамерное",
+                                "laminated": "триплекс"
+                            }
+                        },
+                        formatter: function(cell) {
+                            const map = {
+                                "none": "нет",
+                                "single": "однокамерное",
+                                "double": "двухкамерное",
+                                "triple": "трехкамерное",
+                                "laminated": "триплекс"
+                            };
+                            const value = cell.getValue();
+                            return map[value] || value;
+                        },
+                        editable: true,
+                        cellClick: function(e, cell) {
+                            cell.edit();
+                        }
+                    },
+                    {
+                        title: "Высота",
+                        width: 90,
+                        field: "glazing2_height",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:1000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "Ширина",
+                        width: 95,
+                        field: "glazing2_width",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:2000"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Металл",
+                width: 100,
+                field: "metal",
+                visible: false,
+                editor: customSelectEditor,
+                editorParams: {
+                    values: {
+                        "1.2-1.4": "1.2-1.4",
+                        "1.4-1.4": "1.4-1.4",
+                        "1.4-2.0": "1.4-2.0"
+                    }
+                },
+                editable: true,
+                cellClick: function(e, cell) {
+                    cell.edit();
+                }
+            },
+            {
+                title: "Вентрешетка",
+                headerTooltip: "Группа столбцов вентрешетки",
+                columns: [
+                    {
+                        title: "Вид",
+                        width: 80,
+                        field: "vent_type",
+                        visible: false,
+                        editor: customSelectEditor,
+                        editorParams: {
+                            values: {
+                                "none": "нет",
+                                "tech": "тех.",
+                                "semi-prof": "п/п"
+                            }
+                        },
+                        formatter: function(cell) {
+                            const map = {
+                                "none": "нет",
+                                "tech": "тех.",
+                                "semi-prof": "п/п"
+                            };
+                            const value = cell.getValue();
+                            return map[value] || value;
+                        },
+                        editable: true,
+                        cellClick: function(e, cell) {
+                            cell.edit();
+                        }
+                    },
+                    {
+                        title: "Высота",
+                        width: 90,
+                        field: "vent_height",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:500"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "Ширина",
+                        width: 95,
+                        field: "vent_width",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:500"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Отбойная пластина",
+                headerTooltip: "Группа столбцов отбойной пластины",
+                columns: [
+                    {
+                        title: "Высота",
+                        width: 90,
+                        field: "bumper_height",
+                        visible: false,
+                        editor: "number",
+                        validator: ["numeric", "min:0", "max:300"],
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? value + " мм" : "—";
+                        }
+                    },
+                    {
+                        title: "С 2-х сторон",
+                        width: 110,
+                        field: "bumper_both_sides",
+                        visible: false,
+                        editor: customSelectEditor,
+                        editorParams: {
+                            values: {
+                                "no": "нет",
+                                "yes": "да"
+                            }
+                        },
+                        formatter: function(cell) {
+                            const map = {
+                                "no": "нет",
+                                "yes": "да"
+                            };
+                            const value = cell.getValue();
+                            return map[value] || value;
+                        },
+                        editable: true,
+                        cellClick: function(e, cell) {
+                            cell.edit();
+                        }
+                    }
+                ]
+            },
+            {
+                title: "Добор",
+                width: 100,
+                field: "extension",
+                visible: false,
                 editor: "number",
-                formatter: "money",
-                formatterParams: {symbol: "₽", precision: 0},
-                validator: ["required", "numeric", "min:0"]
+                validator: ["numeric", "min:0", "max:500"],
+                formatter: function(cell) {
+                    const value = cell.getValue();
+                    return value ? value + " мм" : "—";
+                },
+                editable: true,
+                cellClick: function(e, cell) {
+                    cell.edit();
+                }
             },
             {
                 title: "Кол-во",
@@ -180,7 +755,10 @@ document.addEventListener('DOMContentLoaded', function() {
         ],
         layout: "fitColumns",
         cellEdited: function(cell) {
-            if (["price", "quantity"].includes(cell.getField())) {
+            const fieldsToRecalc = ["price", "quantity", "width", "height", "transom_height", "transom_width",
+                                  "glazing1_height", "glazing1_width", "glazing2_height", "glazing2_width",
+                                  "vent_height", "vent_width", "bumper_height", "extension"];
+            if (fieldsToRecalc.includes(cell.getField())) {
                 const row = cell.getRow();
                 row.recalc();
                 table.recalc();
@@ -188,7 +766,203 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Ручной пересчет по кнопке
+    // Функция для отображения информации о строке в модальном окне
+    function showRowInfo(row) {
+        const data = row.getData();
+
+        // Заполняем модальное окно данными
+        document.getElementById('modal-row-id').textContent = data.id;
+        document.getElementById('modal-product').textContent = data.door_type ?
+            ({"door": "Дверь", "door_2": "Дверь 2-ств.", "hatch": "Люк", "gate": "Ворота"}[data.door_type] || data.door_type) : "—";
+
+        document.getElementById('modal-type').textContent = data.door_kind ?
+            ({"tech": "тех.", "ei-60": "EI-60", "eis-60": "EIS-60", "revision": "однолист."}[data.door_kind] || data.door_kind) : "—";
+
+        document.getElementById('modal-width').textContent = data.width ? data.width + " мм" : "—";
+        document.getElementById('modal-height').textContent = data.height ? data.height + " мм" : "—";
+        document.getElementById('modal-transom-height').textContent = data.transom_height ? data.transom_height + " мм" : "—";
+        document.getElementById('modal-transom-width').textContent = data.transom_width ? data.transom_width + " мм" : "—";
+
+        document.getElementById('modal-transom-glazing').textContent = data.transom_glazing ?
+            ({"none": "нет", "single": "однокамерное", "double": "двухкамерное", "triple": "трехкамерное", "laminated": "триплекс"}[data.transom_glazing] || data.transom_glazing) : "—";
+
+        document.getElementById('modal-glazing1-type').textContent = data.glazing1_type ?
+            ({"none": "нет", "single": "однокамерное", "double": "двухкамерное", "triple": "трехкамерное", "laminated": "триплекс"}[data.glazing1_type] || data.glazing1_type) : "—";
+        document.getElementById('modal-glazing1-height').textContent = data.glazing1_height ? data.glazing1_height + " мм" : "—";
+        document.getElementById('modal-glazing1-width').textContent = data.glazing1_width ? data.glazing1_width + " мм" : "—";
+
+        document.getElementById('modal-glazing2-type').textContent = data.glazing2_type ?
+            ({"none": "нет", "single": "однокамерное", "double": "двухкамерное", "triple": "трехкамерное", "laminated": "триплекс"}[data.glazing2_type] || data.glazing2_type) : "—";
+        document.getElementById('modal-glazing2-height').textContent = data.glazing2_height ? data.glazing2_height + " мм" : "—";
+        document.getElementById('modal-glazing2-width').textContent = data.glazing2_width ? data.glazing2_width + " мм" : "—";
+
+        document.getElementById('modal-metal').textContent = data.metal || "—";
+
+        document.getElementById('modal-vent-type').textContent = data.vent_type ?
+            ({"none": "нет", "tech": "тех.", "semi-prof": "п/п"}[data.vent_type] || data.vent_type) : "—";
+        document.getElementById('modal-vent-height').textContent = data.vent_height ? data.vent_height + " мм" : "—";
+        document.getElementById('modal-vent-width').textContent = data.vent_width ? data.vent_width + " мм" : "—";
+
+        document.getElementById('modal-bumper-height').textContent = data.bumper_height ? data.bumper_height + " мм" : "—";
+        document.getElementById('modal-bumper-both-sides').textContent = data.bumper_both_sides ?
+            ({"no": "нет", "yes": "да"}[data.bumper_both_sides] || data.bumper_both_sides) : "—";
+
+        document.getElementById('modal-extension').textContent = data.extension ? data.extension + " мм" : "—";
+
+        document.getElementById('modal-quantity').textContent = data.quantity || "—";
+
+        // Рассчитываем сумму
+        const total = (parseFloat(data.price) || 0) * (parseInt(data.quantity) || 0);
+        document.getElementById('modal-total').textContent = total.toLocaleString('ru-RU') + " ₽";
+
+        document.getElementById('modal-status').innerHTML = data.status !== undefined ?
+            ({"0": "<span class='text-secondary'>Черновик</span>",
+              "1": "<span class='text-primary'>На производстве</span>",
+              "2": "<span class='text-success'>Готов к отгрузке</span>",
+              "3": "<span class='text-info'>Отгружен</span>",
+              "4": "<span class='text-danger'>Отменен</span>"}[data.status] || data.status) : "—";
+
+        // Показываем модальное окно
+        rowInfoModal.show();
+    }
+
+    // Получаем ссылки на столбцы после инициализации таблицы
+    setTimeout(() => {
+        sizeColumns = [
+            table.getColumn("width"),
+            table.getColumn("height")
+        ];
+
+        transomColumns = [
+            table.getColumn("transom_height"),
+            table.getColumn("transom_width"),
+            table.getColumn("transom_glazing")
+        ];
+
+        glazing1Columns = [
+            table.getColumn("glazing1_type"),
+            table.getColumn("glazing1_height"),
+            table.getColumn("glazing1_width")
+        ];
+
+        glazing2Columns = [
+            table.getColumn("glazing2_type"),
+            table.getColumn("glazing2_height"),
+            table.getColumn("glazing2_width")
+        ];
+
+        metalColumn = table.getColumn("metal");
+
+        ventColumns = [
+            table.getColumn("vent_type"),
+            table.getColumn("vent_height"),
+            table.getColumn("vent_width")
+        ];
+
+        bumperColumns = [
+            table.getColumn("bumper_height"),
+            table.getColumn("bumper_both_sides")
+        ];
+
+        extensionColumn = table.getColumn("extension");
+
+    }, 100);
+
+    // Функция для переключения видимости группы столбцов
+    // Функция для переключения видимости группы столбцов
+    function toggleColumnGroup(buttonId, buttonTextShow, buttonTextHide) {
+        document.getElementById(buttonId).addEventListener("click", function() {
+            const button = this;
+            let columns = [];
+
+            // Всегда заново находим столбцы по их field names
+            switch(buttonId) {
+                case "toggle-size-btn":
+                    columns = [table.getColumn("width"), table.getColumn("height")];
+                    break;
+                case "toggle-transom-btn":
+                    columns = [table.getColumn("transom_height"), table.getColumn("transom_width"), table.getColumn("transom_glazing")];
+                    break;
+                case "toggle-glazing1-btn":
+                    columns = [table.getColumn("glazing1_type"), table.getColumn("glazing1_height"), table.getColumn("glazing1_width")];
+                    break;
+                case "toggle-glazing2-btn":
+                    columns = [table.getColumn("glazing2_type"), table.getColumn("glazing2_height"), table.getColumn("glazing2_width")];
+                    break;
+                case "toggle-metal-btn":
+                    columns = [table.getColumn("metal")];
+                    break;
+                case "toggle-vent-btn":
+                    columns = [table.getColumn("vent_type"), table.getColumn("vent_height"), table.getColumn("vent_width")];
+                    break;
+                case "toggle-bumper-btn":
+                    columns = [table.getColumn("bumper_height"), table.getColumn("bumper_both_sides")];
+                    break;
+                case "toggle-extension-btn":
+                    columns = [table.getColumn("extension")];
+                    break;
+            }
+
+            // Проверяем текущее состояние видимости первого столбца
+            const currentVisible = columns[0] && columns[0].isVisible();
+            const newVisible = !currentVisible;
+
+            // Переключаем видимость всех столбцов в группе
+            columns.forEach(column => {
+                if (column) {
+                    column.toggle(newVisible);
+                }
+            });
+
+            // Обновляем текст и иконку кнопки
+            if (newVisible) {
+                button.innerHTML = buttonTextHide;
+                button.classList.remove('btn-outline-secondary');
+                button.classList.add('btn-secondary');
+            } else {
+                button.innerHTML = buttonTextShow;
+                button.classList.remove('btn-secondary');
+                button.classList.add('btn-outline-secondary');
+            }
+
+            table.redraw(true);
+        });
+    }
+
+    // Инициализация обработчиков для всех кнопок
+    // Инициализация обработчиков для всех кнопок
+    toggleColumnGroup("toggle-size-btn",
+        '<i class="bi bi-arrows-expand"></i> Показать размеры',
+        '<i class="bi bi-arrows-collapse"></i> Скрыть размеры');
+
+    toggleColumnGroup("toggle-transom-btn",
+        '<i class="bi bi-layout-three-columns"></i> Показать фрамугу',
+        '<i class="bi bi-layout-three-columns"></i> Скрыть фрамугу');
+
+    toggleColumnGroup("toggle-glazing1-btn",
+        '<i class="bi bi-grid-3x3"></i> Остекление 1',
+        '<i class="bi bi-grid-3x3"></i> Скрыть остекление 1');
+
+    toggleColumnGroup("toggle-glazing2-btn",
+        '<i class="bi bi-grid-3x3"></i> Остекление 2',
+        '<i class="bi bi-grid-3x3"></i> Скрыть остекление 2');
+
+    toggleColumnGroup("toggle-metal-btn",
+        '<i class="bi bi-shield"></i> Металл',
+        '<i class="bi bi-shield"></i> Скрыть металл');
+
+    toggleColumnGroup("toggle-vent-btn",
+        '<i class="bi bi-grid"></i> Вентрешетка',
+        '<i class="bi bi-grid"></i> Скрыть вентрешетку');
+
+    toggleColumnGroup("toggle-bumper-btn",
+        '<i class="bi bi-border-all"></i> Отбойная пластина',
+        '<i class="bi bi-border-all"></i> Скрыть отбойную пластину');
+
+    toggleColumnGroup("toggle-extension-btn",
+        '<i class="bi bi-arrows-expand-vertical"></i> Добор',
+        '<i class="bi bi-arrows-expand-vertical"></i> Скрыть добор');
+
     document.getElementById("calculate-btn").addEventListener("click", function() {
         table.getRows().forEach(row => {
             const data = row.getData();
@@ -199,7 +973,6 @@ document.addEventListener('DOMContentLoaded', function() {
         table.recalc();
     });
 
-    // Добавление новой строки
     document.getElementById("add-row").addEventListener("click", function() {
         const newId = table.getData().length + 1;
         table.addRow({
@@ -208,28 +981,40 @@ document.addEventListener('DOMContentLoaded', function() {
             price: 0,
             quantity: 1,
             door_type: "internal",
-            status: 0
+            status: 0,
+            width: 800,
+            height: 2000,
+            transom_height: 0,
+            transom_width: 0,
+            transom_glazing: "none",
+            glazing1_type: "none",
+            glazing1_height: 0,
+            glazing1_width: 0,
+            glazing2_type: "none",
+            glazing2_height: 0,
+            glazing2_width: 0,
+            metal: "1.2-1.4",
+            vent_type: "none",
+            vent_height: 0,
+            vent_width: 0,
+            bumper_height: 0,
+            bumper_both_sides: "no",
+            extension: 0
         }, true);
     });
 
-    // Сохранение данных на сервере
     document.getElementById("save-btn").addEventListener("click", function() {
         const saveBtn = this;
         const statusContainer = document.getElementById('save-status');
         const originalBtnText = saveBtn.innerHTML;
 
-        // Показываем индикатор загрузки
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
         saveBtn.disabled = true;
         statusContainer.innerHTML = '';
 
-        // Получаем данные таблицы
         const tableData = table.getData();
-
-        // Получаем CSRF-токен
         const csrftoken = getCookie('csrftoken');
 
-        // Отправляем данные на сервер
         fetch("{% url 'save_calculation_data' %}", {
             method: 'POST',
             headers: {
@@ -238,33 +1023,22 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 calculation_data: tableData,
-                // Дополнительные данные, если нужны
                 project_id: 123
             })
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка сети');
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Успешное сохранение
                 statusContainer.innerHTML = `
                     <div class="alert alert-success mt-2">
                         Данные успешно сохранены! ID: ${data.calculation_id}
                     </div>
                 `;
-                console.log("Данные сохранены на сервере:", data);
             } else {
-                // Ошибка на сервере
                 throw new Error(data.error || 'Неизвестная ошибка сервера');
             }
         })
         .catch(error => {
-            // Обработка ошибок
-            console.error('Ошибка сохранения:', error);
             statusContainer.innerHTML = `
                 <div class="alert alert-danger mt-2">
                     Ошибка сохранения: ${error.message}
@@ -272,13 +1046,11 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         })
         .finally(() => {
-            // Восстанавливаем кнопку
             saveBtn.innerHTML = originalBtnText;
             saveBtn.disabled = false;
         });
     });
 
-    // Функция для получения CSRF-токена (уже есть в base.html)
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -293,9 +1065,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return cookieValue;
     }
-
-    // Проверка загрузки Tabulator
-    console.log("Tabulator version:", Tabulator.version);
 });
 </script>
 
@@ -305,5 +1074,58 @@ document.addEventListener('DOMContentLoaded', function() {
     .text-success { color: #28a745; }
     .text-info { color: #17a2b8; }
     .text-danger { color: #dc3545; }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .flex-wrap {
+        flex-wrap: wrap;
+    }
+
+    .gap-2 {
+        gap: 0.5rem;
+    }
+
+    .table-controls-panel {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+    }
+
+    .table-controls-panel .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .ms-2 {
+        margin-left: 0.5rem;
+    }
+
+    /* Стили для группового заголовка */
+    .tabulator-col-group .tabulator-col-group-cols {
+        border-top: 1px solid #dee2e6;
+    }
+
+    .tabulator-col-group .tabulator-col-title {
+        font-weight: bold;
+        background-color: #f8f9fa;
+    }
+
+    /* Стиль для ячеек с номерами - курсор указатель */
+    .tabulator-cell[tabulator-field="id"] {
+        cursor: pointer;
+    }
+    .tabulator-cell[tabulator-field="id"]:hover {
+        background-color: #f0f0f0;
+    }
 </style>
 {% endblock %}
