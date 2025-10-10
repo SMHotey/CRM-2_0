@@ -10,6 +10,20 @@ from django.views.decorators.http import require_POST
 
 def calculation(request):
     context = {'name': 'Sergey'}
+    dropdown_data = {
+        'door_types': {'door': 'Дверь', 'door_2': 'Дверь 2-ств.'},
+        'door_kinds': {'tech': 'тех.', 'ei-60': 'EI-60'},
+        'glazing_types': {'none': 'нет', 'single': 'однокамерное'},
+        'glazing_options': {'none': 'нет', 'A1_1': 'А1-1', 'A1_2': 'A1-2', 'A2_1': 'A2-2'},
+        'metal_types': {'1.2-1.4': '1.2-1.4', '1.4-1.4': '1.4-1.4'},
+        'vent_types': {'none': 'нет', 'tech': 'тех.'},
+        'ral_colors': {'9001': 'RAL 9001', '9010': 'RAL 9010'},
+        'hardware_handles': {'handle_type1': 'Ручка тип 1'},
+        'hardware_locks': {'lock_type1': 'Замок тип 1'},
+        'closers': {'closer_type1': 'Доводчик тип 1'},
+        'cylinders': {'cylinder_type1': 'Цилиндр тип 1'}
+    }
+    context['dropdown_data'] = dropdown_data
     return render(request, 'calculation_table.html', context)
 
 

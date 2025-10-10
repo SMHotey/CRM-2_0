@@ -26,6 +26,9 @@ from openpyxl import load_workbook
 from django.contrib.auth.mixins import LoginRequiredMixin
 import re
 from django.utils.http import url_has_allowed_host_and_scheme
+from .models import ChatRoom, ChatMessage, UserStatus
+from django.contrib.auth.models import User
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -845,8 +848,6 @@ def create_contract(request, pk):
             'legal_entities': legal_entities,
         })
 
-    def get_full_name(self):
-        return f'{self.first_name} {self.last_name}'
 
 
 def glass_info(request, pk=''):
@@ -1068,3 +1069,63 @@ def calendar_view(request):
     }
 
     return render(request, 'calendar.html', context)
+
+
+# Добавьте в erp_main/views.py
+from django.http import JsonResponse
+from django.contrib.auth.models import User
+
+
+def debug_users(request):
+    """Временный endpoint для диагностики"""
+    users = User.objects.all()
+    user_data = []
+
+    for user in users:
+        user_data.append({
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+        })
+
+    return JsonResponse({
+        'total_users': users.count(),
+        'users': user_data,
+        'debug': 'This is from debug endpoint'
+    })
+
+
+@login_required
+def chat_view(request):
+    """Основная страница чата"""
+    return render(request, 'chat/chat.html')
+
+
+@login_required
+def get_available_users(request):
+    """API для получения списка пользователей для создания чата"""
+    users = User.objects.exclude(id=request.user.id).select_related('userstatus')
+    user_data = []
+
+    for user in users:
+        try:
+            status = user.userstatus
+            is_online = status.is_online
+            last_seen = status.last_seen
+        except UserStatus.DoesNotExist:
+            is_online = False
+            last_seen = None
+
+        user_data.append({
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'is_online': is_online,
+            'last_seen': last_seen
+        })
+
+    return JsonResponse({'users': user_data})

@@ -1,25 +1,12 @@
-"""
-URL configuration for Journal_4_0 project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.core.asgi import get_asgi_application
 from django.urls import path, include
-
 from erp_main.views import custom_login, index
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+import erp_main.routing
+
 
 urlpatterns = [
     path('', index, name='index'),
@@ -27,6 +14,17 @@ urlpatterns = [
     path('erp_main/', include('erp_main.urls')),
     path('custom-login/', custom_login, name='custom_login'),
     path('calculation/', include('calculation.urls')),
+    path('api/erp/', include('erp_main.urls_api')),
+    path('api/calculation/', include('calculation.urls_api')),
+    path('api/auth/', include('rest_framework.urls')),
 ]
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# WebSocket routing
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            erp_main.routing.websocket_urlpatterns
+        )
+    ),
+})

@@ -77,23 +77,22 @@ class Organization(models.Model):
             self.ceo_title,
             self.ceo_name
         ]
-        print(*fields)
         return all(field not in (None, '') for field in fields)
 
 
 class LegalEntity(models.Model):
     name = models.CharField(max_length=255)
-    inn = models.CharField(max_length=12, unique=True)
-    ogrn = models.CharField(max_length=15, unique=True)
-    kpp = models.CharField(max_length=9)
-    r_s = models.CharField(max_length=20)
-    bank = models.CharField(max_length=255)
-    bik = models.CharField(max_length=9)
-    k_s = models.CharField(max_length=20)
-    address = models.CharField(max_length=255)
-    email = models.EmailField()
-    ceo_title = models.CharField(max_length=100)
-    ceo_name = models.CharField(max_length=255)
+    inn = models.CharField(max_length=12, blank=True, null=True)
+    ogrn = models.CharField(max_length=15,blank=True, null=True)
+    kpp = models.CharField(max_length=9, blank=True, null=True)
+    r_s = models.CharField(max_length=20, blank=True, null=True)
+    bank = models.CharField(max_length=255, blank=True, null=True)
+    bik = models.CharField(max_length=9, blank=True, null=True)
+    k_s = models.CharField(max_length=20, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    ceo_title = models.CharField(max_length=100, blank=True, null=True)
+    ceo_name = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -441,6 +440,58 @@ class Shipment(models.Model):
         return user.is_superuser or self.user == user
 
 
+class ChatRoom(models.Model):
+    ROOM_TYPES = [
+        ('private', 'Приватный чат'),
+        ('group', 'Групповой чат'),
+        ('department', 'Отдел'),
+        ('project', 'Проект'),
+    ]
+
+    name = models.CharField(max_length=255)
+    room_type = models.CharField(max_length=20, choices=ROOM_TYPES, default='private')
+    participants = models.ManyToManyField(User, related_name='chat_rooms')
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_rooms')
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    avatar = models.ImageField(upload_to='chat_avatars/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.get_room_type_display()})"
+
+
+class ChatMessage(models.Model):
+    MESSAGE_TYPES = [
+        ('text', 'Текст'),
+        ('file', 'Файл'),
+        ('image', 'Изображение'),
+        ('system', 'Системное'),
+    ]
+
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message_type = models.CharField(max_length=10, choices=MESSAGE_TYPES, default='text')
+    content = models.TextField()
+    file = models.FileField(upload_to='chat_files/', null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    reply_to = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.content[:50]}"
+
+
+class UserStatus(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(auto_now=True)
+    status_text = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {'Online' if self.is_online else 'Offline'}"
 
 
 

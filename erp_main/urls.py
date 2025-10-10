@@ -35,6 +35,9 @@ urlpatterns = [
     path('shipment/<int:workshop>/<str:date>/', views.shipment_detail, name='shipment_detail'),
     path('save_shipment/', views.save_shipment, name='save_shipment'),
     path('delete_shipment/<int:shipment_id>/', views.delete_shipment, name='delete_shipment'),
+    path('debug-users/', views.debug_users, name='debug_users'),
+    path('chat/', views.chat_view, name='chat'),
+    path('chat/api/users/', views.get_available_users, name='chat_users'),
 
 ]
 
