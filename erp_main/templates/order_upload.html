@@ -2,173 +2,1004 @@
 {% load static %}
 {% load my_filters %}
 
-{% block head %}
-<!-- Импорт Bootstrap CSS -->
-{% endblock %}
-
 {% block content %}
-    <style>
-    .custom-button {
-    border: 1px solid black; /* Установка зеленого цвета для внешней линии */
-    background-color: lightgrey; /* Делаем фон прозрачным, чтобы линия была видна */
-    color: black; /* Установка цвета текста кнопки (по желанию) */
-    }
+<div class="order-upload-container">
+    <div class="order-upload-header">
+        <h1 class="order-upload-title">Загрузка заказа</h1>
+        <p class="order-upload-subtitle">Заполните информацию о новом заказе</p>
+    </div>
 
-    .custom-button:hover {
-    background-color: lightgreen; /* Изменение цвета фона при наведении */
-    }
-    </style>
-
-<div class="container mt-5" style="width: 30%;">
-    <h2 class="mb-4">Загрузка заказа</h2>
-    <form method="post" enctype="multipart/form-data" id="orderForm">
+    <form method="post" enctype="multipart/form-data" id="orderForm" class="order-form">
         {% csrf_token %}
-        <div class="mb-3">
-            {{ form.order_file.label_tag }}
-            {{ form.order_file }}  <!-- Поле файла -->
-            {% if form.order_file.errors %}
-                <div class="text-danger">
-                    {{ form.order_file.errors }}
-                </div>
-            {% endif %}
-        </div>
-        <div class="mb-3">
-            {{ form.invoice.label_tag }}
-            {{ form.invoice }}  <!-- Поле счета -->
-            <button type="button" class="custom-button" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">Новый счет</button>
-            {% if form.invoice.errors %}
-                <div class="text-danger">
-                    {{ form.invoice.errors }}
-                </div>
-            {% endif %}
-        </div>
 
-        <!-- Новые поля для ввода -->
-        <div class="mb-3">
-            <label for="id_readiness"><b>Согласованный срок изготовления</b></label><br>
-            <input type="radio" name="kind_of_date" value="working" checked onchange="calculateDate()"> рабочие дни
-            <input type="radio" name="kind_of_date" value="calendar" onchange="calculateDate()"> календарные дни<br>
+        <div class="form-grid">
+            <!-- Файл заказа -->
+            <div class="form-field-group file-upload-group {% if form.order_file.errors %}form-field-error{% endif %}">
+                <label for="{{ form.order_file.id_for_label }}" class="form-label">
+                    {{ form.order_file.label }}
+                    <span class="required-asterisk">*</span>
+                </label>
+                <div class="file-upload-wrapper">
+                    {{ form.order_file }}
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <div class="file-upload-icon">📎</div>
+                        <div class="file-upload-content">
+                            <h4>Перетащите файл сюда</h4>
+                            <p>или нажмите для выбора</p>
+                        </div>
+                    </div>
+                    <div class="file-selected" id="fileSelected" style="display: none;">
+                        <span class="file-name" id="fileName"></span>
+                        <button type="button" class="file-remove" id="fileRemove">×</button>
+                    </div>
+                </div>
+                {% if form.order_file.errors %}
+                    <div class="field-error-message">
+                        <span class="error-icon">❌</span>
+                        {{ form.order_file.errors }}
+                    </div>
+                {% endif %}
+            </div>
 
-            <input type="number" class="form-control numeric-input" id="id_readiness" name="readiness"
-                   value="1" style="width: 60%;" required placeholder="Введите готовность"
-                   oninput="calculateDate()">
-            <input type="hidden" id="dueDateInput" name="due_date"> <!-- Скрытое поле для даты готовности -->
-            <div>
-                <strong>Планируемая дата готовности:</strong> <span id="dueDate"></span>
+            <!-- Выбор счета -->
+            <div class="form-field-group invoice-select-group {% if form.invoice.errors %}form-field-error{% endif %}">
+                <label for="{{ form.invoice.id_for_label }}" class="form-label">
+                    {{ form.invoice.label }}
+                    <span class="required-asterisk">*</span>
+                </label>
+                <div class="invoice-select-wrapper">
+                    <div class="select-wrapper">
+                        {{ form.invoice }}
+                    </div>
+                    <button type="button" class="btn btn-outline btn-new-invoice" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
+                        <span class="btn-icon">➕</span>
+                        Новый счет
+                    </button>
+                </div>
+                {% if form.invoice.errors %}
+                    <div class="field-error-message">
+                        <span class="error-icon">❌</span>
+                        {{ form.invoice.errors }}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        <div class="mb-3">
-            <label for="id_comment"><b>Комментарий</b></label>
-            <textarea class="form-control" id="id_comment" name="comment" rows="3" placeholder="Введите комментарий"></textarea>
+        <!-- Срок изготовления -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Согласованный срок изготовления</h3>
+            </div>
+
+            <div class="readiness-container">
+                <div class="date-type-selector">
+                    <label class="date-type-option">
+                        <input type="radio" name="kind_of_date" value="working" checked onchange="calculateDate()">
+                        <div class="date-type-card">
+                            <div class="date-type-icon">📅</div>
+                            <div class="date-type-content">
+                                <h4>Рабочие дни</h4>
+                                <p>Без учета выходных</p>
+                            </div>
+                            <div class="date-type-check"></div>
+                        </div>
+                    </label>
+                    <label class="date-type-option">
+                        <input type="radio" name="kind_of_date" value="calendar" onchange="calculateDate()">
+                        <div class="date-type-card">
+                            <div class="date-type-icon">📆</div>
+                            <div class="date-type-content">
+                                <h4>Календарные дни</h4>
+                                <p>С учетом выходных</p>
+                            </div>
+                            <div class="date-type-check"></div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="readiness-input-group">
+                    <div class="input-with-button">
+                        <div class="input-wrapper">
+                            <label for="id_readiness" class="input-label">Введите количество дней</label>
+                            <input type="number"
+                                   class="form-input"
+                                   id="id_readiness"
+                                   name="readiness"
+                                   value="1"
+                                   required
+                                   placeholder="1"
+                                   oninput="calculateDate()"
+                                   min="1"
+                                   max="365">
+                        </div>
+                    </div>
+
+                    <div class="due-date-display">
+                        <div class="due-date-label">Планируемая дата готовности:</div>
+                        <div class="due-date-value" id="dueDate">
+                            <span class="date-icon">📌</span>
+                            <span id="dueDateText"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="dueDateInput" name="due_date">
         </div>
 
-        <button type="submit" class="btn btn-primary">Загрузить</button>
+        <!-- Комментарий -->
+        <div class="form-field-group">
+            <label for="id_comment" class="form-label">Комментарий</label>
+            <div class="input-wrapper">
+                <textarea class="form-input"
+                          id="id_comment"
+                          name="comment"
+                          rows="4"
+                          placeholder="Дополнительная информация о заказе..."></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-submit">
+                <span class="btn-text">Загрузить заказ</span>
+                <span class="btn-loading" style="display: none;">
+                    <span class="spinner"></span>
+                    Загрузка...
+                </span>
+            </button>
+        </div>
     </form>
 </div>
 
 <!-- Модальное окно для добавления нового счета -->
-<div class="modal fade" id="newInvoiceModal" tabindex="-1" aria-labelledby="newInvoiceModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade modern-modal" id="newInvoiceModal" tabindex="-1" aria-labelledby="newInvoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="newInvoiceModalLabel">Добавить новый счет</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header-content">
+                    <h2 class="modal-title" id="newInvoiceModalLabel">Добавить новый счет</h2>
+                    <p class="modal-subtitle">Заполните реквизиты счета</p>
+                </div>
+                <button type="button" class="btn-close-modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span>×</span>
+                </button>
             </div>
+
             <form id="newInvoiceForm" method="post" action="{% url 'invoice_add' %}">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="id_number">Номер</label>
-                        <input type="text" class="form-control" id="id_number" name="number" maxlength="5" required>
+                    <div class="modal-form-grid">
+                        <div class="form-field-group">
+                            <label for="id_number" class="form-label">Номер счета</label>
+                            <div class="input-wrapper">
+                                <input type="text"
+                                       class="form-input invoice-number"
+                                       id="id_number"
+                                       name="number"
+                                       maxlength="5"
+                                       required
+                                       placeholder=""
+                                       pattern="[0-9]*"
+                                       inputmode="numeric">
+                            </div>
+                        </div>
+
+                        <div class="form-field-group">
+                            <label for="id_date" class="form-label">Дата</label>
+                            <div class="input-wrapper">
+                                <input type="date" class="form-input" id="id_date" name="date" required>
+                            </div>
+                        </div>
+
+                        <div class="form-field-group">
+                            <label for="id_amount" class="form-label">Сумма</label>
+                            <div class="input-wrapper amount-input">
+                                <input type="number" class="form-input" id="id_amount" name="amount" required
+                                       placeholder="0" min="0" step="1">
+                                <span class="input-suffix">₽</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field-group">
+                            <label for="id_payed_amount" class="form-label">Оплачено</label>
+                            <div class="input-wrapper amount-input">
+                                <input type="number" class="form-input" id="id_payed_amount" name="payed_amount"
+                                       value="0" placeholder="0" min="0" step="1">
+                                <span class="input-suffix">₽</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field-group">
+                            <label for="id_shipping_amount" class="form-label">Стоимость доставки</label>
+                            <div class="input-wrapper amount-input">
+                                <input type="number" class="form-input" id="id_shipping_amount" name="shipping_amount"
+                                       value="0" placeholder="0" min="0" step="1">
+                                <span class="input-suffix">₽</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field-group">
+                            <label for="id_montage_amount" class="form-label">Стоимость монтажа</label>
+                            <div class="input-wrapper amount-input">
+                                <input type="number" class="form-input" id="id_montage_amount" name="montage_amount"
+                                       value="0" placeholder="0" min="0" step="1">
+                                <span class="input-suffix">₽</span>
+                            </div>
+                        </div>
+
+                        <div class="form-field-group full-width">
+                            <label for="id_legal_entity" class="form-label">Юридическое лицо</label>
+                            <div class="input-wrapper">
+                                <select class="form-input" id="id_legal_entity" name="legal_entity" required>
+                                    <option value="" disabled selected>Выберите юридическое лицо</option>
+                                    {% for entity in legal_entities %}
+                                        <option value="{{ entity.id }}">{{ entity.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-field-group full-width">
+                            <label for="id_organization" class="form-label">Орангизация</label>
+                            <div class="input-wrapper">
+                                <select class="form-input" id="id_organization" name="organization" required>
+                                    <option value="" disabled selected>Выберите организацию</option>
+                                    {% for organization in organizations %}
+                                        <option value="{{ organization.id }}">{{ organization.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_date">Дата</label>
-                        <input type="date" class="form-control" id="id_date" name="date" maxlength="10" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_amount">Сумма</label>
-                        <input type="text" class="form-control numeric-input" id="id_amount" name="amount" required placeholder="Введите сумму">
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_payed_amount">Оплачено</label>
-                        <input type="text" class="form-control numeric-input" id="id_payed_amount" name="payed_amount" value="0" placeholder="Введите оплачено">
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_shipping_amount">Стоимость доставки</label>
-                        <input type="text" class="form-control numeric-input" id="id_shipping_amount" name="shipping_amount" value="0" placeholder="Введите стоимость доставки">
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_montage_amount">Стоимость монтажа</label>
-                        <input type="text" class="form-control numeric-input" id="id_montage_amount" name="montage_amount" value="0" placeholder="Введите стоимость монтажа">
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_legal_entity">Юридическое лицо</label>
-                        <select class="form-select" id="id_legal_entity" name="legal_entity" required>
-                            <option value="" disabled selected>Выберите юридическое лицо</option>
-                            {% for entity in legal_entities %}
-                                <option value="{{ entity.id }}">{{ entity.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_organization">Организация</label>
-                        <select class="form-select" id="id_organization" name="organization" required>
-                            <option value="" disabled selected>Выберите организацию</option>
-                            {% for organization in organizations %}
-                                <option value="{{ organization.id }}">{{ organization.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div id="modal-error-messages" class="text-danger" style="display: none;"></div> <!-- Для отображения ошибок -->
+
+                    <div id="modal-error-messages" class="alert alert-error" style="display: none;"></div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="submit" class="btn btn-primary">Сохранить счет</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="btn-text">Сохранить счет</span>
+                        <span class="btn-loading" style="display: none;">
+                            <span class="spinner"></span>
+                        </span>
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<style>
+.order-upload-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.order-upload-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.order-upload-title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.5rem 0;
+}
+
+.order-upload-subtitle {
+    font-size: 1rem;
+    color: #718096;
+    margin: 0;
+}
+
+.order-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* File Upload Styles */
+.file-upload-group {
+    grid-column: 1 / -1;
+}
+
+.file-upload-wrapper {
+    position: relative;
+}
+
+.file-upload-area {
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #f7fafc;
+}
+
+.file-upload-area:hover {
+    border-color: #4299e1;
+    background: #edf2f7;
+}
+
+.file-upload-area.dragover {
+    border-color: #4299e1;
+    background: #ebf8ff;
+}
+
+.file-upload-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.file-upload-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.file-upload-content p {
+    margin: 0;
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.file-selected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0fff4;
+    border: 1px solid #9ae6b4;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.file-name {
+    color: #2f855a;
+    font-weight: 500;
+}
+
+.file-remove {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #e53e3e;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-remove:hover {
+    background: #fed7d7;
+    border-radius: 50%;
+}
+
+/* Invoice Select Styles */
+.invoice-select-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.select-wrapper {
+    flex: 1;
+}
+
+.btn-new-invoice {
+    white-space: nowrap;
+    padding: 0.75rem 1rem;
+}
+
+/* Date Type Selector */
+.date-type-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.date-type-option {
+    cursor: pointer;
+}
+
+.date-type-option input {
+    display: none;
+}
+
+.date-type-card {
+    position: relative;
+    padding: 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: white;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.date-type-card:hover {
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+}
+
+.date-type-option input:checked + .date-type-card {
+    border-color: #4299e1;
+    background: #f7fafc;
+}
+
+.date-type-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.date-type-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.date-type-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.date-type-check {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.date-type-option input:checked + .date-type-card .date-type-check {
+    border-color: #4299e1;
+    background: #4299e1;
+}
+
+.date-type-option input:checked + .date-type-card .date-type-check::after {
+    content: '✓';
+    color: white;
+    font-size: 0.75rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Readiness Input */
+.readiness-input-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .readiness-input-group {
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+    }
+}
+
+.input-with-button {
+    display: flex;
+    gap: 1rem;
+}
+
+.input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.input-label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.input-suffix {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #718096;
+    font-weight: 500;
+}
+
+/* Стили для поля номера счета */
+.invoice-number {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    letter-spacing: 1px;
+    font-size: 1.1rem;
+    text-align: center;
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+}
+
+.invoice-number:focus {
+    border-color: #4299e1;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Стили для числовых полей с суффиксом */
+.amount-input {
+    position: relative;
+}
+
+.amount-input .form-input {
+    padding-right: 3rem;
+}
+
+.amount-input .input-suffix {
+    right: 1rem;
+}
+
+/* Общие стили для полей ввода */
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: white;
+    font-family: inherit;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Стили для числовых полей - ВОССТАНАВЛИВАЕМ СТРЕЛКИ */
+input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+/* Восстанавливаем стрелки для WebKit браузеров */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: auto;
+    appearance: auto;
+    margin: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+input[type="number"]::-webkit-outer-spin-button:hover,
+input[type="number"]::-webkit-inner-spin-button:hover {
+    opacity: 1;
+}
+
+/* Для Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]:hover {
+    -moz-appearance: number-input;
+}
+
+/* Due Date Display */
+.due-date-display {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.due-date-label {
+    font-size: 0.875rem;
+    color: #718096;
+    margin-bottom: 0.5rem;
+}
+
+.due-date-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.125rem;
+}
+
+.date-icon {
+    font-size: 1.25rem;
+}
+
+/* Modal Styles */
+.modern-modal .modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modern-modal .modal-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.5rem 2rem;
+}
+
+.modal-header-content {
+    flex: 1;
+}
+
+.modern-modal .modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.25rem 0;
+}
+
+.modal-subtitle {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #a0aec0;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-close-modal:hover {
+    background: #fed7d7;
+    color: #e53e3e;
+}
+
+.modern-modal .modal-body {
+    padding: 2rem;
+}
+
+.modal-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .modal-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .full-width {
+        grid-column: 1 / -1;
+    }
+}
+
+.modern-modal .modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 1.5rem 2rem;
+}
+
+/* Common Styles */
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    display: block;
+}
+
+.required-asterisk {
+    color: #e53e3e;
+}
+
+.form-field-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-field-error .form-input {
+    border-color: #e53e3e;
+}
+
+.field-error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.error-icon {
+    font-size: 0.75rem;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+.btn-outline {
+    background: white;
+    color: #4299e1;
+    border: 2px solid #4299e1;
+}
+
+.btn-outline:hover {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+.btn-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.alert-error {
+    background: #fed7d7;
+    border: 1px solid #feb2b2;
+    color: #c53030;
+}
+
+/* Hide original file input */
+input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+select.form-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+</style>
+
 <script>
-    // Валидация для полей ввода числовых значений
+document.addEventListener('DOMContentLoaded', function() {
+    // File upload handling
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const fileSelected = document.getElementById('fileSelected');
+    const fileName = document.getElementById('fileName');
+    const fileRemove = document.getElementById('fileRemove');
+    const orderForm = document.getElementById('orderForm');
+    const submitBtn = orderForm.querySelector('.btn-submit');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+
+    // File upload drag and drop
+    fileUploadArea.addEventListener('click', () => fileInput.click());
+
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect();
+        }
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+
+    function handleFileSelect() {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileName.textContent = file.name;
+            fileUploadArea.style.display = 'none';
+            fileSelected.style.display = 'flex';
+        }
+    }
+
+    fileRemove.addEventListener('click', () => {
+        fileInput.value = '';
+        fileUploadArea.style.display = 'block';
+        fileSelected.style.display = 'none';
+    });
+
+    // Numeric input validation for text fields
     document.addEventListener('input', function(event) {
-        if (event.target.classList.contains('numeric-input')) {
+        if (event.target.getAttribute('inputmode') === 'numeric') {
             event.target.value = event.target.value.replace(/[^0-9]/g, '');
         }
     });
 
-    // Обработка отправки формы с помощью Fetch API
-    document.getElementById('newInvoiceForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Предотвращает перезагрузку страницы
+    // Form submission handling
+    orderForm.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        // Basic validation
+        if (!fileInput.files.length) {
+            isValid = false;
+            document.querySelector('.file-upload-group').classList.add('form-field-error');
+        }
+
+        const invoiceSelect = document.querySelector('#id_invoice');
+        if (!invoiceSelect.value) {
+            isValid = false;
+            document.querySelector('.invoice-select-group').classList.add('form-field-error');
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+
+        // Show loading state
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'flex';
+        submitBtn.disabled = true;
+    });
+
+    // Modal form handling
+    const newInvoiceForm = document.getElementById('newInvoiceForm');
+    const modalSubmitBtn = newInvoiceForm.querySelector('.btn-primary');
+    const modalBtnText = modalSubmitBtn.querySelector('.btn-text');
+    const modalBtnLoading = modalSubmitBtn.querySelector('.btn-loading');
+
+    newInvoiceForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Show loading in modal
+        modalBtnText.style.display = 'none';
+        modalBtnLoading.style.display = 'flex';
+        modalSubmitBtn.disabled = true;
+
         const formData = new FormData(this);
 
         fetch(this.action, {
             method: 'POST',
             body: formData,
             headers: {
-                'X-CSRFToken': '{{ csrf_token }}' // Добавляем CSRF-токен
+                'X-CSRFToken': '{{ csrf_token }}'
             }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Закрыть модальное окно
+                // Close modal
                 const modalElement = document.getElementById('newInvoiceModal');
-                const newInvoiceModal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-                newInvoiceModal.hide();
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
 
-                // Убедиться, что фокус уходит с кнопки в модальном окне
-                setTimeout(() => {
-                    document.querySelector('button[data-bs-target="#newInvoiceModal"]').focus();
-                }, 100);
+                // Reset modal form
+                newInvoiceForm.reset();
 
-                // Выбор только что сохраненного счета
+                // Add new invoice to select
                 const invoiceSelect = document.querySelector('#id_invoice');
                 const newOption = new Option(`Счет № ${data.invoice_number}`, data.invoice_id);
                 invoiceSelect.add(newOption);
-                invoiceSelect.value = data.invoice_id; // Устанавливаем его как выбранный
+                invoiceSelect.value = data.invoice_id;
+
+                // Show success message
+                showNotification('Счет успешно добавлен', 'success');
+            } else {
+                throw new Error(data.error || 'Unknown error');
             }
         })
         .catch(error => {
@@ -176,38 +1007,76 @@
             const errorMessage = 'Произошла ошибка при добавлении счета.';
             document.getElementById('modal-error-messages').innerText = errorMessage;
             document.getElementById('modal-error-messages').style.display = 'block';
+        })
+        .finally(() => {
+            // Reset loading state
+            modalBtnText.style.display = 'flex';
+            modalBtnLoading.style.display = 'none';
+            modalSubmitBtn.disabled = false;
         });
     });
 
-    function calculateDate() {
-        const readinessInput = document.getElementById('id_readiness').value;
-        const kindOfDate = document.querySelector('input[name="kind_of_date"]:checked').value;
-        const workDays = kindOfDate === 'working';
-        const startDate = new Date();
+    // Reset modal when closed
+    document.getElementById('newInvoiceModal').addEventListener('hidden.bs.modal', function () {
+        newInvoiceForm.reset();
+        document.getElementById('modal-error-messages').style.display = 'none';
+    });
 
-        let daysToAdd = parseInt(readinessInput) || 0;
-        let resultDate = new Date(startDate);
+    // Set today's date as default in modal
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('id_date').value = today;
 
-        if (workDays) {
-            let addedDays = 0;
-            while (addedDays < daysToAdd) {
-                resultDate.setDate(resultDate.getDate() + 1);
-                if (resultDate.getDay() !== 0 && resultDate.getDay() !== 6) {
-                    addedDays++;
-                }
+    // Initialize date calculation
+    calculateDate();
+});
+
+function calculateDate() {
+    const readinessInput = document.getElementById('id_readiness');
+    const kindOfDate = document.querySelector('input[name="kind_of_date"]:checked').value;
+    const workDays = kindOfDate === 'working';
+    const startDate = new Date();
+
+    let daysToAdd = parseInt(readinessInput.value) || 0;
+    let resultDate = new Date(startDate);
+
+    if (workDays) {
+        let addedDays = 0;
+        while (addedDays < daysToAdd) {
+            resultDate.setDate(resultDate.getDate() + 1);
+            if (resultDate.getDay() !== 0 && resultDate.getDay() !== 6) {
+                addedDays++;
             }
-        } else {
-            resultDate.setDate(resultDate.getDate() + daysToAdd);
         }
-
-        const dueDateFormatted = resultDate.toLocaleDateString();
-        document.getElementById('dueDate').textContent = dueDateFormatted;
-        document.getElementById('dueDateInput').value = resultDate.toISOString().split('T')[0];
+    } else {
+        resultDate.setDate(resultDate.getDate() + daysToAdd);
     }
 
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function() {
-        calculateDate(); // Рассчитать дату сразу при загрузке
+    const dueDateFormatted = resultDate.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
     });
+
+    document.getElementById('dueDateText').textContent = dueDateFormatted;
+    document.getElementById('dueDateInput').value = resultDate.toISOString().split('T')[0];
+}
+
+function showNotification(message, type = 'info') {
+    // Simple notification implementation
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type}`;
+    notification.textContent = message;
+    notification.style.position = 'fixed';
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
 </script>
 {% endblock %}

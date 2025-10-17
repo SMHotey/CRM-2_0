@@ -1072,9 +1072,6 @@ def calendar_view(request):
 
 
 # Добавьте в erp_main/views.py
-from django.http import JsonResponse
-from django.contrib.auth.models import User
-
 
 def debug_users(request):
     """Временный endpoint для диагностики"""

@@ -18,7 +18,8 @@ def is_project_file(file_path, extensions, exclude_dirs):
         'node_modules',
         '.pytest_cache',
         'dist',
-        'build'
+        'build',
+        'sqlite'
     ]
 
     for pattern in exclude_patterns:

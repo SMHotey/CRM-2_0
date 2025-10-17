@@ -1,255 +1,944 @@
 {% extends 'base.html' %}
+{% load static %}
 
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статистика</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <style>
-        .stat-card {
-            transition: transform 0.3s;
-            height: 100%;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .progress {
-            height: 1.5rem;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-        @media (max-width: 768px) {
-            .date-picker {
-                flex-direction: column;
-            }
-            .date-input {
-                margin-bottom: 10px;
-            }
-            .status-filter {
-                flex-direction: column;
-            }
-        }
-    </style>
-
-</head>
 {% block content %}
-<body>
-    <div class="container-fluid py-4">
-        <h1 class="text-center mb-4">Статистика менеджера</h1>
+<div class="stats-container">
+    <!-- Header -->
+    <div class="stats-header">
+        <h1 class="stats-title">Статистика менеджера</h1>
+        <p class="stats-subtitle">Аналитика производительности и ключевые показатели</p>
+    </div>
 
-        <!-- Фильтры -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Фильтры</h5>
-                <form>
-                    <div class="row date-picker mb-3">
-                        <div class="col-md-5 date-input">
-                            <label for="startDate" class="form-label">Начальная дата</label>
-                            <input type="date" class="form-control" id="startDate" name="startDate" value="{{ start_date }}">
+    <!-- Filters -->
+    <div class="stats-filters glass-effect">
+        <div class="filters-header">
+            <h3 class="filters-title">
+                <i class="bi bi-funnel-fill"></i>
+                Фильтры и настройки
+            </h3>
+        </div>
+        <form class="filters-form">
+            <div class="filters-grid">
+                <!-- Date Range -->
+                <div class="filter-group date-range-group">
+                    <label class="filter-label">Период анализа</label>
+                    <div class="date-inputs">
+                        <div class="input-wrapper">
+                            <input type="date"
+                                   class="form-input"
+                                   id="startDate"
+                                   name="startDate"
+                                   value="{{ start_date }}">
+                            <label for="startDate" class="input-label-floating">Начальная дата</label>
                         </div>
-                        <div class="col-md-5 date-input">
-                            <label for="endDate" class="form-label">Конечная дата</label>
-                            <input type="date" class="form-control" id="endDate" name="endDate" value="{{ end_date }}">
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">Применить</button>
+                        <div class="date-separator">—</div>
+                        <div class="input-wrapper">
+                            <input type="date"
+                                   class="form-input"
+                                   id="endDate"
+                                   name="endDate"
+                                   value="{{ end_date }}">
+                            <label for="endDate" class="input-label-floating">Конечная дата</label>
                         </div>
                     </div>
+                </div>
 
-                    <div class="row status-filter">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Статус счетов</label>
-                            <select class="form-select" name="invoice_status">
-                                <option value="">Все</option>
-                                <option value="paid" {% if invoice_status == 'paid' %}selected{% endif %}>Оплаченные</option>
-                                <option value="unpaid" {% if invoice_status == 'unpaid' %}selected{% endif %}>Неоплаченные</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Статус заказов</label>
-                            <select class="form-select" name="order_status">
-                                <option value="">Все</option>
-                                <option value="in_query" {% if order_status == 'in_query' %}selected{% endif %}>В очереди</option>
-                                <option value="product" {% if order_status == 'product' %}selected{% endif %}>Запущенные</option>
-                                <option value="ready" {% if order_status == 'ready' %}selected{% endif %}>Готовые</option>
-                                <option value="shipped" {% if order_status == 'shipped' %}selected{% endif %}>Отгруженные</option>
-                                <option value="stopped" {% if order_status == 'stopped' %}selected{% endif %}>Остановленные</option>
-                                <option value="canceled" {% if order_status == 'canceled' %}selected{% endif %}>Отмененные</option>
-                            </select>
-                        </div>
+                <!-- Status Filters -->
+                <div class="filter-group">
+                    <label for="invoiceStatus" class="filter-label">Статус счетов</label>
+                    <div class="input-wrapper">
+                        <select class="form-input" id="invoiceStatus" name="invoice_status">
+                            <option value="">Все счета</option>
+                            <option value="paid" {% if invoice_status == 'paid' %}selected{% endif %}>Оплаченные</option>
+                            <option value="unpaid" {% if invoice_status == 'unpaid' %}selected{% endif %}>Неоплаченные</option>
+                        </select>
+                        <i class="bi bi-chevron-down select-arrow"></i>
                     </div>
-                </form>
+                </div>
+
+                <div class="filter-group">
+                    <label for="orderStatus" class="filter-label">Статус заказов</label>
+                    <div class="input-wrapper">
+                        <select class="form-input" id="orderStatus" name="order_status">
+                            <option value="">Все заказы</option>
+                            <option value="in_query" {% if order_status == 'in_query' %}selected{% endif %}>В очереди</option>
+                            <option value="product" {% if order_status == 'product' %}selected{% endif %}>Запущенные</option>
+                            <option value="ready" {% if order_status == 'ready' %}selected{% endif %}>Готовые</option>
+                            <option value="shipped" {% if order_status == 'shipped' %}selected{% endif %}>Отгруженные</option>
+                            <option value="stopped" {% if order_status == 'stopped' %}selected{% endif %}>Остановленные</option>
+                            <option value="canceled" {% if order_status == 'canceled' %}selected{% endif %}>Отмененные</option>
+                        </select>
+                        <i class="bi bi-chevron-down select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters-actions">
+                <button type="submit" class="btn btn-primary btn-apply">
+                    <i class="bi bi-check-lg"></i>
+                    Применить фильтры
+                </button>
+                <button type="reset" class="btn btn-secondary btn-reset">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Сбросить
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon org-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Организации</h3>
+                    <div class="metric-value">{{ orgs_count }}</div>
+                </div>
+            </div>
+            <div class="metric-trend">
+                <span class="trend-text">Активные клиенты</span>
             </div>
         </div>
 
-        <!-- Общая статистика -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <div class="card stat-card bg-primary text-black">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="card-title">Организации</h5>
-                                <h2 class="mb-0">{{ orgs_count }}</h2>
-                            </div>
-                            <i class="bi bi-building fs-1"></i>
-                        </div>
-                    </div>
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon order-icon">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Заказы</h3>
+                    <div class="metric-value">{{ orders_count }}</div>
                 </div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="card stat-card bg-success text-black bi-align-center">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="card-title">Заказы</h5>
-                                <h2 class="mb-0">{{ orders_count }}</h2>
-                            </div>
-                            <i class="bi bi-clipboard-check fs-1"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="card stat-card bg-info text-black">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="card-title">Счета</h5>
-                                <h2 class="mb-0">{{ invoices_count }}</h2>
-                            </div>
-                            <i class="bi bi-receipt fs-1"></i>
-                        </div>
-                    </div>
-                </div>
+            <div class="metric-trend">
+                <span class="trend-text">Всего за период</span>
             </div>
         </div>
 
-        <!-- Статистика по счетам -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title d-flex justify-content-between align-items-center">
-                    <span>Текущие счета</span>
-                    <span class="badge bg-primary">Общая сумма: {{ total_invoices_amount }} руб.</span>
-                </h5>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Организация</th>
-                                <th>Дата</th>
-                                <th>Сумма</th>
-                                <th>Оплачено</th>
-                                <th>Статус</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for invoice in invoices %}
-                            <tr>
-                                <td><a href="{% url 'invoice_detail' invoice.id %}">{{ invoice.number }}</a></td>
-                                <td><a href="{% url 'organization_detail' invoice.organization.id %}">{{ invoice.organization }}</a></td>
-                                <td>{{ invoice.date|date:"d.m.Y" }}</td>
-                                <td>{{ invoice.amount }} руб.</td>
-                                <td>
-                                    <div class="progress">
-                                        <div class="progress-bar bg-{% if invoice.percent == 100 %}success{% else %}warning{% endif %}"
-                                             role="progressbar"
-                                             style="width: {{ invoice.percent }}%"
-                                             aria-valuenow="{{ invoice.percent }}"
-                                             aria-valuemin="0"
-                                             aria-valuemax="100">
-                                            {{ invoice.percent }}%
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-{% if invoice.is_paid %}success{% else %}warning{% endif %}">
-                                        {% if invoice.is_paid %}Оплачен{% else %}Не оплачен{% endif %}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon invoice-icon">
+                    <i class="bi bi-receipt"></i>
                 </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Счета</h3>
+                    <div class="metric-value">{{ invoices_count }}</div>
+                </div>
+            </div>
+            <div class="metric-trend">
+                <span class="trend-text">Финансовые операции</span>
             </div>
         </div>
 
-        <!-- Статистика по заказам -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Статистика по заказам</h5>
-
-                <div class="table-responsive mt-3">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>№</th>
-                                <th>Дата создания</th>
-                                <th>Срок выполнения</th>
-                                <th>Статус</th>
-                                <th>Количество изделий</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for order in orders %}
-                            <tr>
-                                <td><a href="{% url 'order_detail' order.id %}">{{ order.id }}</a></td>
-                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
-                                <td>{{ order.due_date|date:"d.m.Y" }}</td>
-                                <td>
-                                    <span class="badge bg-{% if order.status == 'готов' %}success{% elif order.status == 'отгружен' %}info{% elif order.status == 'запущен' %}primary{% elif order.status == 'в очереди' %}secondary{% elif order.status == 'остановлен' %}warning{% else %}danger{% endif %}">
-                                        {{ order.status }}
-                                    </span>
-                                </td>
-                                <td>{{ order.quantity }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="metric-card">
+            <div class="metric-header">
+                <div class="metric-icon revenue-icon">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="metric-info">
+                    <h3 class="metric-title">Общая сумма</h3>
+                    <div class="metric-value">{{ total_invoices_amount }} ₽</div>
                 </div>
             </div>
-        </div>
-
-        <!-- Организации -->
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Организации</h5>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Название</th>
-                                <th>ИНН</th>
-                                <th>Телефон</th>
-                                <th>Email</th>
-                                <th>Последний заказ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for org in organizations %}
-                            <tr>
-
-                                <td> <a href="{% url 'organization_detail' org.id %}">{{ org.name|default:org.name_fl }}</a></td>
-                                <td>{{ org.inn }}</td>
-                                <td>{{ org.phone_number }}</td>
-                                <td>{{ org.email }}</td>
-                                <td>{{ org.last_order|date:"d.m.Y"|default:"Нет заказов" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="metric-trend">
+                <span class="trend-text">По текущим счетам</span>
             </div>
         </div>
     </div>
+
+    <!-- Invoices Section -->
+    <div class="stats-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="bi bi-receipt"></i>
+                Текущие счета
+            </h2>
+            <div class="section-badge">
+                <span class="badge total-amount">Общая сумма: {{ total_invoices_amount }} руб.</span>
+            </div>
+        </div>
+
+        <div class="table-container glass-effect">
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>№ счета</th>
+                            <th>Организация</th>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Прогресс оплаты</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr class="table-row">
+                            <td>
+                                <a href="{% url 'invoice_detail' invoice.id %}" class="table-link">
+                                    {{ invoice.number }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'organization_detail' invoice.organization.id %}" class="table-link">
+                                    {{ invoice.organization }}
+                                </a>
+                            </td>
+                            <td>{{ invoice.date|date:"d.m.Y" }}</td>
+                            <td class="amount-cell">{{ invoice.amount }} ₽</td>
+                            <td>
+                                <div class="progress-container">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill {% if invoice.percent == 100 %}progress-complete{% else %}progress-pending{% endif %}"
+                                             style="width: {{ invoice.percent }}%">
+                                            <span class="progress-text">{{ invoice.percent }}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if invoice.is_paid %}status-paid{% else %}status-pending{% endif %}">
+                                    <i class="bi {% if invoice.is_paid %}bi-check-circle{% else %}bi-clock{% endif %}"></i>
+                                    {% if invoice.is_paid %}Оплачен{% else %}Ожидание{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Section -->
+    <div class="stats-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="bi bi-clipboard-data"></i>
+                Статистика по заказам
+            </h2>
+        </div>
+
+        <div class="table-container glass-effect">
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>№ заказа</th>
+                            <th>Дата создания</th>
+                            <th>Срок выполнения</th>
+                            <th>Статус</th>
+                            <th>Изделия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="table-row">
+                            <td>
+                                <a href="{% url 'order_detail' order.id %}" class="table-link">
+                                    #{{ order.id }}
+                                </a>
+                            </td>
+                            <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                <span class="date-cell {% if order.is_overdue %}date-overdue{% endif %}">
+                                    {{ order.due_date|date:"d.m.Y" }}
+                                </span>
+                            </td>
+                            <td>
+                                {% with status=order.status %}
+                                <span class="status-badge
+                                    {% if status == 'готов' %}status-ready
+                                    {% elif status == 'отгружен' %}status-shipped
+                                    {% elif status == 'запущен' %}status-in-progress
+                                    {% elif status == 'в очереди' %}status-queued
+                                    {% elif status == 'остановлен' %}status-stopped
+                                    {% else %}status-cancelled{% endif %}">
+                                    <i class="bi
+                                        {% if status == 'готов' %}bi-check-circle
+                                        {% elif status == 'отгружен' %}bi-truck
+                                        {% elif status == 'запущен' %}bi-gear
+                                        {% elif status == 'в очереди' %}bi-clock
+                                        {% elif status == 'остановлен' %}bi-pause-circle
+                                        {% else %}bi-x-circle{% endif %}">
+                                    </i>
+                                    {{ status }}
+                                </span>
+                                {% endwith %}
+                            </td>
+                            <td class="quantity-cell">{{ order.quantity }} шт.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Organizations Section -->
+    <div class="stats-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="bi bi-people"></i>
+                Организации
+            </h2>
+        </div>
+
+        <div class="table-container glass-effect">
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>ИНН</th>
+                            <th>Контакты</th>
+                            <th>Последний заказ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for org in organizations %}
+                        <tr class="table-row">
+                            <td>
+                                <a href="{% url 'organization_detail' org.id %}" class="table-link org-name">
+                                    {{ org.name|default:org.name_fl }}
+                                </a>
+                            </td>
+                            <td class="inn-cell">{{ org.inn }}</td>
+                            <td>
+                                <div class="contact-info">
+                                    {% if org.phone_number %}
+                                    <div class="contact-item">
+                                        <i class="bi bi-telephone"></i>
+                                        {{ org.phone_number }}
+                                    </div>
+                                    {% endif %}
+                                    {% if org.email %}
+                                    <div class="contact-item">
+                                        <i class="bi bi-envelope"></i>
+                                        {{ org.email }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="last-order {% if not org.last_order %}no-orders{% endif %}">
+                                    {{ org.last_order|date:"d.m.Y"|default:"Нет заказов" }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stats-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.stats-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.stats-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.stats-subtitle {
+    color: #718096;
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Filters */
+.stats-filters {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.filters-header {
+    margin-bottom: 1.5rem;
+}
+
+.filters-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.date-inputs {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.date-separator {
+    color: #a0aec0;
+    font-weight: 600;
+}
+
+.input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    pointer-events: none;
+}
+
+.filters-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.btn-secondary:hover {
+    background: #cbd5e0;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.org-icon { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.order-icon { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.invoice-icon { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.revenue-icon { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+.metric-info {
+    flex: 1;
+}
+
+.metric-title {
+    font-size: 0.875rem;
+    color: #718096;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    line-height: 1;
+}
+
+.metric-trend {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+}
+
+.trend-text {
+    font-size: 0.75rem;
+    color: #a0aec0;
+    font-weight: 500;
+}
+
+/* Sections */
+.stats-section {
+    margin-bottom: 3rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-badge .badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* Tables */
+.table-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.modern-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.modern-table th {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modern-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.modern-table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.modern-table td {
+    padding: 1rem 1.5rem;
+    color: #4a5568;
+    font-size: 0.875rem;
+}
+
+.table-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.table-link:hover {
+    color: #764ba2;
+}
+
+/* Progress Bars */
+.progress-container {
+    width: 100%;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    position: relative;
+    transition: width 0.3s ease;
+}
+
+.progress-complete {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.progress-pending {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.progress-text {
+    position: absolute;
+    right: 0.5rem;
+    top: -1.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-paid {
+    background: rgba(67, 233, 123, 0.1);
+    color: #22543d;
+    border: 1px solid rgba(67, 233, 123, 0.2);
+}
+
+.status-pending {
+    background: rgba(250, 112, 154, 0.1);
+    color: #742a2a;
+    border: 1px solid rgba(250, 112, 154, 0.2);
+}
+
+.status-ready {
+    background: rgba(67, 233, 123, 0.1);
+    color: #22543d;
+    border: 1px solid rgba(67, 233, 123, 0.2);
+}
+
+.status-shipped {
+    background: rgba(66, 153, 225, 0.1);
+    color: #2a4365;
+    border: 1px solid rgba(66, 153, 225, 0.2);
+}
+
+.status-in-progress {
+    background: rgba(102, 126, 234, 0.1);
+    color: #322659;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.status-queued {
+    background: rgba(160, 174, 192, 0.1);
+    color: #4a5568;
+    border: 1px solid rgba(160, 174, 192, 0.2);
+}
+
+.status-stopped {
+    background: rgba(237, 137, 54, 0.1);
+    color: #744210;
+    border: 1px solid rgba(237, 137, 54, 0.2);
+}
+
+.status-cancelled {
+    background: rgba(229, 62, 62, 0.1);
+    color: #742a2a;
+    border: 1px solid rgba(229, 62, 62, 0.2);
+}
+
+/* Special Cells */
+.amount-cell {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.quantity-cell {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.inn-cell {
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.date-cell {
+    font-weight: 500;
+}
+
+.date-overdue {
+    color: #e53e3e;
+    font-weight: 600;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #718096;
+}
+
+.org-name {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.last-order {
+    font-weight: 500;
+}
+
+.no-orders {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stats-container {
+        padding: 1rem;
+    }
+
+    .stats-title {
+        font-size: 2rem;
+    }
+
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .date-inputs {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .date-separator {
+        display: none;
+    }
+
+    .filters-actions {
+        flex-direction: column;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modern-table {
+        font-size: 0.75rem;
+    }
+
+    .modern-table th,
+    .modern-table td {
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-header {
+        margin-bottom: 1rem;
+    }
+
+    .stats-filters {
+        padding: 1.5rem;
+    }
+
+    .metric-card {
+        padding: 1rem;
+    }
+
+    .metric-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize date inputs with today's date as default end date
+    const endDateInput = document.getElementById('endDate');
+    const startDateInput = document.getElementById('startDate');
+
+    if (endDateInput && !endDateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        endDateInput.value = today;
+    }
+
+    if (startDateInput && !startDateInput.value) {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        startDateInput.value = oneMonthAgo.toISOString().split('T')[0];
+    }
+
+    // Add loading state to form submission
+    const filtersForm = document.querySelector('.filters-form');
+    if (filtersForm) {
+        filtersForm.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('.btn-apply');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Загрузка...';
+            submitBtn.disabled = true;
+
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+    }
+
+    // Add smooth scrolling to sections
+    document.querySelectorAll('.table-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Add loading animation
+            this.style.opacity = '0.7';
+            setTimeout(() => {
+                window.location.href = this.href;
+            }, 300);
+        });
+    });
+
+    // Add animation to metric cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.metric-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(card);
+    });
+});
+</script>
 {% endblock %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-
-

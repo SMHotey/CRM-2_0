@@ -1,91 +1,167 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block page_title %}Расчет стоимости{% endblock %}
+{% block stats_dashboard %}
+<!-- Пустой блок - скрываем статистику -->
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-3">
-    <div class="card">
-        <div class="card-header">
-            <h4>Калькулятор стоимости</h4>
-        </div>
-        <div class="card-body">
-            <!-- Основные кнопки действий -->
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <button id="calculate-btn" class="btn btn-primary">Рассчитать</button>
-                <button id="add-row" class="btn btn-success">+ Добавить строку</button>
-                <button id="save-btn" class="btn btn-info">Сохранить данные</button>
+<div class="content-area">
+    <!-- Main Card -->
+    <div class="stats-section">
+        <div class="table-container glass-effect">
+            <!-- Action Buttons -->
+            <div class="section-header mb-4">
+                <h2 class="section-title">
+                    <i class="bi bi-calculator"></i>
+                    Управление расчетом
+                </h2>
+                <div class="section-badge">
+                    <span class="badge total-amount">Всего строк: <span id="total-rows">0</span></span>
+                </div>
             </div>
 
-            <!-- Блок элементов управления таблицей -->
-            <div class="table-controls-panel card mb-3">
-                <div class="card-header py-2">
-                    <h6 class="mb-0">Управление таблицей</h6>
+            <div class="d-flex flex-wrap gap-3 mb-4">
+                <button id="calculate-btn" class="btn btn-primary">
+                    <i class="bi bi-calculator-fill"></i>
+                    Рассчитать
+                </button>
+                <button id="add-row" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i>
+                    Добавить строку
+                </button>
+                <button id="save-btn" class="btn btn-info">
+                    <i class="bi bi-save"></i>
+                    Сохранить данные
+                </button>
+            </div>
+
+            <!-- Table Controls Panel -->
+            <div class="stats-filters glass-effect mb-4">
+                <div class="filters-header">
+                    <h3 class="filters-title">
+                        <i class="bi bi-sliders"></i>
+                        Управление столбцами
+                    </h3>
                 </div>
-                <div class="card-body py-2">
-                    <div class="d-flex flex-wrap gap-2 align-items-center">
-                        <button id="toggle-size-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-arrows-expand"></i> Скрыть размеры
+                <div class="filters-grid">
+                    <!-- Row 1 -->
+                    <div class="filter-group">
+                        <button id="toggle-size-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-arrows-expand"></i>
+                            <span class="btn-text">Размеры</span>
                         </button>
-                        <button id="toggle-transom-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-layout-three-columns"></i> Фрамуга
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-transom-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-layout-three-columns"></i>
+                            <span class="btn-text">Фрамуга</span>
                         </button>
-                        <button id="toggle-glazing1-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-grid-3x3"></i> Остекление 1
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-glazing1-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-grid-3x3"></i>
+                            <span class="btn-text">Остекление 1</span>
                         </button>
-                        <button id="toggle-glazing2-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-grid-3x3"></i> Остекление 2
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-glazing2-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-grid-3x3"></i>
+                            <span class="btn-text">Остекление 2</span>
                         </button>
-                        <button id="toggle-metal-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-shield"></i> Металл
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="filter-group">
+                        <button id="toggle-metal-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-shield"></i>
+                            <span class="btn-text">Металл</span>
                         </button>
-                        <button id="toggle-vent-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-grid"></i> Вентрешетка
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-vent-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-grid"></i>
+                            <span class="btn-text">Вентрешетка</span>
                         </button>
-                        <button id="toggle-bumper-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-border-all"></i> Отбойная пластина
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-bumper-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-border-all"></i>
+                            <span class="btn-text">Отбойная пластина</span>
                         </button>
-                        <button id="toggle-extension-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-arrows-expand-vertical"></i> Добор
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-extension-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-arrows-expand-vertical"></i>
+                            <span class="btn-text">Добор</span>
                         </button>
-                        <button id="toggle-color-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-palette"></i> Цвет
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div class="filter-group">
+                        <button id="toggle-color-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-palette"></i>
+                            <span class="btn-text">Цвет</span>
                         </button>
-                        <button id="toggle-hardware1-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-gear"></i> Скрыть фурнитуру 1
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-hardware1-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-gear"></i>
+                            <span class="btn-text">Фурнитура 1</span>
                         </button>
-                        <button id="toggle-hardware2-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-gear"></i> Фурнитура 2
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-hardware2-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-gear"></i>
+                            <span class="btn-text">Фурнитура 2</span>
                         </button>
-                        <button id="toggle-closer-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-arrow-left-right"></i> Доводчик
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-closer-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-arrow-left-right"></i>
+                            <span class="btn-text">Доводчик</span>
                         </button>
-                        <button id="toggle-cylinder-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-key"></i> Цилиндр
+                    </div>
+
+                    <!-- Row 4 -->
+                    <div class="filter-group">
+                        <button id="toggle-cylinder-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-key"></i>
+                            <span class="btn-text">Цилиндр</span>
                         </button>
-                        <button id="toggle-autothreshold-btn" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-border-bottom"></i> Авт.порог
+                    </div>
+                    <div class="filter-group">
+                        <button id="toggle-autothreshold-btn" class="btn btn-outline-secondary btn-control">
+                            <i class="bi bi-border-bottom"></i>
+                            <span class="btn-text">Авт.порог</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div id="save-status" class="mt-2"></div>
-            <div id="calculation-table" style="height: 500px;"></div>
+            <!-- Status Messages -->
+            <div id="save-status" class="mt-3"></div>
+
+            <!-- Calculation Table -->
+            <div id="calculation-table" class="tabulator-container"></div>
         </div>
     </div>
 </div>
 
 <!-- Модальное окно для отображения информации о строке -->
 <div class="modal fade" id="rowInfoModal" tabindex="-1" aria-labelledby="rowInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content glass-effect">
             <div class="modal-header">
-                <h5 class="modal-title" id="rowInfoModalLabel">Информация о строке #<span id="modal-row-id"></span></h5>
+                <h5 class="modal-title" id="rowInfoModalLabel">
+                    <i class="bi bi-info-circle"></i>
+                    Информация о строке #<span id="modal-row-id"></span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="modern-table">
                         <thead>
                             <tr>
                                 <th>Поле</th>
@@ -234,30 +310,41 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i>
+                    Закрыть
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Контекстное меню для строк -->
-<div id="rowContextMenu" class="dropdown-menu">
-    <button class="dropdown-item" type="button" data-action="add-above">Добавить строку сверху</button>
-    <button class="dropdown-item" type="button" data-action="add-below">Добавить строку снизу</button>
-    <button class="dropdown-item" type="button" data-action="delete">Удалить строку</button>
+<div id="rowContextMenu" class="dropdown-menu glass-effect" style="display: none; position: fixed; z-index: 10000;">
+    <button class="dropdown-item" type="button" data-action="add-above">
+        <i class="bi bi-arrow-up"></i>
+        Добавить строку сверху
+    </button>
+    <button class="dropdown-item" type="button" data-action="add-below">
+        <i class="bi bi-arrow-down"></i>
+        Добавить строку снизу
+    </button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item text-danger" type="button" data-action="delete">
+        <i class="bi bi-trash"></i>
+        Удалить строку
+    </button>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof Tabulator === 'undefined') {
         console.error('Tabulator не загружен!');
         document.getElementById('save-status').innerHTML = `
             <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i>
                 Ошибка загрузки Tabulator. Пожалуйста, обновите страницу.
             </div>
         `;
@@ -272,6 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const customSelectEditor = function(cell, onRendered, success, cancel, editorParams) {
         const input = document.createElement("select");
+        input.className = "form-select form-select-sm";
 
         for (const [value, label] of Object.entries(editorParams.values)) {
             const option = document.createElement("option");
@@ -300,10 +388,10 @@ document.addEventListener('DOMContentLoaded', function() {
         data: [
             {
                 id: 1,
-                door_type: "Дверь",
+                door_type: "door",
                 price: 15000,
                 quantity: 1,
-                door_kind: "EI-60",
+                door_kind: "ei-60",
                 width: 900,
                 height: 2100,
                 transom_height: 0,
@@ -337,10 +425,10 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             {
                 id: 2,
-                door_type: "Дверь 2-ств.",
+                door_type: "door_2",
                 price: 8000,
                 quantity: 2,
-                door_kind: "EIS-60",
+                door_kind: "eis-60",
                 width: 800,
                 height: 2000,
                 transom_height: 400,
@@ -377,19 +465,22 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 title: "№",
                 field: "id",
-                width: 40,
+                width: 60,
                 frozen: true,
                 hozAlign: "center",
                 vertAlign: "middle",
                 headerHozAlign: "center",
+                formatter: function(cell) {
+                    const value = cell.getValue();
+                    return `<span class="row-number">${value}</span>`;
+                },
                 cellClick: function(e, cell) {
-                    // Открываем модальное окно при клике на ячейку с номером
                     showRowInfo(cell.getRow());
                 }
             },
             {
                 title: "Изделие",
-                width: 100,
+                width: 120,
                 field: "door_type",
                 editor: customSelectEditor,
                 editorParams: {
@@ -408,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "gate": "Ворота"
                     };
                     const value = cell.getValue();
-                    return map[value] || value;
+                    return `<span class="product-name">${map[value] || value}</span>`;
                 },
                 editable: true,
                 hozAlign: "center",
@@ -421,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 title: "Тип",
                 field: "door_kind",
-                width: 60,
+                width: 80,
                 editor: customSelectEditor,
                 editorParams: {
                     values: dropdownData.door_kinds || {
@@ -439,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         "revision": "однолист."
                     };
                     const value = cell.getValue();
-                    return map[value] || value;
+                    return `<span class="type-badge">${map[value] || value}</span>`;
                 },
                 editable: true,
                 hozAlign: "center",
@@ -462,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["required", "numeric", "min:100", "max:3000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -478,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["required", "numeric", "min:100", "max:2000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -500,7 +591,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:1000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -516,7 +607,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:2000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -547,7 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 "laminated": "триплекс"
                             };
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="glazing-type">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -588,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 "laminated": "триплекс"
                             };
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="glazing-type">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -608,7 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:1000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -624,43 +715,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:2000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
                         headerHozAlign: "center",
                         headerSort: false
-                    },
-                    {
-                        title: "Опции",
-                        width: 100,
-                        field: "glazing1_options",
-                        visible: false,
-                        editor: customSelectEditor,
-                        editorParams: {
-                            values: dropdownData.glazing_options || {
-                                "option1": "Опция 1",
-                                "option2": "Опция 2",
-                                "option3": "Опция 3"
-                            }
-                        },
-                        formatter: function(cell) {
-                            const map = dropdownData.glazing_options || {
-                                "option1": "Опция 1",
-                                "option2": "Опция 2",
-                                "option3": "Опция 3"
-                            };
-                            const value = cell.getValue();
-                            return map[value] || value;
-                        },
-                        editable: true,
-                        hozAlign: "center",
-                        vertAlign: "middle",
-                        headerHozAlign: "center",
-                        headerSort: false,
-                        cellClick: function(e, cell) {
-                            cell.edit();
-                        }
                     }
                 ]
             },
@@ -692,7 +752,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 "laminated": "триплекс"
                             };
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="glazing-type">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -712,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:1000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -728,43 +788,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:2000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
                         headerHozAlign: "center",
                         headerSort: false
-                    },
-                    {
-                        title: "Опции",
-                        width: 100,
-                        field: "glazing2_options",
-                        visible: false,
-                        editor: customSelectEditor,
-                        editorParams: {
-                            values: dropdownData.glazing_options || {
-                                "option1": "Опция 1",
-                                "option2": "Опция 2",
-                                "option3": "Опция 3"
-                            }
-                        },
-                        formatter: function(cell) {
-                            const map = dropdownData.glazing_options || {
-                                "option1": "Опция 1",
-                                "option2": "Опция 2",
-                                "option3": "Опция 3"
-                            };
-                            const value = cell.getValue();
-                            return map[value] || value;
-                        },
-                        editable: true,
-                        hozAlign: "center",
-                        vertAlign: "middle",
-                        headerHozAlign: "center",
-                        headerSort: false,
-                        cellClick: function(e, cell) {
-                            cell.edit();
-                        }
                     }
                 ]
             },
@@ -780,6 +809,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         "1.4-1.4": "1.4-1.4",
                         "1.4-2.0": "1.4-2.0"
                     }
+                },
+                formatter: function(cell) {
+                    const value = cell.getValue();
+                    return `<span class="metal-type">${value}</span>`;
                 },
                 editable: true,
                 hozAlign: "center",
@@ -814,7 +847,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 "semi-prof": "п/п"
                             };
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="vent-type">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -834,7 +867,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:500"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -850,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:500"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -872,7 +905,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         validator: ["numeric", "min:0", "max:300"],
                         formatter: function(cell) {
                             const value = cell.getValue();
-                            return value ? value + " мм" : "—";
+                            return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                         },
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -897,7 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 "yes": "да"
                             };
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="boolean-value ${value === 'yes' ? 'text-success' : 'text-secondary'}">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -919,7 +952,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 validator: ["numeric", "min:0", "max:500"],
                 formatter: function(cell) {
                     const value = cell.getValue();
-                    return value ? value + " мм" : "—";
+                    return value ? `<span class="dimension-value">${value} мм</span>` : "—";
                 },
                 editable: true,
                 hozAlign: "center",
@@ -942,6 +975,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         editorParams: {
                             values: dropdownData.ral_colors || {}
                         },
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? `<span class="color-value">${value}</span>` : "—";
+                        },
                         editable: true,
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -959,6 +996,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         editor: customSelectEditor,
                         editorParams: {
                             values: dropdownData.ral_colors || {}
+                        },
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? `<span class="color-value">${value}</span>` : "—";
                         },
                         editable: true,
                         hozAlign: "center",
@@ -984,7 +1025,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         formatter: function(cell) {
                             const map = {"yes": "да", "no": "нет"};
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="boolean-value ${value === 'yes' ? 'text-success' : 'text-secondary'}">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -1010,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         formatter: function(cell) {
                             const map = {"yes": "да", "no": "нет"};
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="boolean-value ${value === 'yes' ? 'text-success' : 'text-secondary'}">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -1036,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         formatter: function(cell) {
                             const map = {"yes": "да", "no": "нет"};
                             const value = cell.getValue();
-                            return map[value] || value;
+                            return `<span class="boolean-value ${value === 'yes' ? 'text-success' : 'text-secondary'}">${map[value] || value}</span>`;
                         },
                         editable: true,
                         hozAlign: "center",
@@ -1062,6 +1103,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         editorParams: {
                             values: dropdownData.hardware_handles || {}
                         },
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? `<span class="hardware-item">${value}</span>` : "—";
+                        },
                         editable: true,
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -1079,6 +1124,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         editor: customSelectEditor,
                         editorParams: {
                             values: dropdownData.hardware_locks || {}
+                        },
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? `<span class="hardware-item">${value}</span>` : "—";
                         },
                         editable: true,
                         hozAlign: "center",
@@ -1104,6 +1153,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         editorParams: {
                             values: dropdownData.hardware_handles || {}
                         },
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? `<span class="hardware-item">${value}</span>` : "—";
+                        },
                         editable: true,
                         hozAlign: "center",
                         vertAlign: "middle",
@@ -1121,6 +1174,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         editor: customSelectEditor,
                         editorParams: {
                             values: dropdownData.hardware_locks || {}
+                        },
+                        formatter: function(cell) {
+                            const value = cell.getValue();
+                            return value ? `<span class="hardware-item">${value}</span>` : "—";
                         },
                         editable: true,
                         hozAlign: "center",
@@ -1142,6 +1199,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 editorParams: {
                     values: dropdownData.closers || {}
                 },
+                formatter: function(cell) {
+                    const value = cell.getValue();
+                    return value ? `<span class="hardware-item">${value}</span>` : "—";
+                },
                 editable: true,
                 hozAlign: "center",
                 vertAlign: "middle",
@@ -1159,6 +1220,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 editor: customSelectEditor,
                 editorParams: {
                     values: dropdownData.cylinders || {}
+                },
+                formatter: function(cell) {
+                    const value = cell.getValue();
+                    return value ? `<span class="hardware-item">${value}</span>` : "—";
                 },
                 editable: true,
                 hozAlign: "center",
@@ -1184,7 +1249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formatter: function(cell) {
                     const map = {"yes": "да", "no": "нет"};
                     const value = cell.getValue();
-                    return map[value] || value;
+                    return `<span class="boolean-value ${value === 'yes' ? 'text-success' : 'text-secondary'}">${map[value] || value}</span>`;
                 },
                 editable: true,
                 hozAlign: "center",
@@ -1198,18 +1263,25 @@ document.addEventListener('DOMContentLoaded', function() {
             {
                 title: "Кол-во",
                 field: "quantity",
+                width: 80,
                 editor: "number",
                 validator: ["required", "integer", "min:1"],
                 hozAlign: "center",
                 vertAlign: "middle",
-                headerHozAlign: "center"
+                headerHozAlign: "center",
+                formatter: function(cell) {
+                    const value = cell.getValue();
+                    return `<span class="quantity-badge">${value} шт</span>`;
+                }
             },
             {
                 title: "Сумма (₽)",
                 field: "total",
-                formatter: "money",
-                formatterParams: {symbol: "₽", precision: 0},
-                bottomCalc: "sum",
+                width: 120,
+                formatter: function(cell) {
+                    const value = cell.getValue() || 0;
+                    return `<span class="amount-value">${value.toLocaleString('ru-RU')} ₽</span>`;
+                },
                 bottomCalcParams: {precision: 0},
                 mutator: function(value, data) {
                     const price = parseFloat(data.price) || 0;
@@ -1220,8 +1292,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 vertAlign: "middle",
                 headerHozAlign: "center"
             }
+
         ],
+
         layout: "fitColumns",
+
+        height: "100%", // Занимает всю доступную высоту контейнера
+        maxHeight: "80vh", // Ограничиваем максимальную высоту
+        renderVertical: "virtual", // Виртуализация для производительности
+        rowContext: function(e, row) {
+            e.preventDefault();
+            showContextMenu(e, row);
+        },
+        dataChanged: function(data) {
+            document.getElementById('total-rows').textContent = data.length;
+            // Автоматически подстраиваем высоту таблицы
+            setTimeout(() => {
+                adjustTableHeight();
+            }, 10);
+        },
+        rowAdded: function(row) {
+            // Подстраиваем высоту при добавлении строки
+            setTimeout(() => {
+                adjustTableHeight();
+            }, 10);
+        },
+        rowDeleted: function(row) {
+            // Подстраиваем высоту при удалении строки
+            setTimeout(() => {
+                adjustTableHeight();
+            }, 10);
+        },
         cellEdited: function(cell) {
             const fieldsToRecalc = ["price", "quantity", "width", "height", "transom_height", "transom_width",
                                   "glazing1_height", "glazing1_width", "glazing2_height", "glazing2_width",
@@ -1229,25 +1330,71 @@ document.addEventListener('DOMContentLoaded', function() {
             if (fieldsToRecalc.includes(cell.getField())) {
                 const row = cell.getRow();
                 row.recalc();
-                table.recalc();
             }
         }
     });
+    // Функция для автоматической подстройки высоты таблицы
+        function adjustTableHeight() {
+            const tableElement = document.getElementById('calculation-table');
+            const tableContainer = tableElement.closest('.table-container');
+
+            if (!tableElement || !tableContainer) return;
+
+            // Получаем все строки таблицы
+            const rows = table.getRows();
+            const headerHeight = 50; // Примерная высота заголовка
+            const rowHeight = 48; // Примерная высота одной строки
+            const padding = 20; // Отступы
+
+            if (rows.length === 0) {
+                // Минимальная высота когда нет строк
+                tableElement.style.height = '200px';
+                return;
+            }
+
+            // Рассчитываем общую высоту
+            let totalHeight = headerHeight + (rows.length * rowHeight) + padding;
+
+            // Ограничиваем максимальную высоту
+            const maxHeight = window.innerHeight * 0.8; // 80% от высоты окна
+            totalHeight = Math.min(totalHeight, maxHeight);
+
+            // Устанавливаем минимальную высоту
+            totalHeight = Math.max(totalHeight, 200);
+
+            // Применяем высоту
+            tableElement.style.height = totalHeight + 'px';
+
+            // Перерисовываем таблицу
+            table.redraw(true);
+        }
+
+        // Обработчик изменения размера окна
+        window.addEventListener('resize', function() {
+            adjustTableHeight();
+        });
+
+        // Вызываем при загрузке
+        setTimeout(() => {
+            adjustTableHeight();
+        }, 100);
+
+    // Обновляем счетчик строк при загрузке
+    document.getElementById('total-rows').textContent = table.getDataCount();
 
     // Обработчик контекстного меню для строк
     let contextMenuRow = null;
 
-    table.on("rowContext", function(e, row) {
+    function showContextMenu(e, row) {
         e.preventDefault();
         contextMenuRow = row;
 
         // Позиционируем контекстное меню
         const menu = document.getElementById("rowContextMenu");
         menu.style.display = "block";
-        menu.style.position = "absolute";
         menu.style.left = e.pageX + "px";
         menu.style.top = e.pageY + "px";
-    });
+    }
 
     // Закрытие контекстного меню при клике вне его
     document.addEventListener("click", function(e) {
@@ -1278,6 +1425,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 case "delete":
                     contextMenuRow.delete();
+                    setTimeout(() => {
+                    adjustTableHeight();
+                    }, 50);
                     break;
             }
 
@@ -1302,11 +1452,9 @@ document.addEventListener('DOMContentLoaded', function() {
             glazing1_type: "none",
             glazing1_height: 0,
             glazing1_width: 0,
-            glazing1_options: "",
             glazing2_type: "none",
             glazing2_height: 0,
             glazing2_width: 0,
-            glazing2_options: "",
             metal: "1.2-1.4",
             vent_type: "none",
             vent_height: 0,
@@ -1329,6 +1477,10 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         table.addRow(newRow, false, index);
+            // Автоматически подстраиваем высоту после добавления строки
+        setTimeout(() => {
+        adjustTableHeight();
+        }, 50)
     }
 
     // Функция для отображения информации о строке в модальном окне
@@ -1412,162 +1564,84 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Функция для переключения видимости группы столбцов
-    function toggleColumnGroup(buttonId, buttonTextShow, buttonTextHide) {
+    function toggleColumnGroup(buttonId, columnFields) {
         document.getElementById(buttonId).addEventListener("click", function() {
             const button = this;
-            let columns = [];
+            const columns = columnFields.map(field => table.getColumn(field)).filter(col => col);
 
-            // Всегда заново находим столбцы по их field names
-            switch(buttonId) {
-                case "toggle-size-btn":
-                    columns = [table.getColumn("width"), table.getColumn("height")];
-                    break;
-                case "toggle-transom-btn":
-                    columns = [table.getColumn("transom_height"), table.getColumn("transom_width"), table.getColumn("transom_glazing")];
-                    break;
-                case "toggle-glazing1-btn":
-                    columns = [table.getColumn("glazing1_type"), table.getColumn("glazing1_height"), table.getColumn("glazing1_width"), table.getColumn("glazing1_options")];
-                    break;
-                case "toggle-glazing2-btn":
-                    columns = [table.getColumn("glazing2_type"), table.getColumn("glazing2_height"), table.getColumn("glazing2_width"), table.getColumn("glazing2_options")];
-                    break;
-                case "toggle-metal-btn":
-                    columns = [table.getColumn("metal")];
-                    break;
-                case "toggle-vent-btn":
-                    columns = [table.getColumn("vent_type"), table.getColumn("vent_height"), table.getColumn("vent_width")];
-                    break;
-                case "toggle-bumper-btn":
-                    columns = [table.getColumn("bumper_height"), table.getColumn("bumper_both_sides")];
-                    break;
-                case "toggle-extension-btn":
-                    columns = [table.getColumn("extension")];
-                    break;
-                case "toggle-color-btn":
-                    columns = [
-                        table.getColumn("ral_external"),
-                        table.getColumn("ral_internal"),
-                        table.getColumn("moire"),
-                        table.getColumn("varnish"),
-                        table.getColumn("primer")
-                    ];
-                    break;
-                case "toggle-hardware1-btn":
-                    columns = [table.getColumn("hardware1_handle"), table.getColumn("hardware1_lock")];
-                    break;
-                case "toggle-hardware2-btn":
-                    columns = [table.getColumn("hardware2_handle"), table.getColumn("hardware2_lock")];
-                    break;
-                case "toggle-closer-btn":
-                    columns = [table.getColumn("closer")];
-                    break;
-                case "toggle-cylinder-btn":
-                    columns = [table.getColumn("cylinder")];
-                    break;
-                case "toggle-autothreshold-btn":
-                    columns = [table.getColumn("auto_threshold")];
-                    break;
-            }
+            if (columns.length === 0) return;
 
-            // Проверяем текущее состояние видимости первого столбца (кроме RALвнеш, который всегда видим)
-            let currentVisible;
-            if (buttonId === "toggle-color-btn") {
-                // Для группы цвета проверяем второй столбец (RALвнутр), так как RALвнеш всегда видим
-                currentVisible = columns[1] && columns[1].isVisible();
-            } else {
-                currentVisible = columns[0] && columns[0].isVisible();
-            }
+            const isVisible = columns[0].isVisible();
+            const newVisible = !isVisible;
 
-            const newVisible = !currentVisible;
-
-            // Переключаем видимость всех столбцов в группе (кроме RALвнеш)
-            columns.forEach((column, index) => {
-                if (column && !(buttonId === "toggle-color-btn" && index === 0)) {
-                    column.toggle(newVisible);
-                }
+            // Переключаем видимость всех столбцов в группе
+            columns.forEach(column => {
+                column.toggle(newVisible);
             });
 
-            // Обновляем текст и иконку кнопки
+            // Обновляем текст и стиль кнопки
+            const btnText = button.querySelector('.btn-text');
             if (newVisible) {
-                button.innerHTML = buttonTextHide;
                 button.classList.remove('btn-outline-secondary');
                 button.classList.add('btn-secondary');
+                btnText.textContent = btnText.textContent.replace('Показать', 'Скрыть');
             } else {
-                button.innerHTML = buttonTextShow;
                 button.classList.remove('btn-secondary');
                 button.classList.add('btn-outline-secondary');
+                btnText.textContent = btnText.textContent.replace('Скрыть', 'Показать');
             }
 
             table.redraw(true);
         });
     }
 
-    // Инициализация обработчиков для всех кнопки
-    toggleColumnGroup("toggle-size-btn",
-        '<i class="bi bi-arrows-expand"></i> Размеры',
-        '<i class="bi bi-arrows-collapse"></i> Скрыть размеры');
+    // Инициализация обработчиков для всех кнопок переключения столбцов
+    toggleColumnGroup("toggle-size-btn", ["width", "height"]);
+    toggleColumnGroup("toggle-transom-btn", ["transom_height", "transom_width", "transom_glazing"]);
+    toggleColumnGroup("toggle-glazing1-btn", ["glazing1_type", "glazing1_height", "glazing1_width"]);
+    toggleColumnGroup("toggle-glazing2-btn", ["glazing2_type", "glazing2_height", "glazing2_width"]);
+    toggleColumnGroup("toggle-metal-btn", ["metal"]);
+    toggleColumnGroup("toggle-vent-btn", ["vent_type", "vent_height", "vent_width"]);
+    toggleColumnGroup("toggle-bumper-btn", ["bumper_height", "bumper_both_sides"]);
+    toggleColumnGroup("toggle-extension-btn", ["extension"]);
+    toggleColumnGroup("toggle-color-btn", ["ral_internal", "moire", "varnish", "primer"]); // ral_external всегда видим
+    toggleColumnGroup("toggle-hardware1-btn", ["hardware1_handle", "hardware1_lock"]);
+    toggleColumnGroup("toggle-hardware2-btn", ["hardware2_handle", "hardware2_lock"]);
+    toggleColumnGroup("toggle-closer-btn", ["closer"]);
+    toggleColumnGroup("toggle-cylinder-btn", ["cylinder"]);
+    toggleColumnGroup("toggle-autothreshold-btn", ["auto_threshold"]);
 
-    toggleColumnGroup("toggle-transom-btn",
-        '<i class="bi bi-layout-three-columns"></i> Фрамуга',
-        '<i class="bi bi-layout-three-columns"></i> Скрыть фрамугу');
-
-    toggleColumnGroup("toggle-glazing1-btn",
-        '<i class="bi bi-grid-3x3"></i> Остекление 1',
-        '<i class="bi bi-grid-3x3"></i> Скрыть остекление 1');
-
-    toggleColumnGroup("toggle-glazing2-btn",
-        '<i class="bi bi-grid-3x3"></i> Остекление 2',
-        '<i class="bi bi-grid-3x3"></i> Скрыть остекление 2');
-
-    toggleColumnGroup("toggle-metal-btn",
-        '<i class="bi bi-shield"></i> Металл',
-        '<i class="bi bi-shield"></i> Скрыть металл');
-
-    toggleColumnGroup("toggle-vent-btn",
-        '<i class="bi bi-grid"></i> Вентрешетка',
-        '<i class="bi bi-grid"></i> Скрыть вентрешетку');
-
-    toggleColumnGroup("toggle-bumper-btn",
-        '<i class="bi bi-border-all"></i> Отбойная пластина',
-        '<i class="bi bi-border-all"></i> Скрыть отбойную пластину');
-
-    toggleColumnGroup("toggle-extension-btn",
-        '<i class="bi bi-arrows-expand-vertical"></i> Добор',
-        '<i class="bi bi-arrows-expand-vertical"></i> Скрыть добор');
-
-    toggleColumnGroup("toggle-color-btn",
-        '<i class="bi bi-palette"></i> Цвет',
-        '<i class="bi bi-palette"></i> Скрыть цвет');
-
-    toggleColumnGroup("toggle-hardware1-btn",
-        '<i class="bi bi-gear"></i> Фурнитура 1',
-        '<i class="bi bi-gear"></i> Скрыть фурнитуру 1');
-
-    toggleColumnGroup("toggle-hardware2-btn",
-        '<i class="bi bi-gear"></i> Фурнитура 2',
-        '<i class="bi bi-gear"></i> Скрыть фурнитуру 2');
-
-    toggleColumnGroup("toggle-closer-btn",
-        '<i class="bi bi-arrow-left-right"></i> Доводчик',
-        '<i class="bi bi-arrow-left-right"></i> Скрыть доводчик');
-
-    toggleColumnGroup("toggle-cylinder-btn",
-        '<i class="bi bi-key"></i> Цилиндр',
-        '<i class="bi bi-key"></i> Скрыть цилиндр');
-
-    toggleColumnGroup("toggle-autothreshold-btn",
-        '<i class="bi bi-border-bottom"></i> Авт.порог',
-        '<i class="bi bi-border-bottom"></i> Скрыть авт.порог');
-
-// Функция расчета
+    // Функция расчета
     document.getElementById("calculate-btn").addEventListener("click", function() {
-        table.getRows().forEach(row => {
-            const data = row.getData();
-            row.update({
-                total: (parseFloat(data.price) || 0) * (parseInt(data.quantity) || 0)
+        const calculateBtn = this;
+        const originalText = calculateBtn.innerHTML;
+
+        calculateBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Расчет...';
+        calculateBtn.disabled = true;
+
+        // Имитация расчета
+        setTimeout(() => {
+            table.getRows().forEach(row => {
+                const data = row.getData();
+                // Здесь должна быть ваша логика расчета
+                const calculatedTotal = (parseFloat(data.price) || 0) * (parseInt(data.quantity) || 0);
+                row.update({
+                    total: calculatedTotal
+                });
             });
-        });
-        table.recalc();
+            table.recalc();
+
+            calculateBtn.innerHTML = '<i class="bi bi-check-lg"></i> Рассчитано';
+            calculateBtn.classList.remove('btn-primary');
+            calculateBtn.classList.add('btn-success');
+
+            setTimeout(() => {
+                calculateBtn.innerHTML = originalText;
+                calculateBtn.classList.remove('btn-success');
+                calculateBtn.classList.add('btn-primary');
+                calculateBtn.disabled = false;
+            }, 2000);
+        }, 500);
     });
 
     document.getElementById("add-row").addEventListener("click", function() {
@@ -1579,13 +1653,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const statusContainer = document.getElementById('save-status');
         const originalBtnText = saveBtn.innerHTML;
 
-        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Сохранение...';
+        saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Сохранение...';
         saveBtn.disabled = true;
         statusContainer.innerHTML = '';
 
         const tableData = table.getData();
         const csrftoken = getCookie('csrftoken');
 
+        // ЗАМЕНИТЕ URL НА АКТУАЛЬНЫЙ ДЛЯ ВАШЕГО ПРОЕКТА
         fetch("{% url 'save_calculation_data' %}", {
             method: 'POST',
             headers: {
@@ -1594,14 +1669,15 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 calculation_data: tableData,
-                project_id: 123
+                project_id: 123  // Замените на актуальный ID проекта
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 statusContainer.innerHTML = `
-                    <div class="alert alert-success mt-2">
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i>
                         Данные успешно сохранены! ID: ${data.calculation_id}
                     </div>
                 `;
@@ -1611,7 +1687,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             statusContainer.innerHTML = `
-                <div class="alert alert-danger mt-2">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
                     Ошибка сохранения: ${error.message}
                 </div>
             `;
@@ -1619,6 +1696,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .finally(() => {
             saveBtn.innerHTML = originalBtnText;
             saveBtn.disabled = false;
+
+            // Автоскрытие уведомления через 5 секунд
+            setTimeout(() => {
+                statusContainer.innerHTML = '';
+            }, 5000);
         });
     });
 
@@ -1640,71 +1722,305 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-    .text-secondary { color: #6c757d; }
-    .text-primary { color: #007bff; }
-    .text-success { color: #28a745; }
-    .text-info { color: #17a2b8; }
-    .text-danger { color: #dc3545; }
+/* Кастомные стили для калькулятора */
+.tabulator-container {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-height: 200px; /* Минимальная высота */
+    transition: height 0.3s ease;
+}
 
-    .d-flex {
-        display: flex;
+.tabulator-table {
+    background: transparent;
+    height: auto !important;
+}
+.tabulator-row:last-child {
+    border-bottom: none;
+}
+.tabulator-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+}
+
+.tabulator-col {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent !important;
+}
+
+.tabulator-col .tabulator-col-content {
+    padding: 0.75rem 0.5rem;
+}
+
+.tabulator-row {
+    transition: var(--transition-smooth);
+    border-bottom: 1px solid #e2e8f0;
+    background: transparent;
+}
+
+.tabulator-row:hover {
+    background: rgba(102, 126, 234, 0.05) !important;
+    transform: translateX(2px);
+}
+
+.tabulator-cell {
+    padding: 0.75rem 0.5rem;
+    border-right: 1px solid #e2e8f0;
+    background: transparent;
+}
+
+.tabulator-cell:first-child {
+    border-left: none;
+}
+
+.tabulator-cell:last-child {
+    border-right: none;
+}
+.tabulator-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: #a0aec0;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.tabulator-placeholder span {
+    padding: 2rem;
+    text-align: center;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .tabulator-container {
+        min-height: 150px;
     }
 
-    .flex-wrap {
-        flex-wrap: wrap;
+    #calculation-table {
+        min-height: 150px;
+    }
+}
+/* Стили для ячеек */
+.row-number {
+    font-weight: 600;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.product-name {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.type-badge {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.dimension-value {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.875rem;
+}
+
+.glazing-type {
+    font-weight: 500;
+    color: #2d3748;
+    font-size: 0.85rem;
+}
+
+.metal-type {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.vent-type {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.85rem;
+}
+
+.boolean-value {
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.color-value {
+    font-weight: 600;
+    color: #2d3748;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+.hardware-item {
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.85rem;
+}
+
+.quantity-badge {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.amount-value {
+    font-weight: 700;
+    color: #2d3748;
+    font-size: 0.9rem;
+    background: rgba(102, 126, 234, 0.05);
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+}
+
+/* Кнопки управления */
+.btn-control {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: var(--transition-smooth);
+    border: 2px solid #e2e8f0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-control:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-control.btn-secondary {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
+    color: #667eea;
+}
+
+/* Сетка фильтров */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+/* Контекстное меню */
+#rowContextMenu {
+    box-shadow: var(--shadow-large);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 0.5rem;
+}
+
+#rowContextMenu .dropdown-item {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#rowContextMenu .dropdown-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(3px);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
     }
 
-    .gap-2 {
-        gap: 0.5rem;
-    }
-
-    .table-controls-panel {
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-    }
-
-    .table-controls-panel .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
+    .tabulator-container {
         font-size: 0.875rem;
     }
 
-    .align-items-center {
-        align-items: center;
-    }
-
-    .ms-2 {
-        margin-left: 0.5rem;
-    }
-
-    /* Стили для центрирования содержимого ячеек */
-    .tabulator-cell {
-        text-align: center;
-        vertical-align: middle;
-    }
-
     .tabulator-col {
+        min-width: 80px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .d-flex.flex-wrap {
+        justify-content: center;
+    }
+
+    .btn {
+        flex: 1;
+        min-width: 140px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-area {
+        padding: 0 1rem 1rem;
+    }
+
+    .stats-header {
         text-align: center;
     }
 
-
-
-    /* Стиль для ячеек с номерами - курсор указатель */
-    .tabulator-cell[tabulator-field="id"] {
-        cursor: pointer;
+    .tabulator-container {
+        font-size: 0.8rem;
     }
-    .tabulator-cell[tabulator-field="id"]:hover {
-        background-color: #f0f0f0;
-    }
+}
 
-    /* Стили для контекстного меню */
-    #rowContextMenu {
-        display: none;
-        z-index: 1000;
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert {
+    animation: fadeIn 0.3s ease-out;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+}
+
+/* Стили для выпадающих списков в таблице */
+.tabulator-select-editor {
+    border: 2px solid #667eea;
+    border-radius: 6px;
+    padding: 0.25rem;
+    background: white;
+    font-size: 0.875rem;
+}
+
+/* Подсветка редактируемых ячеек */
+.tabulator-cell.editing {
+    background: rgba(102, 126, 234, 0.1) !important;
+}
+
 </style>
 {% endblock %}

@@ -3,482 +3,768 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon"/>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Система управления производством металлических дверей">
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="{% static 'erp_main/images/back.png' %}" as="image">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+
     <style>
-        .alert-info {
-            background: none;
-            padding: 0;
-            border: none;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4F97C7 0%, #4F97C7 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --danger-gradient: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 80px;
+            --sidebar-transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --header-height: 70px;
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --shadow-large: 0 15px 40px rgba(0, 0, 0, 0.15);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background-image: url("{% static 'erp_main/images/back.png' %}");
             background-size: cover;
             background-position: center;
             background-repeat: repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-medium);
+            transition: var(--sidebar-transition);
+            position: fixed;
             height: 100vh;
-            margin: 0;
+            overflow-y: auto;
+            z-index: 1000;
         }
 
-        .card, #first-block, #readiness, #shipment, #delay {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 20px 20px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s, box-shadow 0.3s;
-            background-color:whitesmoke;
-        }
-        .card .card-header {
-            font-size: 20px;
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
         }
 
-        #first-block {
-            background: linear-gradient(135deg, #37b1de, #494949);
-            box-shadow: 0 6px 5px rgba(0, 0, 0, 0.2);
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
-        #first-block:hover {
-            background: linear-gradient(135deg, #494949, #37b1de);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        #readiness {
-            background: linear-gradient(25deg, grey, blue);
-            box-shadow: 0 6px 5px rgba(0, 0, 0, 0.2);
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-        #readiness:hover {
-            background: linear-gradient(25deg, blue, grey);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        #shipment {
-            background: linear-gradient(25deg, grey, green);
-            box-shadow: 0 6px 5px rgba(0, 0, 0, 0.2);
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-        #shipment:hover {
-            background: linear-gradient(25deg, green, grey);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        #delay {
-            background: linear-gradient(25deg, grey, red);
-            box-shadow: 0 6px 5px rgba(0, 0, 0, 0.2);
-            transition: box-shadow 0.3s ease, transform 0.3s ease;
-        }
-
-        #delay:hover {
-            background: linear-gradient(25deg, red, grey);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        #logo {
-            transition: transform 0.6s ease;
-            width: 200px;
+        .logo {
+            transition: var(--transition-smooth);
+            width: 120px;
             height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
         }
 
-        #logo:hover {
-            transform: rotateY(180deg);
+        .logo:hover {
+            transform: scale(1.05) rotateY(10deg);
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
         }
 
-        .card-header {
-            font-size: 1.2rem;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .card-body {
-            padding: 20px;
-            text-align: center;
-            background-color: aliceblue;
+        .sidebar-nav {
+            padding: 1rem 0;
         }
 
         .nav-item {
-            position: relative;
-            list-style: none;
+            margin: 0.25rem 0.75rem;
         }
 
         .nav-link {
-            transition: background-color 0.3s, transform 0.5s, box-shadow 0.3s;
-            border-radius: 25px;
-            padding: 10px 15px 10px 45px;
-            color: #494949;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1rem;
+            color: #4a5568;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
         }
 
-        .nav-link:hover {
-            background-color: #37b1de;
-            color: #494949;
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.75);
-            margin-left: 20px;
-            border-color: white;
-        }
-
-        .sidebar {
-            width: 260px;
-            padding-top: 20px;
-            position: fixed;
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
             height: 100%;
-            overflow-y: auto;
-            background-color: aliceblue;
-            transition: 0.5s;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
-            z-index: 2;
-    <!--        font-family: "Monotype Corsiva", fantasy; -->
-            font-size: 21px;
+            width: 3px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: var(--transition-smooth);
         }
 
-        .sidebar:hover {
-            box-shadow: 10px 5px 20px rgba(0, 0, 0, 0.5);
-            transition: 0.5s;
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateX(5px);
         }
 
-        .main-content {
-            margin-left: 270px;
-            padding: 20px;
-            transition: margin-left 0.5s;
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 0.75rem;
+            transition: var(--transition-smooth);
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            visibility: hidden;
         }
 
         .dropdown-menu {
-            background-color: deepskyblue;
-            font-size: 17px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            color: #4a5568;
         }
 
         .dropdown-item:hover {
-            background-color: #4ea1e0;
-            font-size: 20px;
-            color: aliceblue;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateX(3px);
         }
 
-        .gradient-line {
-            height: 2px;
-            background-color: white;
-            width: 100%;
-            margin: 20px 0;
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: var(--transition-smooth);
+            min-height: 100vh;
         }
 
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed);
+        }
+
+        /* Header */
+        .main-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-soft);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition-smooth);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .stat-card.info::before { background: var(--primary-gradient); }
+        .stat-card.success::before { background: var(--success-gradient); }
+        .stat-card.warning::before { background: var(--warning-gradient); }
+        .stat-card.danger::before { background: var(--danger-gradient); }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-large);
+        }
+
+        .stat-header {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #2d3748;
+        }
+
+        .stat-content {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-link {
+            color: inherit;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+        }
+
+        .stat-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 0 2rem 2rem;
+        }
+
+        /* Mobile Menu Button */
         .mobile-menu-btn {
             display: none;
             position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 1001;
-            background: aliceblue;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
             border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            font-size: 1.25rem;
+            box-shadow: var(--shadow-medium);
+            transition: var(--transition-smooth);
         }
 
-        /* Мобильные стили */
+        .mobile-menu-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 992px) {
             .sidebar {
-                width: 70px;
-                overflow: hidden;
-            }
-
-            .sidebar:hover {
-                width: 260px;
-                z-index: 1000;
-            }
-
-            .sidebar .nav-link {
-                padding: 10px 15px;
-                white-space: nowrap;
-            }
-
-            .sidebar .dropdown-toggle::after {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 80px;
-            }
-
-            #logo {
-                width: 50px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
                 transform: translateX(-100%);
-                width: 260px;
-                position: fixed;
             }
 
-            .sidebar.show {
+            .sidebar.mobile-open {
                 transform: translateX(0);
             }
 
             .main-content {
                 margin-left: 0;
-                padding-top: 60px;
             }
 
             .mobile-menu-btn {
-                display: block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
-            .card, #first-block, #readiness, #shipment, #delay {
-                margin-bottom: 15px;
-                box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            .stats-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
             }
 
-            .card-header {
-                font-size: 1rem;
+            .stat-card {
+                padding: 1.25rem;
             }
 
-            .card-body {
-                padding: 10px;
+            .page-title {
+                font-size: 1.5rem;
             }
 
-            .row.my-3 > div {
-                margin-bottom: 15px;
+            .content-area {
+                padding: 0 1rem 1rem;
             }
 
-            .alert-info {
-                font-size: 24px !important;
-            }
-
-            .row.mb-0 .col-md-10,
-            .row.mb-0 .col-md-2 {
-                width: 100%;
-                text-align: center !important;
-            }
         }
 
         @media (max-width: 576px) {
-            .main-content {
-                padding: 15px 10px;
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
             }
 
-            #logo {
-                width: 40px;
+            .user-menu {
+                justify-content: center;
             }
 
-            .nav-link {
-                font-size: 16px;
-                padding: 8px 12px;
+            .stats-grid {
+                gap: 1rem;
             }
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 2px;
+        }
+
+        /* Loading Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        /* Utility Classes */
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
     </style>
 
-    <title>Завод металлических дверей</title>
+    <title>ЗМДД</title>
 </head>
 <body>
+    <div class="app-container">
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Открыть меню">
+            <i class="bi bi-list"></i>
+        </button>
 
-<div class="container-fluid">
-    <div class="row">
-        <button class="mobile-menu-btn d-lg-none" onclick="toggleMenu()">☰</button>
-
-        <nav class="sidebar" id="sidebar">
-            <div style="text-align: center;">
-                <a href="{% url 'index' %}">
-                    <img src="{% static 'erp_main/images/logo.png' %}" style="width: 120px; height: auto;" alt="Главная" id="logo">
+        <!-- Sidebar -->
+        <nav class="sidebar glass-effect" id="sidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'index' %}" aria-label="Главная страница">
+                    <img src="{% static 'erp_main/images/logo.png' %}" alt="Логотип завода" class="logo">
                 </a>
             </div>
-            <div class="gradient-line"></div>
 
-            <div class="sidebar-sticky">
-                <ul class="nav flex-column text-left">
+            <div class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <!-- Orders Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Заказы</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
+                            <i class="bi bi-folder-fill nav-icon"></i>
+                            <span class="nav-text">Заказы</span>
+                        </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'orders_list' %}">Все заказы</a></li>
-                            <li><a class="dropdown-item" href="{% url 'orders_list' %}">Мои заказы</a></li>
-                            <li><a class="dropdown-item" href="{% url 'order_upload' %}">Создать заказ</a></li>
+                            <li><a class="dropdown-item" href="{% url 'orders_list' %}">
+                                <i class="bi bi-list-check"></i> Все заказы
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'orders_list' %}">
+                                <i class="bi bi-person-check"></i> Мои заказы
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'order_upload' %}">
+                                <i class="bi bi-plus-circle"></i> Создать заказ
+                            </a></li>
                         </ul>
                     </li>
+
+                    <!-- Clients Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Клиенты</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-people-fill nav-icon"></i>
+                            <span class="nav-text">Клиенты</span>
+                        </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'organization_list' %}">Все клиенты</a></li>
-                             {% if user.is_superuser %}
-                            <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">Новое ЮЛ</a></li>
+                            <li><a class="dropdown-item" href="{% url 'organization_list' %}">
+                                <i class="bi bi-building"></i> Все клиенты
+                            </a></li>
+                            {% if user.is_superuser %}
+                            <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">
+                                <i class="bi bi-building-add"></i> Новое ЮЛ
+                            </a></li>
                             {% endif %}
-                            <li><a class="dropdown-item" href="{% url 'organization_add' %}">Добавить клиента</a></li>
+                            <li><a class="dropdown-item" href="{% url 'organization_add' %}">
+                                <i class="bi bi-person-plus"></i> Добавить клиента
+                            </a></li>
                         </ul>
                     </li>
+
+                    <!-- Calculations Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Расчеты</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-calculator-fill nav-icon"></i>
+                            <span class="nav-text">Расчеты</span>
+                        </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'invoice_add' %}">Добавить счет</a></li>
-                            <li><a class="dropdown-item" href="{% url 'invoices_list' %}">Все счета</a></li>
-                            <li><a class="dropdown-item" href="{% url 'calculation_table' %}">Расчеты</a></li>
+                            <li><a class="dropdown-item" href="{% url 'invoice_add' %}">
+                                <i class="bi bi-file-earmark-plus"></i> Добавить счет
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'invoices_list' %}">
+                                <i class="bi bi-files"></i> Все счета
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'calculation_table' %}">
+                                <i class="bi bi-table"></i> Расчеты
+                            </a></li>
                         </ul>
                     </li>
+
+                    <!-- Shipments Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Отгрузки</a>
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-truck-flatbed nav-icon"></i>
+                            <span class="nav-text">Отгрузки</span>
+                        </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'calendar' %}">Календарь отгрузок</a></li>
+                            <li><a class="dropdown-item" href="{% url 'calendar' %}">
+                                <i class="bi bi-calendar-week"></i> Календарь отгрузок
+                            </a></li>
                         </ul>
                     </li>
+
+                    <!-- Chat -->
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'chat' %}">
-                            <i class="bi bi-chat-dots"></i> Чат
+                            <i class="bi bi-chat-dots-fill nav-icon"></i>
+                            <span class="nav-text">Чат</span>
                         </a>
                     </li>
                 </ul>
             </div>
-            <div class="gradient-line"></div>
         </nav>
 
-        <main role="main" class="col-md-10 main-content">
-            <div class="row my-1">
-                <div class="col-md-12">
-                    <div class="row mb-0">
-                        <div class="col-md-10 text-center">
-                            <div class="alert alert-info" role="alert" style="font-family: 'Antique Olive Roman'; font-size: 38px">
-                                <strong></strong>
-                            </div>
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Header -->
+            <header class="main-header glass-effect">
+                <div class="header-content">
+                    <h1 class="page-title">ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ</h1>
+                    <div class="user-menu">
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a class="dropdown-toggle d-flex align-items-center text-decoration-none" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar">
+                                    {{ user.first_name|first }}{{ user.last_name|first }}
+                                </div>
+                                <span class="ms-2 d-none d-sm-block">
+                                    {{ user.first_name }} {{ user.last_name }}
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">
+                                    <i class="bi bi-person-circle"></i> Профиль
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item border-0 bg-transparent">
+                                            <i class="bi bi-box-arrow-right"></i> Выйти
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
-                        <div class="col-md-2 text-center" style="background: none;">
-                            <div class="alert alert-info" role="alert">
-                                {% if user.is_authenticated %}
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ user.first_name }} {{ user.last_name }}</a>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                                                    {% csrf_token %}
-                                                    <a href="javascript:void(0);" onclick="this.closest('form').submit();" class="dropdown-item">Выйти</a>
-                                                </form>
-                                            </li>
-                                            <li><a class="dropdown-item" href="#">Профиль</a></li>
-                                        </ul>
-                                    </li>
-                                {% endif %}
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
-                    <div class="card mb-3 text-white" id="first-block">
-                        <div class="card-header">Информация</div>
-                        <div class="card-body">
-                            <p class="card-text">Текст информационного блока</p>
-                        </div>
+                </div>
+            </header>
+
+            <!-- Stats Dashboard -->
+            {% block stats_dashboard %}
+            <div class="stats-grid">
+                <!-- Info Card -->
+                <div class="stat-card info">
+                    <div class="stat-header">Информация</div>
+                    <div class="stat-content">
+                        <p class="card-text">Добро пожаловать в систему управления продажами</p>
+                    </div>
+                </div>
+
+                <!-- Readiness Card -->
+                <div class="stat-card success">
+                    <div class="stat-header">Готовность на сегодня</div>
+                    <div class="stat-content">
+                        {% if today %}
+                            {% for num, link in today.items %}
+                                <a href="{{ link }}" class="stat-link">
+                                    <strong>{{ num }}</strong>
+                                </a>
+                                {% if forloop.last != True %},{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">Нет данных</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Shipments Card -->
+                <div class="stat-card warning">
+                    <div class="stat-header">Отгрузки на сегодня</div>
+                    <div class="stat-content">
+                        {% if ships %}
+                            {% for num, link in ships.items %}
+                                <a href="{{ link }}" class="stat-link">
+                                    <strong>{{ num }}</strong>
+                                </a>
+                                {% if forloop.last != True %},{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">Нет отгрузок</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Overdue Card -->
+                <div class="stat-card danger">
+                    <div class="stat-header">Просроченные заявки</div>
+                    <div class="stat-content">
+                        {% if overdue %}
+                            {% for num, link in overdue.items %}
+                                <a href="{{ link }}" class="stat-link">
+                                    <strong>{{ num }}</strong>
+                                </a>
+                                {% if forloop.last != True %},{% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-success">Просрочек нет</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
+            {% endblock %}
 
-            <div class="row my-3">
-                <div class="col-md-4">
-                    <div class="card text-white bg-primary mb-3" id="readiness">
-                        <div class="card-header">Готовность на сегодня</div>
-                        <div class="card-body">
-                            <p class="card-text">
-                            {% if today %}
-                                {% for num, link in today.items %}
-                                    <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
-                                    {% if forloop.last != True %},{% endif %}
-                                {% endfor %}
-                            {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-white bg-success mb-3" id="shipment">
-                        <div class="card-header">Отгрузки на сегодня</div>
-                        <div class="card-body text-black">
-                            <p class="card-text">
-                                {% if ships %}
-                                {% for num, link in ships.items %}
-                                    <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
-                                    {% if forloop.last != True %},{% endif %}
-                                {% endfor %}
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-white bg-danger mb-3" id="delay">
-                        <div class="card-header">Просроченные заявки</div>
-                        <div class="card-body text-black">
-                            <p class="card-text">
-                                {% if overdue %}
-                                {% for num, link in overdue.items %}
-                                    <a href="{{ link }}" style="color: #494949;"><i><strong>{{ num }}</strong></i></a>
-                                    {% if forloop.last != True %},{% endif %}
-                                {% endfor %}
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+            <!-- Content Block -->
+            <div class="content-area">
+                {% block content %}
+                <!-- Page content will be inserted here -->
+                {% endblock %}
             </div>
-
-        {% block content %}
-        {% endblock %}
         </main>
     </div>
-</div>
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
-<script>
-    const sidebar = document.getElementById('sidebar');
-    const mainContent = document.querySelector('.main-content');
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 
-    function toggleMenu() {
-        sidebar.classList.toggle('show');
-        if (mobileMenuBtn) {
-            mobileMenuBtn.textContent = sidebar.classList.contains('show') ? '✕' : '☰';
-        }
-    }
+    {% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Прячем кнопку меню на десктопах
-        if (window.innerWidth >= 992) {
-            sidebar.classList.add('show');
-            if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
-        }
-    });
+    <script>
+        class AppController {
+            constructor() {
+                this.sidebar = document.getElementById('sidebar');
+                this.mainContent = document.getElementById('mainContent');
+                this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                this.isMobile = window.innerWidth < 992;
 
-    // Обработчик изменения размера окна
-    window.addEventListener('resize', function() {
-        if (window.innerWidth >= 992) {
-            sidebar.classList.add('show');
-            if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
-        } else {
-            if (mobileMenuBtn) mobileMenuBtn.style.display = 'block';
-        }
-    });
-</script>
-<meta name="csrf-token" content="{{ csrf_token }}">
-<script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+                this.init();
+            }
+
+            init() {
+                try {
+                    this.setupEventListeners();
+                    this.handleResize();
+                } catch (error) {
+                    console.error('AppController initialization error:', error);
+                }
+            }
+            setupEventListeners() {
+                // Mobile menu toggle
+                if (this.mobileMenuBtn) {
+                    this.mobileMenuBtn.addEventListener('click', () => this.toggleMobileMenu());
+                }
+
+                // Window resize handler
+                window.addEventListener('resize', () => this.handleResize());
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (this.isMobile &&
+                        !this.sidebar.contains(e.target) &&
+                        !this.mobileMenuBtn.contains(e.target)) {
+                        this.closeMobileMenu();
+                    }
+                });
+
+                // Smooth scrolling for anchor links
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
+            }
+
+            toggleMobileMenu() {
+                this.sidebar.classList.toggle('mobile-open');
+                const icon = this.mobileMenuBtn.querySelector('i');
+                if (this.sidebar.classList.contains('mobile-open')) {
+                    icon.classList.remove('bi-list');
+                    icon.classList.add('bi-x');
+                } else {
+                    icon.classList.remove('bi-x');
+                    icon.classList.add('bi-list');
+                }
+            }
+
+            closeMobileMenu() {
+                this.sidebar.classList.remove('mobile-open');
+                const icon = this.mobileMenuBtn.querySelector('i');
+                icon.classList.remove('bi-x');
+                icon.classList.add('bi-list');
+            }
+
+            handleResize() {
+                this.isMobile = window.innerWidth < 992;
+
+                if (!this.isMobile) {
+                    this.closeMobileMenu();
+                    this.mobileMenuBtn.style.display = 'none';
+                } else {
+                    this.mobileMenuBtn.style.display = 'flex';
+                }
             }
         }
-    }
-    return cookieValue;
-}
-const csrftoken = getCookie('csrftoken');
-</script>
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new AppController();
+        });
+
+        // CSRF Token setup
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+    </script>
+
     {% block extra_scripts %}{% endblock %}
-{% endblock %}
+    {% endblock %}
 </body>
 </html>

@@ -1,156 +1,752 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container my-4">
-    <h1 id="form-title" class="mb-4 text-center">Добавить организацию</h1>
-    <form method="post" id="organization-form" class="needs-validation" novalidate>
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+<div class="organization-create-container">
+    <div class="organization-create-header">
+        <h1 id="form-title" class="organization-create-title">Добавить организацию</h1>
+        <p id="form-subtitle" class="organization-create-subtitle">Заполните информацию о контрагенте</p>
+    </div>
 
-        <div class="mb-4">
-            <h5>Тип организации</h5>
-            <div class="form-check form-check-inline">
-                <input type="radio" class="form-check-input" name="type" value="organization" checked onchange="toggleFields()">
-                <label class="form-check-label">Юридическое лицо</label>
+    <form method="post" id="organization-form" class="organization-form" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error" role="alert">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <strong>Пожалуйста, исправьте ошибки:</strong>
+                    <ul class="alert-list">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
-            <div class="form-check form-check-inline">
-                <input type="radio" class="form-check-input" name="type" value="individual" onchange="toggleFields()">
-                <label class="form-check-label">Физическое лицо</label>
+        {% endif %}
+
+        <!-- Тип организации -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Тип контрагента</h3>
+            </div>
+            <div class="type-selector">
+                <label class="type-option">
+                    <input type="radio" name="type" value="organization" checked onchange="toggleFields()">
+                    <div class="type-card">
+                        <div class="type-icon">🏢</div>
+                        <div class="type-content">
+                            <h4>Юридическое лицо</h4>
+                        </div>
+                        <div class="type-check"></div>
+                    </div>
+                </label>
+                <label class="type-option">
+                    <input type="radio" name="type" value="individual" onchange="toggleFields()">
+                    <div class="type-card">
+                        <div class="type-icon">👤</div>
+                        <div class="type-content">
+                            <h4>Физическое лицо</h4>
+                        </div>
+                        <div class="type-check"></div>
+                    </div>
+                </label>
             </div>
         </div>
 
         <!-- Поля для юридического лица -->
-        <div id="organization-fields" class="mb-4">
-            <div class="mb-3">
-                <label for="{{ form.inn.id_for_label }}">{{ form.inn.label }}</label>
-                {{ form.inn }}
-                {{ form.inn.errors }}
+        <div id="organization-fields" class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Информация о компании</h3>
             </div>
-            <div class="mb-3">
-                <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
-                {{ form.name }}
-                {{ form.name.errors }}
+            <div class="form-grid">
+                <div class="form-field-group {% if form.inn.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.inn.id_for_label }}" class="form-label">
+                        {{ form.inn.label }}
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.inn }}
+                        {% if form.inn.help_text %}
+                            <div class="help-text">{{ form.inn.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% for error in form.inn.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field-group {% if form.name.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        {{ form.name.label }}
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.name }}
+                        {% if form.name.help_text %}
+                            <div class="help-text">{{ form.name.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% for error in form.name.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="text-left mb-4">
-            <button type="button" class="btn btn-secondary" onclick="toggleAdditionalFields()">Расширенная информация</button>
+
+            <div class="section-actions">
+                <button type="button" class="btn btn-outline" onclick="toggleAdditionalFields()" id="additional-fields-btn">
+                    <span class="btn-icon">📋</span>
+                    Расширенная информация
+                    <span class="btn-arrow">▼</span>
+                </button>
             </div>
         </div>
 
         <!-- Поля для физического лица -->
-        <div id="individual-fields" style="display:none;" class="mb-4">
-            <div class="mb-3">
-                <label for="{{ form.name_fl.id_for_label }}">{{ form.name_fl.label }}</label>
-                {{ form.name_fl }}
-                {{ form.name_fl.errors }}
+        <div id="individual-fields" style="display:none;" class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Информация о физическом лице</h3>
             </div>
-            <div class="mb-3">
-                <label for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
-                {{ form.phone_number }}
-                {{ form.phone_number.errors }}
+            <div class="form-grid">
+                <div class="form-field-group {% if form.name_fl.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.name_fl.id_for_label }}" class="form-label">
+                        {{ form.name_fl.label }}
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.name_fl }}
+                        {% if form.name_fl.help_text %}
+                            <div class="help-text">{{ form.name_fl.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% for error in form.name_fl.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field-group {% if form.phone_number.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+                        {{ form.phone_number.label }}
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.phone_number }}
+                        {% if form.phone_number.help_text %}
+                            <div class="help-text">{{ form.phone_number.help_text }}</div>
+                        {% endif %}
+                    </div>
+                    {% for error in form.phone_number.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-
-
 
         <!-- Дополнительные поля -->
-        <div id="additional-fields" style="display:none;" class="mb-4 border p-3 rounded">
-            <h5>Дополнительная информация</h5>
-            <div class="mb-3">
-                <label for="id_ceo_footing">Подпись на основании</label>
-                <select name="ceo_footing" id="id_ceo_footing" class="form-select">
-                    <option value="ustav">Устава</option>
-                    <option value="attorney">Доверенности</option>
-                </select>
+        <div id="additional-fields" style="display:none;" class="form-section additional-section">
+            <div class="section-header">
+                <h3 class="section-title">Дополнительная информация</h3>
+                <p class="section-description">Банковские реквизиты и контактная информация</p>
             </div>
-            <div class="mb-3">
-                <label for="id_ogrn">ОГРН</label>
-                <input type="text" name="ogrn" id="id_ogrn" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_kpp">КПП</label>
-                <input type="text" name="kpp" id="id_kpp" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_r_s">Р/с</label>
-                <input type="text" name="r_s" id="id_r_s" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_bank">Банк</label>
-                <input type="text" name="bank" id="id_bank" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_bik">БИК</label>
-                <input type="text" name="bik" id="id_bik" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_k_s">К/с</label>
-                <input type="text" name="k_s" id="id_k_s" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_address">Адрес</label>
-                <input type="text" name="address" id="id_address" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_email">Email</label>
-                <input type="email" name="email" id="id_email" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_ceo_title">Должность</label>
-                <input type="text" name="ceo_title" id="id_ceo_title" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label for="id_ceo_name">ФИО</label>
-                <input type="text" name="ceo_name" id="id_ceo_name" class="form-control" />
+
+            <div class="form-grid">
+                <div class="form-field-group">
+                    <label for="id_ceo_footing" class="form-label">Подпись на основании</label>
+                    <div class="input-wrapper">
+                        <select name="ceo_footing" id="id_ceo_footing" class="form-input">
+                            <option value="ustav">Устава</option>
+                            <option value="attorney">Доверенности</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_ogrn" class="form-label">ОГРН</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="ogrn" id="id_ogrn" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_kpp" class="form-label">КПП</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="kpp" id="id_kpp" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_r_s" class="form-label">Р/с</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="r_s" id="id_r_s" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_bank" class="form-label">Банк</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="bank" id="id_bank" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_bik" class="form-label">БИК</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="bik" id="id_bik" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_k_s" class="form-label">К/с</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="k_s" id="id_k_s" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group full-width">
+                    <label for="id_address" class="form-label">Адрес</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="address" id="id_address" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_email" class="form-label">Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" name="email" id="id_email" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_ceo_title" class="form-label">Должность</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="ceo_title" id="id_ceo_title" class="form-input" />
+                    </div>
+                </div>
+
+                <div class="form-field-group">
+                    <label for="id_ceo_name" class="form-label">ФИО</label>
+                    <div class="input-wrapper">
+                        <input type="text" name="ceo_name" id="id_ceo_name" class="form-input" />
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="text-center mb-4">
-            <button type="submit" class="btn btn-primary">Сохранить</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-submit">
+                <span class="btn-text">Сохранить организацию</span>
+                <span class="btn-loading" style="display: none;">
+                    <span class="spinner"></span>
+                    Сохранение...
+                </span>
+            </button>
         </div>
     </form>
+</div>
 
-    <script>
-    function toggleFields() {
-        const isIndividual = document.querySelector('input[name="type"]:checked').value === 'individual';
-        const organizationFields = document.getElementById('organization-fields');
-        const individualFields = document.getElementById('individual-fields');
+<style>
+.organization-create-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
 
-        organizationFields.style.display = isIndividual ? 'none' : 'block';
-        individualFields.style.display = isIndividual ? 'block' : 'none';
+.organization-create-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
 
-        document.getElementById('form-title').innerText = isIndividual ? 'Добавить физическое лицо' : 'Добавить организацию';
+.organization-create-title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.5rem 0;
+}
 
-        updateRequiredFields(isIndividual);
+.organization-create-subtitle {
+    font-size: 1rem;
+    color: #718096;
+    margin: 0;
+}
+
+.organization-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+}
+
+.section-description {
+    font-size: 0.875rem;
+    color: #718096;
+    margin: 0;
+}
+
+/* Type Selector */
+.type-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.type-option {
+    cursor: pointer;
+}
+
+.type-option input {
+    display: none;
+}
+
+.type-card {
+    position: relative;
+    padding: 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: white;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.type-card:hover {
+    border-color: #cbd5e0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.type-option input:checked + .type-card {
+    border-color: #4299e1;
+    background: #f7fafc;
+}
+
+.type-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.type-content h4 {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.type-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+.type-check {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.type-option input:checked + .type-card .type-check {
+    border-color: #4299e1;
+    background: #4299e1;
+}
+
+.type-option input:checked + .type-card .type-check::after {
+    content: '✓';
+    color: white;
+    font-size: 0.75rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    function updateRequiredFields(isIndividual) {
-        const nameFlField = document.querySelector('input[name="name_fl"]');
-        const phoneNumberField = document.querySelector('input[name="phone_number"]');
-        const innField = document.querySelector('input[name="inn"]');
-        const nameField = document.querySelector('input[name="name"]');
+    .full-width {
+        grid-column: 1 / -1;
+    }
+}
+
+.form-field-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.required-asterisk {
+    color: #e53e3e;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-input:hover, .form-select:hover {
+    border-color: #cbd5e0;
+}
+
+.form-field-error .form-input,
+.form-field-error .form-select {
+    border-color: #e53e3e;
+}
+
+.form-field-error .form-input:focus,
+.form-field-error .form-select:focus {
+    border-color: #e53e3e;
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.field-error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.error-icon {
+    font-size: 0.75rem;
+}
+
+.help-text {
+    font-size: 0.75rem;
+    color: #718096;
+    margin-top: 0.25rem;
+}
+
+/* Section Actions */
+.section-actions {
+    margin-top: 1.5rem;
+}
+
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #4299e1;
+    border: 2px solid #4299e1;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+    background: #4299e1;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-icon {
+    font-size: 1rem;
+}
+
+.btn-arrow {
+    transition: transform 0.3s ease;
+}
+
+.additional-section.active .btn-arrow {
+    transform: rotate(180deg);
+}
+
+/* Additional Section */
+.additional-section {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1rem;
+    border: 1px solid #e2e8f0;
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-submit {
+    position: relative;
+    padding: 0.875rem 2rem;
+    background: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-submit:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.spinner {
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Alert Styles */
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.alert-error {
+    background: #fed7d7;
+    border: 1px solid #feb2b2;
+    color: #c53030;
+}
+
+.alert-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-list {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('organization-form');
+    const submitBtn = form.querySelector('.btn-submit');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const additionalFieldsBtn = document.getElementById('additional-fields-btn');
+
+    // Инициализация стилей для полей формы
+    const styleFormFields = () => {
+        const inputs = form.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            if (!input.classList.contains('form-input') && !input.classList.contains('form-select')) {
+                input.classList.add(input.tagName === 'SELECT' ? 'form-select' : 'form-input');
+            }
+        });
+    };
+
+    styleFormFields();
+
+    form.addEventListener('submit', function(e) {
+        // Валидация перед отправкой
+        let isValid = true;
+        const isIndividual = document.querySelector('input[name="type"]:checked').value === 'individual';
 
         if (isIndividual) {
-            nameFlField.setAttribute('required', '');
-            phoneNumberField.setAttribute('required', '');
-            innField.removeAttribute('required');
-            nameField.removeAttribute('required');
-        } else {
-            innField.setAttribute('required', '');
-            nameField.setAttribute('required', '');
-            nameFlField.removeAttribute('required');
-            phoneNumberField.removeAttribute('required');
-        }
-    }
+            const nameFlField = document.querySelector('input[name="name_fl"]');
+            const phoneNumberField = document.querySelector('input[name="phone_number"]');
 
-    function toggleAdditionalFields() {
-        const additionalFields = document.getElementById('additional-fields');
-        // Переключаем видимость всех дополнительных полей
-        if (additionalFields.style.display === 'none') {
-            additionalFields.style.display = 'block';
+            if (!nameFlField.value.trim()) {
+                isValid = false;
+                nameFlField.closest('.form-field-group').classList.add('form-field-error');
+            }
+            if (!phoneNumberField.value.trim()) {
+                isValid = false;
+                phoneNumberField.closest('.form-field-group').classList.add('form-field-error');
+            }
         } else {
-            additionalFields.style.display = 'none';
+            const innField = document.querySelector('input[name="inn"]');
+            const nameField = document.querySelector('input[name="name"]');
+
+            if (!innField.value.trim()) {
+                isValid = false;
+                innField.closest('.form-field-group').classList.add('form-field-error');
+            }
+            if (!nameField.value.trim()) {
+                isValid = false;
+                nameField.closest('.form-field-group').classList.add('form-field-error');
+            }
         }
+
+        if (!isValid) {
+            e.preventDefault();
+            return;
+        }
+
+        // Показываем состояние загрузки
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'flex';
+        submitBtn.disabled = true;
+    });
+
+    // Динамическая валидация при вводе
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const fieldGroup = this.closest('.form-field-group');
+            if (fieldGroup) {
+                fieldGroup.classList.remove('form-field-error');
+            }
+        });
+    });
+});
+
+function toggleFields() {
+    const isIndividual = document.querySelector('input[name="type"]:checked').value === 'individual';
+    const organizationFields = document.getElementById('organization-fields');
+    const individualFields = document.getElementById('individual-fields');
+    const formTitle = document.getElementById('form-title');
+    const formSubtitle = document.getElementById('form-subtitle');
+
+    // Анимация переключения
+    organizationFields.style.display = isIndividual ? 'none' : 'block';
+    individualFields.style.display = isIndividual ? 'block' : 'none';
+
+    // Обновление заголовков
+    formTitle.innerText = isIndividual ? 'Добавить физическое лицо' : 'Добавить организацию';
+    formSubtitle.innerText = isIndividual ? 'Заполните информацию о физическом лице' : 'Заполните информацию о контрагенте';
+
+    updateRequiredFields(isIndividual);
+}
+
+function updateRequiredFields(isIndividual) {
+    const nameFlField = document.querySelector('input[name="name_fl"]');
+    const phoneNumberField = document.querySelector('input[name="phone_number"]');
+    const innField = document.querySelector('input[name="inn"]');
+    const nameField = document.querySelector('input[name="name"]');
+
+    if (isIndividual) {
+        nameFlField.setAttribute('required', '');
+        phoneNumberField.setAttribute('required', '');
+        innField.removeAttribute('required');
+        nameField.removeAttribute('required');
+    } else {
+        innField.setAttribute('required', '');
+        nameField.setAttribute('required', '');
+        nameFlField.removeAttribute('required');
+        phoneNumberField.removeAttribute('required');
     }
-    </script>
-</div>
+}
+
+function toggleAdditionalFields() {
+    const additionalFields = document.getElementById('additional-fields');
+    const additionalBtn = document.getElementById('additional-fields-btn');
+    const arrow = additionalBtn.querySelector('.btn-arrow');
+
+    if (additionalFields.style.display === 'none') {
+        additionalFields.style.display = 'block';
+        additionalFields.classList.add('active');
+        arrow.style.transform = 'rotate(180deg)';
+        additionalBtn.innerHTML = '<span class="btn-icon">📋</span>Скрыть расширенную информацию<span class="btn-arrow">▼</span>';
+    } else {
+        additionalFields.style.display = 'none';
+        additionalFields.classList.remove('active');
+        arrow.style.transform = 'rotate(0deg)';
+        additionalBtn.innerHTML = '<span class="btn-icon">📋</span>Расширенная информация<span class="btn-arrow">▼</span>';
+    }
+}
+</script>
 {% endblock %}
