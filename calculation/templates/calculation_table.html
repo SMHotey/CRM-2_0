@@ -14,7 +14,7 @@
             <div class="section-header mb-4">
                 <h2 class="section-title">
                     <i class="bi bi-calculator"></i>
-                    Управление расчетом
+                    Калькулятор стоимости
                 </h2>
                 <div class="section-badge">
                     <span class="badge total-amount">Всего строк: <span id="total-rows">0</span></span>
@@ -87,7 +87,7 @@
                     <div class="filter-group">
                         <button id="toggle-bumper-btn" class="btn btn-outline-secondary btn-control">
                             <i class="bi bi-border-all"></i>
-                            <span class="btn-text">Отбойная пластина</span>
+                            <span class="btn-text">Отбойник</span>
                         </button>
                     </div>
                     <div class="filter-group">
@@ -550,7 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         field: "height",
                         visible: true,
                         editor: "number",
-                        validator: ["required", "numeric", "min:100", "max:3000"],
+                        validator: ["required", "numeric", "min:200", "max:6000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
                             return value ? `<span class="dimension-value">${value} мм</span>` : "—";
@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         field: "width",
                         visible: true,
                         editor: "number",
-                        validator: ["required", "numeric", "min:100", "max:2000"],
+                        validator: ["required", "numeric", "min:200", "max:6000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
                             return value ? `<span class="dimension-value">${value} мм</span>` : "—";
@@ -588,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         field: "transom_height",
                         visible: false,
                         editor: "number",
-                        validator: ["numeric", "min:0", "max:1000"],
+                        validator: ["numeric", "min:100", "max:3000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
                             return value ? `<span class="dimension-value">${value} мм</span>` : "—";
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         field: "transom_width",
                         visible: false,
                         editor: "number",
-                        validator: ["numeric", "min:0", "max:2000"],
+                        validator: ["numeric", "min:100", "max:3000"],
                         formatter: function(cell) {
                             const value = cell.getValue();
                             return value ? `<span class="dimension-value">${value} мм</span>` : "—";
@@ -664,18 +664,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         editorParams: {
                             values: dropdownData.glazing_types || {
                                 "none": "нет",
-                                "single": "однокамерное",
-                                "double": "двухкамерное",
-                                "triple": "трехкамерное",
+                                "single": "1-кам. ст.п.",
+                                "double": "2-кам. ст.п.",
+                                "anti_fire": "п/п",
                                 "laminated": "триплекс"
                             }
                         },
                         formatter: function(cell) {
                             const map = dropdownData.glazing_types || {
                                 "none": "нет",
-                                "single": "однокамерное",
-                                "double": "двухкамерное",
-                                "triple": "трехкамерное",
+                                "single": "1-кам. ст.п.",
+                                "double": "2-кам. ст.п.",
+                                "anti_fire": "п/п",
                                 "laminated": "триплекс"
                             };
                             const value = cell.getValue();
@@ -737,18 +737,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         editorParams: {
                             values: dropdownData.glazing_types || {
                                 "none": "нет",
-                                "single": "однокамерное",
-                                "double": "двухкамерное",
-                                "triple": "трехкамерное",
+                                "single": "1-кам. ст.п.",
+                                "double": "2-кам. ст.п.",
+                                "anti_fire": "п/п",
                                 "laminated": "триплекс"
                             }
                         },
                         formatter: function(cell) {
                             const map = dropdownData.glazing_types || {
                                 "none": "нет",
-                                "single": "однокамерное",
-                                "double": "двухкамерное",
-                                "triple": "трехкамерное",
+                                "single": "1-кам. ст.п.",
+                                "double": "2-кам. ст.п.",
+                                "anti_fire": "п/п",
                                 "laminated": "триплекс"
                             };
                             const value = cell.getValue();
@@ -837,14 +837,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             values: dropdownData.vent_types || {
                                 "none": "нет",
                                 "tech": "тех.",
-                                "semi-prof": "п/п"
+                                "anti_fire": "п/п"
                             }
                         },
                         formatter: function(cell) {
                             const map = dropdownData.vent_types || {
                                 "none": "нет",
                                 "tech": "тех.",
-                                "semi-prof": "п/п"
+                                "anti_fire": "п/п"
                             };
                             const value = cell.getValue();
                             return `<span class="vent-type">${map[value] || value}</span>`;

@@ -50,8 +50,9 @@ INSTALLED_APPS = [
     'channels',
 ]
 
-LOGIN_URL = '/custom-login/'  # URL после успешного входа
-LOGOUT_URL = '/custom-login/'  # URL после выхода
+LOGIN_URL = '/login/'  # URL после успешного входа
+#LOGIN_REDIRECT_URL = '/index/'
+LOGOUT_URL = '/login/'  # URL после выхода
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

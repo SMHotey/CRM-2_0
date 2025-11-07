@@ -1,27 +1,166 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация - Название Системы</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h2 {
+            color: #333;
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+        
+        .login-header p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        input[type="text"], 
+        input[type="password"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus, 
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            background-color: #0056b3;
+        }
+        
+        .error-message {
+            background-color: #f8d7da;
+            color: var(--error-color);
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #f5c6cb;
+            font-size: 0.9rem;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e1e5e9;
+        }
+        
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Вход в систему</h2>
+            <p>Введите ваши учетные данные</p>
+        </div>
+        
+        {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+        {% endif %}
 
-{% block content %}
-<div class="container mt-5">
-    <h2 class="text-center">Вход в систему</h2>
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="username">Логин</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <!-- Отображение ошибки аутентификации -->
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
-                <button type="submit" class="btn btn-primary btn-block">Войти</button>
-            </form>
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn-login">Войти в систему</button>
+        </form>
+        
+        <div class="form-footer">
+            <!-- Здесь можно добавить ссылки на восстановление пароля и т.д. -->
         </div>
     </div>
-</div>
-{% endblock %}
+</body>
+</html>

@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from .models import *
 from .serializers import *
 from .filters import *
-from .models import ChatRoom, ChatMessage, UserStatus
+# from .models import ChatRoom, ChatMessage, UserStatus
 
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
@@ -113,81 +113,3 @@ class ShipmentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-
-class ChatRoomViewSet(viewsets.ModelViewSet):
-    serializer_class = ChatRoomSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return ChatRoom.objects.filter(participants=self.request.user, is_active=True)
-
-    @action(detail=False, methods=['post'])
-    def create_private_chat(self, request):
-        user_id = request.data.get('user_id')
-        try:
-            target_user = User.objects.get(id=user_id)
-            # Проверяем, существует ли уже приватный чат
-            existing_room = ChatRoom.objects.filter(
-                room_type='private',
-                participants=request.user
-            ).filter(participants=target_user).distinct()
-
-            if existing_room.exists():
-                room = existing_room.first()
-            else:
-                room = ChatRoom.objects.create(
-                    name=f"Чат с {target_user.get_full_name() or target_user.username}",
-                    room_type='private',
-                    created_by=request.user
-                )
-                room.participants.add(request.user, target_user)
-
-            serializer = self.get_serializer(room)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=404)
-
-
-class ChatMessageViewSet(viewsets.ModelViewSet):
-    serializer_class = ChatMessageSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        room_id = self.request.query_params.get('room_id')
-        if room_id:
-            return ChatMessage.objects.filter(room_id=room_id).select_related('user', 'reply_to')
-        return ChatMessage.objects.none()
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
-
-    def perform_create(self, serializer):
-        room = serializer.validated_data['room']
-
-        # Проверяем, что пользователь является участником комнаты
-        if not room.participants.filter(id=self.request.user.id).exists():
-            raise PermissionDenied("Вы не участник этого чата")
-
-        message = serializer.save(user=self.request.user)
-
-        # Обновляем последнее сообщение в комнате
-        room.last_message = message
-        room.save()
-
-        # Отправка через WebSocket
-        try:
-            from channels.layers import get_channel_layer
-            from asgiref.sync import async_to_sync
-
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f'chat_{room.id}',
-                {
-                    'type': 'chat_message',
-                    'message': ChatMessageSerializer(message, context={'request': self.request}).data
-                }
-            )
-        except Exception as e:
-            print(f"WebSocket error: {e}")

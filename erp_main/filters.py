@@ -1,6 +1,13 @@
 import django_filters
+from django import template
 from .models import *
 
+register = template.Library()
+
+@register.filter
+def get_item(dictionary, key):
+    """Получить значение из словаря по ключу"""
+    return dictionary.get(key)
 
 class OrganizationFilter(django_filters.FilterSet):
     user = django_filters.NumberFilter(field_name='user__id')

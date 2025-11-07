@@ -1,90 +1,713 @@
 {% extends "base.html" %}
 {% load my_filters %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Календарь отгрузок</h1>
-
-    <!-- Кнопки для перелистывания месяцев -->
-    <div class="d-flex justify-content-between mb-4">
-        <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn btn-outline-primary">Предыдущий месяц</a>
-        <h3 class="text-center">{{ current_date|date:"F Y" }}</h3>
-        <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn btn-outline-primary">Следующий месяц</a>
+<div class="shipment-calendar">
+    <!-- Header -->
+    <div class="calendar-header">
+        <h1 class="calendar-title">Календарь отгрузок</h1>
+        <p class="calendar-subtitle">Планирование и мониторинг отгрузок по цехам</p>
     </div>
 
-    <!-- Календари для цехов -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="card-title text-center">Цех №1</h2>
+    <!-- Month Navigation -->
+    <div class="navigation-panel glass-effect">
+        <div class="navigation-content">
+            <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn btn-navigation prev-month">
+                <i class="bi bi-chevron-left"></i>
+                <span>{{ prev_month_name }}</span>
+            </a>
+
+            <div class="current-month">
+                <h2 class="month-title">{{ current_date|date:"F Y" }}</h2>
+                <div class="month-stats">
+                    <span class="stat-item">
+                        <i class="bi bi-calendar-check"></i>
+                        Рабочих дней: {{ work_days_count|default:"0" }}
+                    </span>
+                    <span class="stat-item">
+                        <i class="bi bi-truck"></i>
+                        Всего отгрузок: {{ total_shipments|default:"0" }}
+                    </span>
                 </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Пн</th>
-                                <th>Вт</th>
-                                <th>Ср</th>
-                                <th>Чт</th>
-                                <th>Пт</th>
-                                <th>Сб</th>
-                                <th>Вс</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for week in current_date|month_calendar %}
-                            <tr>
-                                {% for day in week %}
-                                <td class="text-center">
-                                    {% if day != 0 %}
-                                    <a href="{% url 'shipment_detail' workshop=workshop1 date=current_date|date:'Y-m-'|format_date:day %}" class="btn btn-outline-primary btn-sm">{{ day }}</a>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
+            </div>
+
+            <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn btn-navigation next-month">
+                <span>{{ next_month_name }}</span>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Workshops Calendar -->
+    <div class="workshops-grid">
+        <!-- Workshop 1 -->
+        <div class="workshop-card glass-effect">
+            <div class="workshop-header workshop-1">
+                <div class="workshop-icon">
+                    <i class="bi bi-gear-fill"></i>
+                </div>
+                <div class="workshop-info">
+                    <h3 class="workshop-title">Цех №1</h3>
+                    <span class="workshop-shipments">{{ workshop1_shipments|default:"0" }} отгрузок</span>
+                </div>
+            </div>
+
+            <div class="calendar-container">
+                <div class="calendar-grid compact">
+                    <!-- Week Days Header -->
+                    <div class="week-days">
+                        <div class="week-day">Пн</div>
+                        <div class="week-day">Вт</div>
+                        <div class="week-day">Ср</div>
+                        <div class="week-day">Чт</div>
+                        <div class="week-day">Пт</div>
+                        <div class="week-day weekend">Сб</div>
+                        <div class="week-day weekend">Вс</div>
+                    </div>
+
+                    <!-- Calendar Days -->
+                    <div class="calendar-days">
+                        {% for week in calendar_weeks %}
+                            {% for day in week %}
+                            <div class="calendar-day {% if not day.day %}empty{% endif %} {% if day.is_weekend %}weekend{% endif %} {% if day.has_shipments %}has-shipments{% endif %} {% if day.is_today %}today{% endif %}">
+                                {% if day.day %}
+                                    <a href="{% url 'shipment_detail' workshop=1 date=day.date %}"
+                                       class="day-link"
+                                       data-date="{{ day.date }}"
+                                       data-shipments="{{ day.shipments_count_workshop1|default:0 }}"
+                                       title="{{ day.shipments_count_workshop1 }} отгрузок">
+                                        <span class="day-number">{{ day.day }}</span>
+                                        {% if day.shipments_count_workshop1 %}
+                                        <span class="shipments-badge">{{ day.shipments_count_workshop1 }}</span>
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h2 class="card-title text-center">Цех №3</h2>
+        <!-- Workshop 3 -->
+        <div class="workshop-card glass-effect">
+            <div class="workshop-header workshop-3">
+                <div class="workshop-icon">
+                    <i class="bi bi-gear-wide-connected"></i>
                 </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Пн</th>
-                                <th>Вт</th>
-                                <th>Ср</th>
-                                <th>Чт</th>
-                                <th>Пт</th>
-                                <th>Сб</th>
-                                <th>Вс</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for week in current_date|month_calendar %}
-                            <tr>
-                                {% for day in week %}
-                                <td class="text-center">
-                                    {% if day != 0 %}
-                                    <a href="{% url 'shipment_detail' workshop=workshop3 date=current_date|date:'Y-m-'|format_date:day %}" class="btn btn-outline-success btn-sm">{{ day }}</a>
-                                    {% endif %}
-                                </td>
-                                {% endfor %}
-                            </tr>
+                <div class="workshop-info">
+                    <h3 class="workshop-title">Цех №3</h3>
+                    <span class="workshop-shipments">{{ workshop3_shipments|default:"0" }} отгрузок</span>
+                </div>
+            </div>
+
+            <div class="calendar-container">
+                <div class="calendar-grid compact">
+                    <!-- Week Days Header -->
+                    <div class="week-days">
+                        <div class="week-day">Пн</div>
+                        <div class="week-day">Вт</div>
+                        <div class="week-day">Ср</div>
+                        <div class="week-day">Чт</div>
+                        <div class="week-day">Пт</div>
+                        <div class="week-day weekend">Сб</div>
+                        <div class="week-day weekend">Вс</div>
+                    </div>
+
+                    <!-- Calendar Days -->
+                    <div class="calendar-days">
+                        {% for week in calendar_weeks %}
+                            {% for day in week %}
+                            <div class="calendar-day {% if not day.day %}empty{% endif %} {% if day.is_weekend %}weekend{% endif %} {% if day.has_shipments %}has-shipments{% endif %} {% if day.is_today %}today{% endif %}">
+                                {% if day.day %}
+                                    <a href="{% url 'shipment_detail' workshop=3 date=day.date %}"
+                                       class="day-link"
+                                       data-date="{{ day.date }}"
+                                       data-shipments="{{ day.shipments_count_workshop3|default:0 }}"
+                                       title="{{ day.shipments_count_workshop3 }} отгрузок">
+                                        <span class="day-number">{{ day.day }}</span>
+                                        {% if day.shipments_count_workshop3 %}
+                                        <span class="shipments-badge">{{ day.shipments_count_workshop3 }}</span>
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-panel glass-effect">
+        <h3 class="stats-title">Статистика за месяц</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="bi bi-truck"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ total_shipments|default:"0" }}</span>
+                    <span class="stat-label">Всего отгрузок</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon workshop1">
+                    <i class="bi bi-gear"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ workshop1_shipments|default:"0" }}</span>
+                    <span class="stat-label">Цех №1</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon workshop3">
+                    <i class="bi bi-gear-wide"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ workshop3_shipments|default:"0" }}</span>
+                    <span class="stat-label">Цех №3</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon upcoming">
+                    <i class="bi bi-calendar-week"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value">{{ upcoming_shipments|default:"0" }}</span>
+                    <span class="stat-label">Предстоящие</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+<style>
+.shipment-calendar {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.calendar-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-subtitle {
+    color: #718096;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Navigation Panel */
+.navigation-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.navigation-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.btn-navigation {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 140px;
+    font-size: 0.9rem;
+}
+
+.btn-navigation:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.current-month {
+    text-align: center;
+    flex: 1;
+}
+
+.month-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+}
+
+.month-stats {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #718096;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Workshops Grid */
+.workshops-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .workshops-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.workshop-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.workshop-card:hover {
+    transform: translateY(-3px);
+}
+
+.workshop-header {
+    padding: 1rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.workshop-1 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.workshop-3 {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.workshop-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.workshop-info {
+    flex: 1;
+}
+
+.workshop-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+}
+
+.workshop-shipments {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+/* Compact Calendar Grid */
+.calendar-container {
+    padding: 1rem;
+}
+
+.calendar-grid.compact {
+    gap: 0.25rem;
+}
+
+.week-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.week-day {
+    text-align: center;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.75rem;
+    padding: 0.25rem;
+}
+
+.week-day.weekend {
+    color: #e53e3e;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 35px;
+}
+
+.calendar-day.weekend {
+    background: rgba(229, 62, 62, 0.05);
+}
+
+.calendar-day.weekend .day-link {
+    color: #e53e3e;
+}
+
+.calendar-day.has-shipments {
+    background: rgba(72, 187, 120, 0.1);
+    border: 1px solid rgba(72, 187, 120, 0.3);
+}
+
+.calendar-day.today {
+    border: 2px solid #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.calendar-day.empty {
+    background: transparent;
+}
+
+.day-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: #2d3748;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.125rem;
+    font-size: 0.8rem;
+}
+
+.day-link:hover {
+    background: rgba(102, 126, 234, 0.15);
+    transform: scale(1.05);
+}
+
+.day-number {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.shipments-badge {
+    position: absolute;
+    top: 0.125rem;
+    right: 0.125rem;
+    background: #48bb78;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Stats Panel */
+.stats-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stats-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 1rem 0;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+}
+
+.stat-icon.total { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-icon.workshop1 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.stat-icon.workshop3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+.stat-icon.upcoming { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* Modern Modal */
+.modern-modal .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modern-modal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border: none;
+    padding: 1.5rem;
+}
+
+.modern-modal .modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modern-modal .modal-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.btn-close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .shipment-calendar {
+        padding: 0.5rem;
+    }
+
+    .calendar-title {
+        font-size: 1.5rem;
+    }
+
+    .navigation-content {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-navigation {
+        min-width: auto;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .month-stats {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .workshop-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .calendar-day {
+        min-height: 30px;
+    }
+
+    .day-number {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-header {
+        margin-bottom: 1rem;
+    }
+
+    .navigation-panel,
+    .stats-panel {
+        padding: 0.75rem;
+    }
+
+    .calendar-container {
+        padding: 0.75rem;
+    }
+
+    .week-day,
+    .day-number {
+        font-size: 0.7rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips for days with shipments
+    const dayLinks = document.querySelectorAll('.day-link');
+
+    dayLinks.forEach(link => {
+        const shipments = link.getAttribute('data-shipments');
+        const date = link.getAttribute('data-date');
+
+        if (parseInt(shipments) > 0) {
+            link.setAttribute('title', `${shipments} отгрузок\n${formatDate(date)}`);
+        }
+
+    });
+
+    // Add animation to calendar cards
+    const workshopCards = document.querySelectorAll('.workshop-card');
+
+    workshopCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            const prevBtn = document.querySelector('.prev-month');
+            if (prevBtn) prevBtn.click();
+        } else if (e.key === 'ArrowRight') {
+            const nextBtn = document.querySelector('.next-month');
+            if (nextBtn) nextBtn.click();
+        }
+    });
+
+
+
+    // Helper function to format date
+    function formatDate(dateStr) {
+        try {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ru-RU', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (error) {
+            return dateStr;
+        }
+    }
+});
+</script>
 {% endblock %}
