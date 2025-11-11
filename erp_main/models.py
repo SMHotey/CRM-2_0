@@ -289,6 +289,27 @@ class OrderChangeHistory(models.Model):
     comment = models.TextField(blank=True, null=True)
 
 
+class Certificate(models.Model):
+    KIND_CHOICE = (
+        ('door', 'Дверь'),
+        ('gate', 'Ворота'),
+        ('hatch', 'Люк'),
+        ('transom', 'Фрамуга')
+    )
+    TYPE_CHOICE = (
+        ('tech', 'тех.'),
+        ('ei-60', 'EI-60'),
+        ('eis-60', 'EIS-60'),
+        ('eiws-60', 'EIWS-60')
+    )
+    numbers = models.CharField(max_length=20, blank=True, null=True)
+    p_kind = models.CharField(max_length=15, choices=KIND_CHOICE, verbose_name='вид изделия')
+    p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
+    legal_entity = models.ForeignKey(LegalEntity, related_name='certificates', on_delete=models.CASCADE)
+    scan_copy = models.FileField(upload_to='uploads/certificates/', blank=True, null=True)
+    passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/', blank=True, null=True)
+
+
 class OrderItem(models.Model):
     KIND_CHOICE = (
         ('door', 'Дверь'),
@@ -321,30 +342,30 @@ class OrderItem(models.Model):
         ('changed', 'изменен'),
     )
 
-    p_kind = models.CharField(max_length=100, null=True, choices=KIND_CHOICE, verbose_name='вид изделия')
-    p_type = models.CharField(max_length=100, choices=TYPE_CHOICE, verbose_name='тип изделия')
-    p_construction = models.CharField(max_length=100, choices=CONSTRUCTION_CHOICE, blank=True, null=True, verbose_name='конструктив изделия')
+    p_kind = models.CharField(max_length=15, null=True, choices=KIND_CHOICE, verbose_name='вид изделия')
+    p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
+    p_construction = models.CharField(max_length=10, choices=CONSTRUCTION_CHOICE, blank=True, null=True, verbose_name='конструктив изделия')
     p_width = models.IntegerField(default=0, verbose_name='ширина изделия')
     p_height = models.IntegerField(default=0, verbose_name='высота изделия')
     p_open = models.CharField(max_length=2, blank=True, null=True, verbose_name='открывание') # открывание
     p_active_trim = models.CharField(max_length=5, blank=True, null=True, verbose_name='ширина активной створки') # активная створка
     p_furniture = models.CharField(max_length=100, blank=True, null=True, verbose_name='фурнитура') # словарь: код - количество по замку, ручке и ц/м
-    p_ral = models.CharField(max_length=100, blank=True, null=True, verbose_name='RAL') # расписать по элементам (возможные вариации, опции цвета)
-    p_platband = models.CharField(max_length=100, blank=True, null=True, verbose_name='наличник') # наличники: размер с каждой стороны
-    p_door_closer = models.CharField(max_length=100, blank=True, null=True, verbose_name='доводчик') # доводчик
-    p_step = models.CharField(max_length=100, blank=True, null=True, verbose_name='порог') # порог
-    p_metal = models.CharField(max_length=100, blank=True, null=True, verbose_name='толщина металла') # возможные компановки толщины металла изделия
-    p_vent_grate = models.CharField(max_length=100, blank=True, null=True, verbose_name='вент.решетка') # вент. решетки (тип, размер, толщина, кол-во)
+    p_ral = models.CharField(max_length=50, blank=True, null=True, verbose_name='RAL') # расписать по элементам (возможные вариации, опции цвета)
+    p_platband = models.CharField(max_length=50, blank=True, null=True, verbose_name='наличник') # наличники: размер с каждой стороны
+    p_door_closer = models.CharField(max_length=50, blank=True, null=True, verbose_name='доводчик') # доводчик
+    p_step = models.CharField(max_length=20, blank=True, null=True, verbose_name='порог') # порог
+    p_metal = models.CharField(max_length=50, blank=True, null=True, verbose_name='толщина металла') # возможные компановки толщины металла изделия
+    p_vent_grate = models.CharField(max_length=50, blank=True, null=True, verbose_name='вент.решетка') # вент. решетки (тип, размер, толщина, кол-во)
     p_plate = models.CharField(max_length=100, blank=True, null=True, verbose_name='отбойная пластина') # отбойная пластина (высота, отступ от низа, сторонность)
     p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
     p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE, verbose_name='статус')
     position_num = models.CharField(max_length=5, verbose_name='номер позиции')
-    nameplate_range = models.CharField(max_length=100, blank=True, null=True, verbose_name='номера шильдов')  # номерной диапзон шильдов для позиции
+    nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')  # номерной диапзон шильдов для позиции
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
     p_comment = models.TextField(max_length=255, blank=True, null=True, default='', verbose_name='комментарий')
     firm_plate = models.BooleanField(default=True, verbose_name='фирменный шильд')  # фирменный шильд
-    mounting_plates = models.CharField(max_length=100, default=False, blank=True, null=True, verbose_name='монтажные уши')  # монтажные уши: размер, кол-во
+    mounting_plates = models.CharField(max_length=50, default=False, blank=True, null=True, verbose_name='монтажные уши')  # монтажные уши: размер, кол-во
     workshop = models.IntegerField(default=0, verbose_name='цех') # цех
 
     @property
@@ -391,6 +412,13 @@ class GlassInfo(models.Model):
     status = models.CharField(max_length=100, blank=True, null=True, choices=GLASS_STATUS_CHOICE)
     comment = models.TextField(max_length=255, blank=True, null=True, default='')
 
+    def __hash__(self):
+        """Метод для хэширования объекта"""
+        if self.pk:
+            return hash(self.pk)
+        # Если объект еще не сохранен, используем id объекта в памяти
+        return hash(id(self))
+
     def __eq__(self, other):
         if not isinstance(other, GlassInfo):
             return NotImplemented
@@ -405,8 +433,34 @@ class GlassInfo(models.Model):
         )
 
 
-class Passport(models.Model):
-    number = models.IntegerField(blank=True, null=True)
+class Nameplate(models.Model):
+    order_item = models.ForeignKey(
+        OrderItem,
+        related_name='nameplates',
+        on_delete=models.CASCADE,
+        db_column='order_item_id'  # Явно указываем имя столбца
+    )
+    certificate = models.ForeignKey(
+        Certificate,
+        related_name='nameplates',
+        on_delete=models.CASCADE,
+        db_column='certificate_id'  # Явно указываем имя столбца
+    )
+    first_value = models.IntegerField(blank=True, null=True)
+    end_value = models.IntegerField(blank=True, null=True)
+    issue_date = models.DateField(blank=True, null=True, verbose_name='Дата выдачи')
+#    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Шильд'
+        verbose_name_plural = 'Шильды'
+        db_table = 'erp_main_nameplate'  # Явно указываем имя таблицы
+
+    def __str__(self):
+        if self.end_value:
+            return f"Шильды {self.first_value}-{self.end_value}"
+        else:
+            return f"Шильд {self.first_value}"
 
 
 class Contract(models.Model):

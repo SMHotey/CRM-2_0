@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<style>
+    .detail-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow-medium);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 2rem;
+    }
+    
+    .detail-header {
+        background: rgba(55, 177, 222, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #37b1de;
+    }
+    
+    .info-card {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .file-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 2px dashed rgba(79, 151, 199, 0.3);
+        transition: var(--transition-smooth);
+    }
+    
+    .file-card:hover {
+        border-color: rgba(79, 151, 199, 0.6);
+        transform: translateY(-2px);
+    }
+    
+    .file-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--primary-gradient);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .badge-lg {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+</style>
+
+<div class="container-fluid my-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Detail Container -->
+            <div class="detail-container">
+                <!-- Header -->
+                <div class="detail-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h1 class="page-title mb-2">Сертификат продукции</h1>
+                            <p class="text-muted mb-0">
+                                Детальная информация о сертификате
+                            </p>
+                        </div>
+                        <div class="btn-group">
+                            <a href="{% url 'certificate_edit' certificate.id %}" class="btn btn-primary">
+                                <i class="bi bi-pencil me-2"></i>Редактировать
+                            </a>
+                            <a href="{% url 'certificate_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Назад к списку
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="info-card">
+                    <h5 class="mb-4 text-primary">
+                        <i class="bi bi-info-circle me-2"></i>Основная информация
+                    </h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Номер сертификата</label>
+                            <div class="fs-5">
+                                {{ certificate.numbers|default:"—" }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Юридическое лицо</label>
+                            <div class="fs-5">
+                                <span class="badge bg-primary badge-lg">
+                                    {{ certificate.legal_entity.name }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Вид изделия</label>
+                            <div>
+                                <span class="badge kind-{{ certificate.p_kind }} badge-lg">
+                                    {{ certificate.get_p_kind_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Тип изделия</label>
+                            <div>
+                                <span class="badge type-{{ certificate.p_type }} badge-lg">
+                                    {{ certificate.get_p_type_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files Section -->
+                <div class="info-card">
+                    <h5 class="mb-4 text-primary">
+                        <i class="bi bi-files me-2"></i>Файлы документации
+                    </h5>
+                    
+                    <div class="row g-4">
+                        <!-- Scan Copy -->
+                        <div class="col-md-6">
+                            <div class="file-card text-center">
+                                <div class="file-icon mx-auto">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </div>
+                                <h6>Скан-копия сертификата</h6>
+                                {% if certificate.scan_copy %}
+                                    <p class="text-muted small mb-3">
+                                        {{ certificate.scan_copy.name|slice:"-20:" }}
+                                    </p>
+                                    <a href="{{ certificate.scan_copy.url }}" 
+                                       target="_blank" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-download me-2"></i>Скачать
+                                    </a>
+                                {% else %}
+                                    <p class="text-muted mb-3">Файл не загружен</p>
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Passport Templates -->
+                        <div class="col-md-6">
+                            <div class="file-card text-center">
+                                <div class="file-icon mx-auto">
+                                    <i class="bi bi-file-earmark-word"></i>
+                                </div>
+                                <h6>Шаблоны паспортов</h6>
+                                {% if certificate.passport_templates %}
+                                    <p class="text-muted small mb-3">
+                                        {{ certificate.passport_templates.name|slice:"-20:" }}
+                                    </p>
+                                    <a href="{{ certificate.passport_templates.url }}" 
+                                       target="_blank" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-download me-2"></i>Скачать
+                                    </a>
+                                {% else %}
+                                    <p class="text-muted mb-3">Файл не загружен</p>
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="info-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                Создан: {{ certificate.created_at|date:"d.m.Y H:i" }}
+                            </small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a href="{% url 'certificate_edit' certificate.id %}" class="btn btn-primary me-2">
+                                <i class="bi bi-pencil me-2"></i>Редактировать
+                            </a>
+                            <a href="{% url 'certificate_delete' certificate.id %}" class="btn btn-outline-danger">
+                                <i class="bi bi-trash me-2"></i>Удалить
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

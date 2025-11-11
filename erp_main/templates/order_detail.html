@@ -45,11 +45,17 @@
         margin-bottom: 0;
     }
 
+    .table td {
+        vertical-align: middle;     /* Центруем по вертикали */
+        text-align: center;         /* Центруем по горизонтали */
+    }
     .table th {
         background: rgba(55, 177, 222, 0.15);
         border-bottom: 2px solid rgba(55, 177, 222, 0.3);
         font-weight: 600;
         color: #2d3748;
+        vertical-align: middle;     /* Центруем по вертикали */
+        text-align: center;         /* Центруем по горизонтали */
     }
 
     .btn {
@@ -67,6 +73,21 @@
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(79, 151, 199, 0.4);
+    }
+
+    .btn-success {
+        background: var(--success-gradient);
+        box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
     }
 
     .btn-link {
@@ -108,6 +129,7 @@
     .collapse-section {
         transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
+        max-height: 0px;
     }
 
     .file-upload-area {
@@ -179,6 +201,72 @@
     .toast.success { border-left: 4px solid #198754; }
     .toast.error { border-left: 4px solid #dc3545; }
     .toast.warning { border-left: 4px solid #ffc107; }
+
+    /* Modal Styles */
+    .modal-backdrop {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: var(--shadow-large);
+    }
+
+    .modal-header {
+        background: rgba(55, 177, 222, 0.1);
+        border-bottom: 1px solid rgba(55, 177, 222, 0.2);
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1px solid rgba(79, 151, 199, 0.2);
+        padding: 0.75rem 1rem;
+        transition: var(--transition-smooth);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4F97C7;
+        box-shadow: 0 0 0 0.2rem rgba(79, 151, 199, 0.25);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .nameplate-info {
+        background: rgba(25, 135, 84, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #198754;
+    }
+
+    .nameplate-list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .nameplate-item {
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
 </style>
 
 <!-- Loading Overlay -->
@@ -191,6 +279,82 @@
     <div class="toast-content">
         <strong id="toastTitle"></strong>
         <p id="toastMessage" class="mb-0"></p>
+    </div>
+</div>
+
+<!-- Nameplate Modal -->
+<!-- Nameplate Modal -->
+<div class="modal fade" id="nameplateModal" tabindex="-1" aria-labelledby="nameplateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title page-title" id="nameplateModalLabel">Добавление шильда</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="nameplate-info">
+                    <h6>Информация о позиции заказа</h6>
+                    <div id="modalItemInfo"></div>
+                </div>
+
+                <form id="nameplateForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="order_item_id" name="order_item_id">
+                    <input type="hidden" id="nameplate_id" name="nameplate_id">
+                    <input type="hidden" id="form_mode" name="form_mode" value="create">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="issue_date" class="form-label">Дата выдачи</label>
+                            <input type="date" class="form-control" id="issue_date" name="issue_date" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="certificate" class="form-label">Сертификат</label>
+                            <select class="form-select" id="certificate" name="certificate" required>
+                                <option value="">Выберите сертификат</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12" id="singleNumberField">
+                            <label for="first_value" class="form-label">Номер шильда</label>
+                            <input type="number" class="form-control" id="first_value" name="first_value"
+                                   min="1" step="1" required>
+                        </div>
+
+                        <div class="col-12" id="rangeNumberFields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="range_first_value" class="form-label">Первый номер шильда</label>
+                                    <input type="number" class="form-control" id="range_first_value" name="range_first_value"
+                                           min="1" step="1">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="range_end_value" class="form-label">Последний номер шильда</label>
+                                    <input type="number" class="form-control" id="range_end_value" name="range_end_value"
+                                           min="1" step="1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Existing Nameplates -->
+                    <div class="mt-4" id="existingNameplates" style="display: none;">
+                        <h6>Существующие шильды для этой позиции:</h6>
+                        <div class="nameplate-list" id="nameplateList"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="deleteNameplate" style="display: none;">
+                    <i class="bi bi-trash me-2"></i>Удалить
+                </button>
+                <button type="button" class="btn btn-success" id="saveNameplate">
+                    <i class="bi bi-save me-2"></i>Сохранить
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -374,7 +538,7 @@
                 <button id="toggleButton" class="btn btn-primary btn-sm me-2">
                     <i class="bi bi-chevron-down me-1"></i>Развернуть
                 </button>
-                <button type="button" class="btn btn-success btn-sm" id="editButton">
+                <button type="button" class="btn btn-primary btn-sm" id="editButton">
                     <i class="bi bi-pencil me-1"></i>Редактировать
                 </button>
             </div>
@@ -386,17 +550,18 @@
                         <thead class="sticky-top">
                             <tr>
                                 <th style="width: 60px;">№</th>
-                                <th style="min-width: 150px;">Наименование</th>
-                                <th style="min-width: 120px;">Тип</th>
+                                <th style="min-width: 70px;">Наименование</th>
+                                <th style="min-width: 50px;">Тип</th>
                                 <th style="width: 80px;">Высота</th>
                                 <th style="width: 80px;">Ширина</th>
                                 <th style="width: 80px;">Откр.</th>
                                 <th style="min-width: 120px;">Стекло</th>
-                                <th style="min-width: 120px;">Фурнитура</th>
+                                <th style="min-width: 70px;">Фурнитура</th>
                                 <th style="width: 80px;">Кол-во</th>
                                 <th style="min-width: 200px;">Комментарий</th>
                                 <th style="width: 140px;">Статус</th>
                                 <th style="width: 100px;">Цех</th>
+                                <th style="width: 160px;">П/п шильд</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -439,6 +604,44 @@
                                         <option value="2" {% if item.workshop == 2 %}selected{% endif %}>стоп</option>
                                     </select>
                                 </td>
+                               <td class="text-center">
+                                {% if item.p_type in "ei-60,eis-60,eiws-60" %}
+                                    {% with nameplates=item.nameplates.all %}
+                                        {% if nameplates %}
+                                            <!-- Если шильды есть - кнопка "Редактировать" -->
+                                            <button class="btn btn-primary btn-sm edit-nameplate-btn"
+                                                    data-item-id="{{ item.id }}"
+                                                    data-item-kind="{{ item.p_kind }}"
+                                                    data-item-type="{{ item.p_type }}"
+                                                    data-item-quantity="{{ item.p_quantity }}"
+                                                    data-due-date="{{ order.due_date|date:'Y-m-d' }}"
+                                                    data-nameplate-id="{{ nameplates.0.id }}">
+                                                <i class="bi bi-pencil me-1"></i>Редактировать
+                                            </button>
+                                            <div class="mt-1">
+                                                <small class="text-success">
+                                                    <i class="bi bi-check-circle"></i>
+                                                    {% for np in nameplates %}
+                                                        {{ np.numbers_display }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </small>
+                                            </div>
+                                        {% else %}
+                                            <!-- Если шильдов нет - кнопка "Добавить" -->
+                                            <button class="btn btn-primary btn-sm add-nameplate-btn"
+                                                    data-item-id="{{ item.id }}"
+                                                    data-item-kind="{{ item.p_kind }}"
+                                                    data-item-type="{{ item.p_type }}"
+                                                    data-item-quantity="{{ item.p_quantity }}"
+                                                    data-due-date="{{ order.due_date|date:'Y-m-d' }}">
+                                                <i class="bi bi-plus-circle me-1"></i>Добавить
+                                            </button>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -454,12 +657,17 @@ class OrderDetailManager {
     constructor() {
         this.csrfToken = '{{ csrf_token }}';
         this.isEditing = false;
+        this.currentItem = null;
+        this.currentNameplate = null;
+        this.formMode = 'create'; // 'create' или 'edit'
         this.init();
     }
 
     init() {
         this.setupEventListeners();
         this.setupFileUpload();
+        this.setupNameplateModal();
+        this.collapseAllSections();
     }
 
     setupEventListeners() {
@@ -478,6 +686,344 @@ class OrderDetailManager {
         // Edit button
         document.getElementById('editButton').addEventListener('click', () =>
             this.toggleEditMode());
+    }
+
+    collapseAllSections() {
+        const sections = ['invoiceItems', 'orderItems', 'changeItems'];
+        sections.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.maxHeight = '0px';
+            }
+        });
+    }
+
+    setupNameplateModal() {
+        // Add nameplate buttons
+        document.querySelectorAll('.add-nameplate-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.openNameplateModal(e.target.closest('button'), 'create');
+            });
+        });
+
+        // Edit nameplate buttons
+        document.querySelectorAll('.edit-nameplate-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.openNameplateModal(e.target.closest('button'), 'edit');
+            });
+        });
+
+        // Save nameplate button
+        document.getElementById('saveNameplate').addEventListener('click', () => {
+            this.saveNameplate();
+        });
+
+        // Delete nameplate button
+        document.getElementById('deleteNameplate').addEventListener('click', () => {
+            this.deleteNameplate();
+        });
+
+        // Modal hidden event
+        const modal = document.getElementById('nameplateModal');
+        modal.addEventListener('hidden.bs.modal', () => {
+            this.resetNameplateForm();
+        });
+    }
+
+    async openNameplateModal(button, mode) {
+        this.formMode = mode;
+        this.currentItem = {
+            id: button.dataset.itemId,
+            kind: button.dataset.itemKind,
+            type: button.dataset.itemType,
+            quantity: parseInt(button.dataset.itemQuantity),
+            dueDate: button.dataset.dueDate
+        };
+
+        // Set form mode
+        document.getElementById('form_mode').value = mode;
+
+        // Set order item ID
+        document.getElementById('order_item_id').value = this.currentItem.id;
+
+        // Update modal title based on mode
+        const modalTitle = document.getElementById('nameplateModalLabel');
+        if (mode === 'edit') {
+            modalTitle.textContent = 'Редактирование шильда';
+            this.currentNameplate = { id: button.dataset.nameplateId };
+            document.getElementById('nameplate_id').value = this.currentNameplate.id;
+            document.getElementById('deleteNameplate').style.display = 'block';
+        } else {
+            modalTitle.textContent = 'Добавление шильда';
+            document.getElementById('nameplate_id').value = '';
+            document.getElementById('deleteNameplate').style.display = 'none';
+        }
+
+        // Set due date
+        document.getElementById('issue_date').value = this.currentItem.dueDate;
+
+
+        // Update modal info
+        document.getElementById('modalItemInfo').innerHTML = `
+            <strong>Позиция:</strong> ${this.currentItem.kind} - ${this.currentItem.type}<br>
+            <strong>Количество:</strong> ${this.currentItem.quantity}
+        `;
+
+        // Show/hide number fields based on quantity
+        if (this.currentItem.quantity === 1) {
+            document.getElementById('singleNumberField').style.display = 'block';
+            document.getElementById('rangeNumberFields').style.display = 'none';
+        } else {
+            document.getElementById('singleNumberField').style.display = 'none';
+            document.getElementById('rangeNumberFields').style.display = 'block';
+        }
+
+        // Load certificates
+        await this.loadCertificates();
+
+        // Load existing nameplate data for editing
+        if (mode === 'edit') {
+            await this.loadNameplateData();
+        }
+
+        // Load existing nameplates list
+        await this.loadExistingNameplates();
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('nameplateModal'));
+        modal.show();
+    }
+
+    async loadCertificates() {
+        try {
+            const response = await fetch(`/erp_main/get-certificates/?kind=${this.currentItem.kind}&type=${this.currentItem.type}`);
+            const certificates = await response.json();
+
+            const select = document.getElementById('certificate');
+            select.innerHTML = '<option value="">Выберите сертификат</option>';
+
+            certificates.forEach(cert => {
+                const option = document.createElement('option');
+                option.value = cert.id;
+                option.textContent = `${cert.numbers} - ${cert.legal_entity_name}`;
+                select.appendChild(option);
+            });
+
+            // Select first certificate by default
+            if (certificates.length > 0) {
+                select.value = certificates[0].id;
+            }
+        } catch (error) {
+            console.error('Error loading certificates:', error);
+            this.showToast('error', 'Ошибка', 'Не удалось загрузить список сертификатов');
+        }
+    }
+
+    async loadNameplateData() {
+        try {
+            const response = await fetch(`/erp_main/get-nameplate-data/?nameplate_id=${this.currentNameplate.id}`);
+            const nameplateData = await response.json();
+
+            if (nameplateData) {
+                // Fill form with existing data
+                document.getElementById('issue_date').value = nameplateData.issue_date;
+                document.getElementById('certificate').value = nameplateData.certificate_id;
+
+                if (this.currentItem.quantity === 1) {
+                    document.getElementById('first_value').value = nameplateData.first_value;
+                } else {
+                    document.getElementById('range_first_value').value = nameplateData.first_value;
+                    document.getElementById('range_end_value').value = nameplateData.end_value;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading nameplate data:', error);
+            this.showToast('error', 'Ошибка', 'Не удалось загрузить данные шильда');
+        }
+    }
+
+    async loadExistingNameplates() {
+        try {
+            const response = await fetch(`/erp_main/get-nameplates/?order_item_id=${this.currentItem.id}`);
+            const nameplates = await response.json();
+
+            const container = document.getElementById('existingNameplates');
+            const list = document.getElementById('nameplateList');
+
+            if (nameplates.length > 0) {
+                list.innerHTML = '';
+                nameplates.forEach(np => {
+                    const item = document.createElement('div');
+                    item.className = 'nameplate-item';
+                    item.innerHTML = `
+                        <strong>Сертификат:</strong> ${np.certificate_numbers}<br>
+                        <strong>Номера:</strong> ${np.first_value}${np.end_value ? ` - ${np.end_value}` : ''}<br>
+                        <strong>Дата:</strong> ${np.issue_date}
+                    `;
+                    list.appendChild(item);
+                });
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error loading nameplates:', error);
+        }
+    }
+
+    async saveNameplate() {
+        const form = document.getElementById('nameplateForm');
+        const formData = new FormData(form);
+
+        // Validate form
+        if (!this.validateNameplateForm()) {
+            return;
+        }
+
+        this.showLoading(true);
+
+        try {
+            const url = this.formMode === 'create' ? '/erp_main/create-nameplate/' : '/erp_main/update-nameplate/';
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nameplate_id: this.formMode === 'edit' ? this.currentNameplate.id : null,
+                    order_item_id: this.currentItem.id,
+                    certificate_id: formData.get('certificate'),
+                    issue_date: formData.get('issue_date'),
+                    first_value: this.currentItem.quantity === 1 ?
+                                parseInt(formData.get('first_value')) :
+                                parseInt(formData.get('range_first_value')),
+                    end_value: this.currentItem.quantity > 1 ?
+                              parseInt(formData.get('range_end_value')) :
+                              null
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                const message = this.formMode === 'create' ? 'Шильд успешно добавлен' : 'Шильд успешно обновлен';
+                this.showToast('success', 'Успех', message);
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('nameplateModal'));
+                modal.hide();
+
+                // Reload page to reflect changes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Ошибка при сохранении шильда');
+            }
+        } catch (error) {
+            this.showToast('error', 'Ошибка', error.message);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    async deleteNameplate() {
+        if (!confirm('Вы уверены, что хотите удалить этот шильд?')) {
+            return;
+        }
+
+        this.showLoading(true);
+
+        try {
+            const response = await fetch('/erp_main/delete-nameplate/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': this.csrfToken,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nameplate_id: this.currentNameplate.id
+                })
+            });
+
+            if (response.ok) {
+                this.showToast('success', 'Успех', 'Шильд успешно удален');
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('nameplateModal'));
+                modal.hide();
+
+                // Reload page to reflect changes
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Ошибка при удалении шильда');
+            }
+        } catch (error) {
+            this.showToast('error', 'Ошибка', error.message);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+    validateNameplateForm() {
+        if (this.currentItem.quantity === 1) {
+            const firstValue = document.getElementById('first_value').value;
+            if (!firstValue || firstValue < 1) {
+                this.showToast('error', 'Ошибка', 'Введите корректный номер шильда');
+                return false;
+            }
+        } else {
+            const firstValue = document.getElementById('range_first_value').value;
+            const endValue = document.getElementById('range_end_value').value;
+
+            if (!firstValue || !endValue || firstValue < 1 || endValue < 1) {
+                this.showToast('error', 'Ошибка', 'Введите корректные номера шильдов');
+                return false;
+            }
+
+            if (parseInt(firstValue) > parseInt(endValue)) {
+                this.showToast('error', 'Ошибка', 'Первый номер не может быть больше последнего');
+                return false;
+            }
+        }
+
+        const certificate = document.getElementById('certificate').value;
+        if (!certificate) {
+            this.showToast('error', 'Ошибка', 'Выберите сертификат');
+            return false;
+        }
+
+        const issueDate = document.getElementById('issue_date').value;
+        if (!issueDate) {
+            this.showToast('error', 'Ошибка', 'Выберите дату выдачи');
+            return false;
+        }
+
+        return true;
+    }
+
+    updateNameplateButton(itemId) {
+        const button = document.querySelector(`.add-nameplate-btn[data-item-id="${itemId}"]`);
+        if (button) {
+            const parentTd = button.closest('td');
+            if (!parentTd.querySelector('.text-success')) {
+                const successBadge = document.createElement('div');
+                successBadge.className = 'mt-1';
+                successBadge.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Есть шильды</small>';
+                parentTd.appendChild(successBadge);
+            }
+        }
+    }
+
+    resetNameplateForm() {
+        document.getElementById('nameplateForm').reset();
+        document.getElementById('existingNameplates').style.display = 'none';
+        this.currentItem = null;
     }
 
     setupFileUpload() {

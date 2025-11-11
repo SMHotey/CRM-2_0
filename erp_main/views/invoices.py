@@ -1,3 +1,7 @@
+from functools import wraps
+
+from django.core.exceptions import PermissionDenied
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -9,9 +13,15 @@ from django.views.decorators.http import require_POST
 from ..models import Invoice, Organization, LegalEntity
 from ..forms import InvoiceForm
 from .mixins import UserAccessMixin
+from .permissions import get_user_role_from_request, can_add_invoice, ajax_permission_required
 
 
+# Использование
 @login_required
+@ajax_permission_required(
+    lambda r: can_add_invoice(r.user, get_user_role_from_request(r)),
+    "У вас недостаточно прав для выставления счета"
+)
 def invoice_add(request):
     if request.method == 'POST':
         referer_url = request.META.get('HTTP_REFERER')

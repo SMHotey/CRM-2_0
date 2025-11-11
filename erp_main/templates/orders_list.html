@@ -6,6 +6,9 @@
     <!-- Header -->
     <div class="dashboard-header">
         <h1 class="dashboard-title">Управление заказами</h1>
+        <div class="user-role-badge">
+            Роль: <strong>{{ user_role }}</strong>
+        </div>
     </div>
 
     <!-- Orders Table -->
@@ -51,9 +54,11 @@
                 <tbody>
                     {% if orders %}
                     {% for order in orders %}
+                    {% with first_item=order.items.first %}
                     <tr class="order-row {% if order.status == 'готов' %}status-ready{% elif order.status == 'остановлен' %}status-stopped{% elif order.status == 'отменен' %}status-cancelled{% elif order.status == 'отгружен' %}status-shipped{% elif order.status == 'запущен' %}status-in-progress{% elif order.status == 'в очереди' %}status-queued{% endif %}"
                         data-order-id="{{ order.id }}"
-                        data-status="{{ order.status }}">
+                        data-status="{{ order.status }}"
+                        data-workshop="{{ first_item.workshop|default:'' }}">
                         <!-- Order Number -->
                         <td class="order-number-cell">
                             <a href="{% url 'order_detail' order.id %}" class="order-link">
@@ -70,16 +75,27 @@
                                     class="workshop-btn"
                                     data-bs-toggle="modal"
                                     data-bs-target="#workshopModal{{ order.id }}"
-                                    aria-label="Изменить статус заказа {{ order.id }}">
+                                    aria-label="Изменить статус заказа {{ order.id }}"
+                                    data-order-id="{{ order.id }}"
+                                    data-status="{{ order.status }}"
+                                    data-workshop="{{ first_item.workshop|default:'' }}">
                                 <div class="workshop-icon">
                                     {% if order.status == 'в очереди' %}
                                         <img src="{% static 'erp_main/images/icon_play.png' %}" alt="Запустить заказ">
                                     {% elif order.status == 'отгружен' %}
                                         <img src="{% static 'erp_main/images/delivered.png' %}" alt="Заказ отгружен">
+                                    {% elif order.status == 'остановлен' %}
+                                        <img src="{% static 'erp_main/images/pause.png' %}" alt="Заказ остановлен">
                                     {% elif order.status == 'отменен' %}
                                         <img src="{% static 'erp_main/images/canceled.png' %}" alt="Заказ отменен">
-                                    {% elif order.workshop %}
-                                        <img src="{{ order.workshop }}" alt="Текущий цех">
+                                    {% elif first_item.workshop %}
+                                        {% if first_item.workshop == 1 %}
+                                            <img src="{% static 'erp_main/images/icon_play1.png' %}" alt="Цех №1">
+                                        {% elif first_item.workshop == 3 %}
+                                            <img src="{% static 'erp_main/images/icon_play3.png' %}" alt="Цех №3">
+                                        {% else %}
+                                            <div class="default-icon">⚙️</div>
+                                        {% endif %}
                                     {% else %}
                                         <div class="default-icon">⚙️</div>
                                     {% endif %}
@@ -177,6 +193,7 @@
                             </div>
                         </td>
                     </tr>
+                    {% endwith %}
                     {% endfor %}
                     {% endif %}
                 </tbody>
@@ -186,6 +203,7 @@
 
     <!-- Workshop Modals -->
     {% for order in orders %}
+    {% with first_item=order.items.first %}
     <div class="modal fade" id="workshopModal{{ order.id }}" tabindex="-1" aria-labelledby="workshopModalLabel{{ order.id }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -197,31 +215,11 @@
                 </div>
                 <div class="modal-body">
                     <p class="modal-subtitle">
-                        {% if order.status != 'в очереди' and order.status != 'остановлен' %}
-                        Измените цех или статус заявки:
-                        {% else %}
-                        Выберите цех для запуска заявки:
-                        {% endif %}
+                        Текущий статус: <strong>{{ order.status }}</strong>
+                        {% if first_item.workshop %} | Цех: <strong>{{ first_item.workshop }}</strong>{% endif %}
                     </p>
-                    <div class="workshop-actions">
-                        <button type="button" class="btn btn-workshop workshop-1" onclick="selectWorkshop({{ order.id }}, 1)">
-                            <i class="bi bi-1-circle-fill"></i>
-                            Запустить в цехе №1
-                        </button>
-                        <button type="button" class="btn btn-workshop workshop-3" onclick="selectWorkshop({{ order.id }}, 3)">
-                            <i class="bi bi-3-circle-fill"></i>
-                            Запустить в цехе №3
-                        </button>
-                        {% if order.status != 'в очереди' and order.status != 'остановлен' %}
-                        <button type="button" class="btn btn-workshop workshop-stop" onclick="selectWorkshop({{ order.id }}, 2)">
-                            <i class="bi bi-pause-circle-fill"></i>
-                            Остановить
-                        </button>
-                        <button type="button" class="btn btn-workshop workshop-ready" onclick="selectWorkshop({{ order.id }}, 4)">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Готово
-                        </button>
-                        {% endif %}
+                    <div class="workshop-actions" id="workshopActions{{ order.id }}">
+                        <!-- Кнопки будут динамически добавляться через JavaScript -->
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -230,6 +228,7 @@
             </div>
         </div>
     </div>
+    {% endwith %}
     {% endfor %}
 
     <!-- Pagination -->
@@ -272,7 +271,29 @@
     </div>
 </div>
 
+<!-- Debug Panel (можно убрать в production) -->
+<div class="debug-panel" style="margin: 10px 0; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; display: none;">
+    <h6>Отладка прав доступа</h6>
+    <div class="row">
+        <div class="col-md-6">
+            <strong>Пользователь:</strong> {{ user.get_full_name }} ({{ user.username }})<br>
+            <strong>Роль:</strong> <span id="debug-role">{{ user_role }}</span><br>
+            <strong>Superuser:</strong> {{ user.is_superuser|yesno:"Да,Нет" }}<br>
+            <strong>Staff:</strong> {{ user.is_staff|yesno:"Да,Нет" }}
+        </div>
+        <div class="col-md-6">
+            <strong>Группы:</strong>
+            {% for group in user.groups.all %}
+                {{ group.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                нет групп
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 <style>
+/* Существующие стили остаются без изменений */
 .orders-dashboard {
     max-width: 100%;
     margin: 0 auto;
@@ -283,6 +304,7 @@
 .dashboard-header {
     text-align: center;
     margin-bottom: 2rem;
+    position: relative;
 }
 
 .dashboard-title {
@@ -293,6 +315,18 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.5rem;
+}
+
+.user-role-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(102, 126, 234, 0.1);
+    border: 1px solid #667eea;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #667eea;
 }
 
 .dashboard-subtitle {
@@ -366,9 +400,9 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ЦВЕТОВЫЕ СТИЛИ ДЛЯ СТРОК ПО СТАТУСАМ - КАК В БАЗОВОЙ ВЕРСИИ */
+/* ЦВЕТОВЫЕ СТИЛИ ДЛЯ СТРОК ПО СТАТУСАМ */
 .status-ready {
-    background: rgba(191, 238, 198, 0.3) !important; /* Зеленый для "готов" */
+    background: rgba(191, 238, 198, 0.3) !important;
 }
 
 .status-ready:hover {
@@ -376,7 +410,7 @@
 }
 
 .status-stopped {
-    background: rgba(238, 225, 226, 0.3) !important; /* Красный для "остановлен" */
+    background: rgba(238, 225, 226, 0.3) !important;
 }
 
 .status-stopped:hover {
@@ -384,7 +418,7 @@
 }
 
 .status-cancelled {
-    background: rgba(255, 144, 133, 0.3) !important; /* Ярко-красный для "отменен" */
+    background: rgba(255, 144, 133, 0.3) !important;
 }
 
 .status-cancelled:hover {
@@ -392,7 +426,7 @@
 }
 
 .status-shipped {
-    background: rgba(200, 191, 231, 0.3) !important; /* Фиолетовый для "отгружен" */
+    background: rgba(200, 191, 231, 0.3) !important;
 }
 
 .status-shipped:hover {
@@ -400,7 +434,7 @@
 }
 
 .status-in-progress {
-    background: rgba(173, 216, 230, 0.3) !important; /* Голубой для "запущен" */
+    background: rgba(173, 216, 230, 0.3) !important;
 }
 
 .status-in-progress:hover {
@@ -408,7 +442,7 @@
 }
 
 .status-queued {
-    background: rgba(255, 255, 255, 0.9) !important; /* Белый для "в очереди" */
+    background: rgba(255, 255, 255, 0.9) !important;
 }
 
 .status-queued:hover {
@@ -656,10 +690,46 @@
     color: #48bb78;
 }
 
+.workshop-cancel {
+    background: rgba(229, 62, 62, 0.1);
+    border-color: #e53e3e;
+    color: #e53e3e;
+}
+
+.workshop-queue {
+    background: rgba(160, 174, 192, 0.1);
+    border-color: #a0aec0;
+    color: #a0aec0;
+}
+
+.workshop-ship {
+    background: rgba(128, 90, 213, 0.1);
+    border-color: #805ad5;
+    color: #805ad5;
+}
+
 .btn-workshop:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     background: rgba(255, 255, 255, 0.9);
+}
+
+.btn-workshop:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-workshop:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.no-actions-message {
+    text-align: center;
+    color: #718096;
+    padding: 1rem;
+    font-style: italic;
 }
 
 /* Остальные стили... */
@@ -860,6 +930,11 @@
     .modern-orders-table {
         min-width: 1200px;
     }
+
+    .user-role-badge {
+        position: relative;
+        margin-top: 1rem;
+    }
 }
 
 @media (max-width: 768px) {
@@ -907,112 +982,374 @@
 </style>
 
 <script>
-function selectWorkshop(orderId, workshopValue) {
-    console.log('Changing workshop for order', orderId, 'to', workshopValue);
+// Передаем user_role в JavaScript
+const USER_ROLE = '{{ user_role }}';
 
-    // Add loading state to all buttons in the modal
+// Улучшенная функция для отображения доступных кнопок
+function initializeWorkshopModal(orderId, currentStatus, currentWorkshop) {
+    const actionsContainer = document.getElementById(`workshopActions${orderId}`);
+    actionsContainer.innerHTML = '';
+
+    console.log('Initializing modal:', { orderId, currentStatus, currentWorkshop, userRole: USER_ROLE });
+
+    const buttons = getAvailableActions(currentStatus, currentWorkshop, USER_ROLE);
+
+    if (buttons.length === 0) {
+        actionsContainer.innerHTML = `
+            <div class="no-actions-message">
+                <i class="bi bi-lock-fill me-2"></i>
+                Нет прав для изменения статуса заказа
+            </div>
+        `;
+        return;
+    }
+
+    buttons.forEach(button => {
+        const btnElement = document.createElement('button');
+        btnElement.type = 'button';
+        btnElement.className = `btn btn-workshop ${button.className}`;
+        btnElement.onclick = () => selectWorkshop(orderId, button.action);
+        btnElement.innerHTML = `
+            <i class="bi ${button.icon}"></i>
+            ${button.text}
+        `;
+
+        // Добавляем подсказку для кнопок
+        btnElement.title = button.title || button.text;
+        actionsContainer.appendChild(btnElement);
+    });
+}
+
+// Улучшенная функция определения доступных действий
+function getAvailableActions(status, workshop, userRole) {
+    const isAdmin = ['admin', 'director'].includes(userRole);
+    const isProduction = ['production'].includes(userRole) || isAdmin;
+    const isManager = ['manager'].includes(userRole) || isAdmin;
+    const isLogistic = ['logistic'].includes(userRole) || isAdmin;
+
+    const buttons = [];
+
+    console.log('Available actions check:', { status, workshop, userRole, isAdmin, isProduction, isManager, isLogistic });
+
+    // Логика для разных статусов
+    switch (status) {
+        case 'в очереди':
+            if (isProduction) {
+                buttons.push(
+                    {
+                        action: 'start_1',
+                        text: 'Запустить в цехе №1',
+                        className: 'workshop-1',
+                        icon: 'bi-1-circle-fill',
+                        title: 'Начать производство в цехе №1'
+                    },
+                    {
+                        action: 'start_3',
+                        text: 'Запустить в цехе №3',
+                        className: 'workshop-3',
+                        icon: 'bi-3-circle-fill',
+                        title: 'Начать производство в цехе №3'
+                    }
+                );
+            }
+            if (isManager || isAdmin) {
+                buttons.push({
+                    action: 'cancel',
+                    text: 'Отменить заказ',
+                    className: 'workshop-cancel',
+                    icon: 'bi-x-circle-fill',
+                    title: 'Отменить заказ'
+                });
+            }
+            break;
+
+        case 'запущен':
+            if (isProduction) {
+                if (workshop === '1') {
+                    buttons.push(
+                        {
+                            action: 'switch_3',
+                            text: 'Перевести в цех №3',
+                            className: 'workshop-3',
+                            icon: 'bi-arrow-left-right',
+                            title: 'Перевести производство в цех №3'
+                        }
+                    );
+                } else if (workshop === '3') {
+                    buttons.push(
+                        {
+                            action: 'switch_1',
+                            text: 'Перевести в цех №1',
+                            className: 'workshop-1',
+                            icon: 'bi-arrow-left-right',
+                            title: 'Перевести производство в цех №1'
+                        }
+                    );
+                }
+
+                buttons.push({
+                    action: 'ready',
+                    text: 'Заказ готов',
+                    className: 'workshop-ready',
+                    icon: 'bi-check-circle-fill',
+                    title: 'Заказ готов к отгрузке'
+                });
+            }
+
+            if (isManager || isProduction) {
+                buttons.push({
+                    action: 'stop',
+                    text: 'Остановить производство',
+                    className: 'workshop-stop',
+                    icon: 'bi-pause-circle-fill',
+                    title: 'Временно остановить производство'
+                });
+            }
+            break;
+
+        case 'остановлен':
+            if (isProduction) {
+                buttons.push(
+                    {
+                        action: 'start_1',
+                        text: 'Возобновить в цехе №1',
+                        className: 'workshop-1',
+                        icon: 'bi-play-circle-fill',
+                        title: 'Возобновить производство в цехе №1'
+                    },
+                    {
+                        action: 'start_3',
+                        text: 'Возобновить в цехе №3',
+                        className: 'workshop-3',
+                        icon: 'bi-play-circle-fill',
+                        title: 'Возобновить производство в цехе №3'
+                    }
+                );
+            }
+            if (isManager || isAdmin) {
+                buttons.push(
+                    {
+                        action: 'cancel',
+                        text: 'Отменить заказ',
+                        className: 'workshop-cancel',
+                        icon: 'bi-x-circle-fill',
+                        title: 'Полностью отменить заказ'
+                    },
+                    {
+                        action: 'to_queue',
+                        text: 'Вернуть в очередь',
+                        className: 'workshop-queue',
+                        icon: 'bi-arrow-left-circle-fill',
+                        title: 'Вернуть заказ в очередь'
+                    }
+                );
+            }
+            break;
+
+        case 'готов':
+            if (isProduction) {
+                // Возможность перезапуска если обнаружен брак
+                buttons.push(
+                    {
+                        action: 'start_1',
+                        text: 'Перезапустить в цехе №1',
+                        className: 'workshop-1',
+                        icon: 'bi-arrow-clockwise',
+                        title: 'Перезапустить производство в цехе №1'
+                    },
+                    {
+                        action: 'start_3',
+                        text: 'Перезапустить в цехе №3',
+                        className: 'workshop-3',
+                        icon: 'bi-arrow-clockwise',
+                        title: 'Перезапустить производство в цехе №3'
+                    }
+                );
+            }
+            if (isManager || isLogistic || isAdmin) {
+                buttons.push({
+                    action: 'ship',
+                    text: 'Отгрузить заказ',
+                    className: 'workshop-ship',
+                    icon: 'bi-truck',
+                    title: 'Отметить заказ как отгруженный'
+                });
+            }
+            break;
+
+        case 'отгружен':
+            // Для отгруженных заказов ограниченный набор действий
+            if (isAdmin) {
+                buttons.push({
+                    action: 'to_queue',
+                    text: 'Вернуть в работу',
+                    className: 'workshop-queue',
+                    icon: 'bi-arrow-return-left',
+                    title: 'Вернуть заказ в работу (только для администраторов)'
+                });
+            }
+            break;
+
+        case 'отменен':
+            // Для отгруженных заказов ограниченный набор действий
+            if (isAdmin) {
+                buttons.push({
+                    action: 'to_queue',
+                    text: 'Вернуть в работу',
+                    className: 'workshop-queue',
+                    icon: 'bi-arrow-return-left',
+                    title: 'Вернуть заказ в работу (только для администраторов)'
+                });
+            }
+            break;
+    }
+
+    console.log('Available buttons:', buttons);
+    return buttons;
+}
+
+// Функция для получения CSRF токена
+function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Улучшенная функция изменения статуса
+async function selectWorkshop(orderId, action) {
+    console.log('Changing order status:', { orderId, action });
+
     const modal = document.getElementById(`workshopModal${orderId}`);
     const buttons = modal.querySelectorAll('.btn-workshop');
+
+    // Блокируем кнопки и показываем индикатор загрузки
     buttons.forEach(btn => {
-        btn.disabled = true;
         const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Обработка...';
         btn.dataset.originalHTML = originalHTML;
     });
 
-    // CSRF token handling
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
+    try {
+        const response = await fetch(`/erp_main/workshop/update/${orderId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({ action: action })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || `HTTP error! status: ${response.status}`);
         }
-        return cookieValue;
-    }
 
-    const csrftoken = getCookie('csrftoken');
-
-    fetch(`/erp_main/update_workshop/${orderId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify({ workshop: workshopValue.toString() })
-    })
-    .then(response => {
-        if (response.ok) {
-            // Show success notification
+        if (data.success) {
             showNotification('Статус заказа успешно обновлен', 'success');
 
-            // Close modal
-            const modalElement = document.getElementById(`workshopModal${orderId}`);
-            const bsModal = bootstrap.Modal.getInstance(modalElement);
+            // Закрываем модальное окно
+            const bsModal = bootstrap.Modal.getInstance(modal);
             if (bsModal) bsModal.hide();
 
-            // Reload page after short delay
+            // Обновляем страницу через короткую задержку
             setTimeout(() => {
                 window.location.reload();
-            }, 1000);
-
+            }, 800);
         } else {
-            throw new Error('Network response was not ok');
+            throw new Error(data.error || 'Неизвестная ошибка сервера');
         }
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        showNotification('Произошла ошибка при обновлении статуса', 'error');
 
-        // Restore button states
+    } catch (error) {
+        console.error('Ошибка при обновлении статуса:', error);
+        showNotification('Ошибка: ' + error.message, 'error');
+
+        // Восстанавливаем кнопки
         buttons.forEach(btn => {
             btn.disabled = false;
             btn.innerHTML = btn.dataset.originalHTML;
         });
-    });
+    }
 }
 
+// Функция показа уведомлений
 function showNotification(message, type) {
-    // Create notification element
+    // Создаем элемент уведомления
     const notification = document.createElement('div');
     notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} notification-toast`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        padding: 1rem 1.5rem;
+        animation: slideIn 0.3s ease;
+    `;
+
+    const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
     notification.innerHTML = `
         <div class="d-flex align-items-center">
-            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}-fill me-2"></i>
+            <i class="bi ${icon} me-2"></i>
             <span>${message}</span>
         </div>
     `;
 
-    // Style notification
-    Object.assign(notification.style, {
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        zIndex: '9999',
-        minWidth: '300px',
-        borderRadius: '12px',
-        boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-        padding: '1rem 1.5rem'
-    });
+    // Добавляем стили анимации
+    if (!document.querySelector('#notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
 
-    // Add to page
     document.body.appendChild(notification);
 
-    // Remove after delay
+    // Удаляем через 3 секунды
     setTimeout(() => {
-        notification.remove();
+        notification.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-// Add animation to table rows on load
+// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    const tableRows = document.querySelectorAll('.order-row');
+    console.log('Initializing orders dashboard with user role:', USER_ROLE);
 
+    // Инициализация модальных окон
+    const workshopModals = document.querySelectorAll('[id^="workshopModal"]');
+    workshopModals.forEach(modal => {
+        modal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const orderId = button.dataset.orderId;
+            const currentStatus = button.dataset.status;
+            const currentWorkshop = button.dataset.workshop || '';
+
+            console.log('Modal shown for order:', { orderId, currentStatus, currentWorkshop });
+            initializeWorkshopModal(orderId, currentStatus, currentWorkshop);
+        });
+    });
+
+    // Анимация загрузки строк таблицы
+    const tableRows = document.querySelectorAll('.order-row');
     tableRows.forEach((row, index) => {
         row.style.opacity = '0';
         row.style.transform = 'translateX(-20px)';
@@ -1023,6 +1360,29 @@ document.addEventListener('DOMContentLoaded', function() {
             row.style.transform = 'translateX(0)';
         }, index * 50);
     });
+
+    // Добавляем обработчики для быстрого просмотра
+    initializeQuickView();
 });
+
+// Функция для быстрого просмотра информации
+function initializeQuickView() {
+    // Добавляем подсказки для ячеек
+    const cells = document.querySelectorAll('.quantity-cell, .glass-cell, .comment-cell');
+    cells.forEach(cell => {
+        if (cell.textContent.trim() !== '') {
+            cell.style.cursor = 'help';
+            cell.title = cell.textContent;
+        }
+    });
+}
+
+// Экспортируем функции для глобального доступа (для отладки)
+window.orderDashboard = {
+    initializeWorkshopModal,
+    getAvailableActions,
+    selectWorkshop,
+    USER_ROLE
+};
 </script>
 {% endblock %}

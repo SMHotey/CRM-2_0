@@ -2,13 +2,13 @@ from django import forms
 from django.contrib.auth.models import User
 
 
-from erp_main.models import Organization, Invoice, Order, LegalEntity, OrderItem, Shipment
+from erp_main.models import Organization, Invoice, Order, LegalEntity, OrderItem, Shipment, Certificate
 
 
-class UserCreationForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password', 'password')
+# class UserCreationForm(forms.ModelForm):
+#     class Meta:
+#         model = User
+#         fields = ('username', 'email', 'password', 'password')
 
 
 class OrderForm(forms.ModelForm):
@@ -221,4 +221,57 @@ class ShipmentForm(forms.ModelForm):
         return shipment
 
 
+class CertificateForm(forms.ModelForm):
+    class Meta:
+        model = Certificate
+        fields = ['numbers', 'p_kind', 'p_type', 'legal_entity', 'scan_copy', 'passport_templates']
+        widgets = {
+            'numbers': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Введите номер сертификата'
+            }),
+            'p_kind': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'p_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'legal_entity': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+        }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make fields required
+        self.fields['p_kind'].required = True
+        self.fields['p_type'].required = True
+        self.fields['legal_entity'].required = True
+
+        # Limit legal_entity choices to active entities
+        self.fields['legal_entity'].queryset = LegalEntity.objects.all()
+
+        # File fields with custom attributes
+        self.fields['scan_copy'].widget.attrs.update({
+            'class': 'form-control',
+            'accept': '.pdf,.jpg,.jpeg,.png'
+        })
+        self.fields['passport_templates'].widget.attrs.update({
+            'class': 'form-control',
+            'accept': '.pdf,.doc,.docx'
+        })
+
+    def clean_scan_copy(self):
+        scan_copy = self.cleaned_data.get('scan_copy')
+        if scan_copy:
+            # Validate file size (5MB limit)
+            if scan_copy.size > 5 * 1024 * 1024:
+                raise forms.ValidationError("Размер файла не должен превышать 5MB")
+        return scan_copy
+
+    def clean_passport_templates(self):
+        passport_templates = self.cleaned_data.get('passport_templates')
+        if passport_templates:
+            if passport_templates.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("Размер файла не должен превышать 10MB")
+        return passport_templates

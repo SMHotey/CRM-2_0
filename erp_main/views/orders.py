@@ -5,34 +5,49 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.generic import FormView
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.db.models import Q
 from openpyxl import load_workbook
 import json
 import logging
 import re
-from collections import Counter
+from django.contrib import messages
 
 from ..models import Order, OrderItem, Organization, LegalEntity, GlassInfo, OrderChangeHistory
 from ..forms import OrderForm, OrderFileForm
 from .mixins import UserAccessMixin
+from .permissions import (  # Импорт из нового файла permissions.py
+    get_user_role_from_request,
+    has_permission_for_action,
+    can_view_order,
+    can_edit_order_detail,
+    can_modify_order_item, ajax_permission_required
+)
 from ..services.order_processor import OrderProcessor
 
 logger = logging.getLogger(__name__)
+
 
 class OrderUploadView(UserAccessMixin, FormView):
     template_name = 'order_upload.html'
     form_class = OrderForm
     processor = OrderProcessor()
 
+    # Определяем требуемые роли для доступа к загрузке заказов
+    required_roles = ['admin', 'director', 'manager', 'production']
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.request.user.is_superuser:
+        user_role = self.get_user_role()
+
+        # Сохраняем предыдущую логику доступа к организациям
+        if self.request.user.is_superuser or user_role in ['admin', 'director']:
             context['organizations'] = Organization.objects.all()
         else:
             context['organizations'] = Organization.objects.filter(user=self.request.user)
 
         context['legal_entities'] = LegalEntity.objects.all()
+        context['user_role'] = user_role  # Передаем роль в шаблон
         return context
 
     def get_form_kwargs(self):
@@ -42,6 +57,11 @@ class OrderUploadView(UserAccessMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
+        # Проверяем права доступа перед обработкой формы
+        user_role = self.get_user_role()
+        if user_role not in self.required_roles:
+            raise PermissionDenied("У вас недостаточно прав для загрузки заказов")
+
         uploaded_file = form.cleaned_data.get('order_file')
         order_id = self.kwargs.get('order_id')
 
@@ -53,6 +73,11 @@ class OrderUploadView(UserAccessMixin, FormView):
         if order_id:
             # Извлечение существующего заказа из базы
             order = get_object_or_404(Order, pk=order_id)
+
+            # Проверяем права на редактирование заказа
+            if not self._can_edit_order(order):
+                raise PermissionDenied("У вас недостаточно прав для редактирования этого заказа")
+
             old_file = order.order_file  # старый файл заказа для сохранения в истории изменений
             is_update = True
         else:
@@ -91,6 +116,20 @@ class OrderUploadView(UserAccessMixin, FormView):
                 self._create_order_items(order, new_positions)
 
         return redirect(reverse('order_detail', args=[order.id]))
+
+    def _can_edit_order(self, order):
+        """Проверяет, может ли пользователь редактировать заказ"""
+        user_role = self.get_user_role()
+
+        # Админы и директоры могут редактировать все заказы
+        if user_role in ['admin', 'director']:
+            return True
+
+        # Менеджеры и производство могут редактировать только свои заказы
+        if user_role in ['manager', 'production']:
+            return order.invoice.organization.user == self.request.user
+
+        return False
 
     def _update_order_items(self, order, new_positions, old_file):
         """Обновление позиций существующего заказа"""
@@ -264,14 +303,19 @@ class OrderUploadView(UserAccessMixin, FormView):
 
 @login_required
 def orders_list(request):
-    """Список заказов"""
+    """Список заказов с учетом ролей пользователей"""
     orders = []
     source = request.GET.get('source')
+    user_role = get_user_role_from_request(request)
 
-    if request.user.is_staff:
+    # Сохраняем предыдущую логику фильтрации заказов
+    if request.user.is_staff or user_role in ['admin', 'director', 'production', 'logistic']:
         orders = Order.objects.all().order_by('-id')
     elif Order.objects.filter(invoice__organization__user=request.user):
         orders = Order.objects.all().order_by('-id')
+    else:
+        # Для пользователей без специальных прав показываем только их заказы
+        orders = Order.objects.filter(invoice__organization__user=request.user).order_by('-id')
 
     if source:
         orders = Order.objects.filter(invoice__organization=source).order_by('-id')
@@ -280,44 +324,76 @@ def orders_list(request):
     page_number = request.GET.get('page')
     orders_page = paginator.get_page(page_number)
 
-    return render(request, 'orders_list.html', {'orders': orders_page})
+    # Передаем роль пользователя в контекст
+    context = {
+        'orders': orders_page,
+        'user_role': user_role
+    }
+
+    return render(request, 'orders_list.html', context)
 
 
 @login_required
 def order_detail(request, order_id):
-    """Детали заказа"""
+    """Детали заказа с проверкой прав доступа"""
     order = get_object_or_404(Order, id=order_id)
+    user_role = get_user_role_from_request(request)
+
+    # Проверяем права доступа к заказу
+    if not can_view_order(request.user, user_role, order):
+        messages.error(request, "У вас недостаточно прав для просмотра этого заказа")
+        return redirect('orders_list')
+
     changes = order.changes.all()
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
     filtered_items = order.items.exclude(p_status__in=['changed'])
 
     if request.method == 'POST':
+        # Проверяем права на редактирование заказа
+        if not can_edit_order_detail(request.user, user_role, order):
+            messages.error(request, "У вас недостаточно прав для редактирования этого заказа")
+            return redirect('order_detail', order_id=order.id)
+
         form = OrderFileForm(request.POST, request.FILES)
         if form.is_valid():
             order.order_file = form.cleaned_data['order_file']
             order.save()
+            messages.success(request, "Файл заказа успешно обновлен")
             return redirect('order_detail', order_id=order.id)
 
     context = {
         'order': order,
         'filtered_items': filtered_items,
         'changes': changes,
+        'user_role': user_role,  # Передаем роль в шаблон
     }
 
     return render(request, 'order_detail.html', context)
 
 
 @require_POST
+@login_required
 def update_order_item_status(request):
-    """Обновление статусов позиций заказа"""
+    """Обновление статусов позиций заказа с проверкой прав"""
     try:
         data = json.loads(request.body)
         updates = data.get('updates', {})
+        user_role = get_user_role_from_request(request)
 
         for item_id in updates.keys():
             order_item = get_object_or_404(OrderItem, id=item_id)
+
+            # Проверяем права на изменение позиции заказа
+            if not can_modify_order_item(request.user, user_role, order_item):
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'У вас недостаточно прав для изменения этой позиции заказа'
+                }, status=403)
+
             new_data = updates[item_id]
+
+            # Сохраняем предыдущую логику обновления статусов
             order_item.p_status = new_data['status']
             order_item.workshop = new_data['workshop']
             if order_item.workshop == '2' and new_data['path'] != 'order_detail':
@@ -335,3 +411,129 @@ def update_order_item_status(request):
         logger.exception("Error updating order items' statuses")
         return JsonResponse({'status': 'error', 'message': 'An error occurred while processing your request.'},
                             status=500)
+
+
+@require_POST
+@login_required
+def update_workshop(request, order_id):
+    """Обновление статуса заказа с проверкой прав доступа"""
+    try:
+        data = json.loads(request.body)
+        action = data.get('action')
+        user_role = get_user_role_from_request(request)
+
+        # Проверяем существование заказа
+        order_items = OrderItem.objects.filter(order_id=order_id)
+        if not order_items.exists():
+            return JsonResponse({'success': False, 'error': 'Order not found'}, status=404)
+
+        # Проверяем права на изменение заказа
+        first_item = order_items.first()
+        if not can_modify_order_item(request.user, user_role, first_item):
+            return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+
+        # Получаем первый элемент заказа для определения текущего статуса
+        current_status = first_item.p_status
+        current_workshop = first_item.workshop
+
+        # Проверяем права доступа для конкретного действия
+        if not has_permission_for_action(user_role, current_status, current_workshop, action):
+            return JsonResponse({'success': False, 'error': 'Permission denied for this action'}, status=403)
+
+        # Обрабатываем действие
+        result = process_order_action(order_items, action, request.user)
+
+        if result['success']:
+            # Записываем в историю изменений
+            add_changes = OrderChangeHistory(
+                order_id=order_id,
+                changed_by=request.user,
+                comment=result['comment']
+            )
+            add_changes.save()
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': result['error']}, status=400)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# Вспомогательные функции для проверки прав
+# def _can_view_order(user, user_role, order):
+#     """Проверяет, может ли пользователь просматривать заказ"""
+#     if user_role in ['admin', 'director']:
+#         return True
+#     return order.invoice.organization.user == user
+#
+#
+# def _can_edit_order_detail(user, user_role, order):
+#     """Проверяет, может ли пользователь редактировать детали заказа"""
+#     if user_role in ['admin', 'director']:
+#         return True
+#     if user_role in ['manager', 'production']:
+#         return order.invoice.organization.user == user
+#     return False
+#
+#
+# def _can_modify_order_item(user, user_role, order_item):
+#     """Проверяет, может ли пользователь изменять позицию заказа"""
+#     if user_role in ['admin', 'director']:
+#         return True
+#     if user_role in ['manager', 'production', 'logistic']:
+#         return order_item.order.invoice.organization.user == user
+#     return False
+
+
+def process_order_action(order_items, action, user):
+    """Обрабатываем действие над заказом (сохраняем предыдущую логику)"""
+
+    status_mapping = {
+        'start_1': 'product',
+        'start_3': 'product',
+        'stop': 'stopped',
+        'ready': 'ready',
+        'cancel': 'canceled',
+        'to_queue': 'in_query',
+        'ship': 'shipped',
+        'switch_1': 'product',
+        'switch_3': 'product'
+    }
+
+    workshop_mapping = {
+        'start_1': '1',
+        'switch_1': '1',
+        'start_3': '3',
+        'switch_3': '3'
+    }
+
+    comment_mapping = {
+        'start_1': 'заказ запущен в цехе №1',
+        'start_3': 'заказ запущен в цехе №3',
+        'stop': 'заказ остановлен',
+        'ready': 'заказ готов',
+        'cancel': 'заказ отменен',
+        'to_queue': 'заказ возвращен в очередь',
+        'ship': 'заказ отгружен',
+        'switch_1': 'заказ переведен в цех №1',
+        'switch_3': 'заказ переведен в цех №3'
+    }
+
+    new_status = status_mapping.get(action)
+    new_workshop = workshop_mapping.get(action)
+    comment = comment_mapping.get(action, 'статус заказа изменен')
+
+    if not new_status:
+        return {'success': False, 'error': 'Invalid action'}
+
+    # Обновляем статус
+    update_data = {'p_status': new_status}
+    if new_workshop:
+        update_data['workshop'] = new_workshop
+
+    order_items.update(**update_data)
+
+    return {'success': True, 'comment': comment}

@@ -2,7 +2,9 @@
 from .auth import custom_login
 
 # Base views
-from .base import index, glass_info, update_glass_status, update_workshop, debug_users
+from .base import index, glass_info, update_glass_status, debug_users
+
+from .orders import update_workshop
 
 # Order views
 from .orders import OrderUploadView, orders_list, order_detail, update_order_item_status

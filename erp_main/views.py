@@ -12,6 +12,8 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
+
+from erp_main.views.permissions import get_user_role_from_request
 from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory, Contract, \
     Shipment
 from .forms import OrderForm, OrganizationForm, InvoiceForm,OrderFileForm, LegalEntityForm, \
@@ -26,7 +28,6 @@ from openpyxl import load_workbook
 from django.contrib.auth.mixins import LoginRequiredMixin
 import re
 from django.utils.http import url_has_allowed_host_and_scheme
-from .models import ChatRoom, ChatMessage, UserStatus
 from django.contrib.auth.models import User
 import json
 
@@ -71,65 +72,66 @@ def custom_login(request):
     return redirect(reverse('index'))  # Используем reverse вместо строки
 
 
-@login_required  # Декоратор для проверки аутентификации пользователя
-def index(request):
-    start_date = request.GET.get('startDate', f'{datetime.now().year}-01-01')
-    end_date = request.GET.get('endDate', timezone.now().strftime('%Y-%m-%d'))
-    invoice_status = request.GET.get('invoice_status', '')
-    order_status = request.GET.get('order_status', '')
-
-    # Преобразуем строки в даты
-    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
-
-    # Фильтруем организации по пользователю
-    user_orgs = Organization.objects.filter(user=request.user)
-
-    # Базовые запросы с фильтрацией по дате
-    invoice_query = Invoice.objects.filter(
-        organization__in=user_orgs,
-        date__range=[start_date_obj, end_date_obj]
-    )
-
-    order_query = Order.objects.filter(
-        invoice__organization__in=user_orgs,
-        created_at__range=[start_date_obj, end_date_obj]
-    )
-
-    # Применяем фильтры статусов
-    if invoice_status == 'paid':
-        invoice_query = invoice_query.filter(is_paid=True)
-    elif invoice_status == 'unpaid':
-        invoice_query = invoice_query.filter(is_paid=False)
-
-    if order_status:
-        # Для заказов фильтрация идет по статусам позиций
-        order_query = order_query.filter(
-            items__p_status=order_status
-        ).distinct()
-
-    # Получаем данные
-    user_invoices = invoice_query.order_by('-date')
-    user_orders = order_query.order_by('-created_at')
-
-    # Подготовка контекста
-    context = {
-        'current_year': datetime.now().year,
-        'start_date': start_date,
-        'end_date': end_date,
-        'invoice_status': invoice_status,
-        'order_status': order_status,
-        'orgs_count': user_orgs.count(),
-        'orders_count': user_orders.count(),
-        'invoices_count': user_invoices.count(),
-        'total_invoices_amount': user_invoices.aggregate(total=Sum('amount'))['total'] or 0,
-        'invoices': user_invoices,
-        'orders': user_orders,
-        'organizations': user_orgs,
-    }
-
-#    return render(request, 'statistics/user_statistics.html', context)
-    return render(request, 'index.html', context)
+# @login_required  # Декоратор для проверки аутентификации пользователя
+# def index(request):
+#     start_date = request.GET.get('startDate', f'{datetime.now().year}-01-01')
+#     end_date = request.GET.get('endDate', timezone.now().strftime('%Y-%m-%d'))
+#     invoice_status = request.GET.get('invoice_status', '')
+#     order_status = request.GET.get('order_status', '')
+#
+#     # Преобразуем строки в даты
+#     start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+#     end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
+#
+#     # Фильтруем организации по пользователю
+#     user_orgs = Organization.objects.filter(user=request.user)
+#
+#     # Базовые запросы с фильтрацией по дате
+#     invoice_query = Invoice.objects.filter(
+#         organization__in=user_orgs,
+#         date__range=[start_date_obj, end_date_obj]
+#     )
+#
+#     order_query = Order.objects.filter(
+#         invoice__organization__in=user_orgs,
+#         created_at__range=[start_date_obj, end_date_obj]
+#     )
+#
+#     # Применяем фильтры статусов
+#     if invoice_status == 'paid':
+#         invoice_query = invoice_query.filter(is_paid=True)
+#     elif invoice_status == 'unpaid':
+#         invoice_query = invoice_query.filter(is_paid=False)
+#
+#     if order_status:
+#         # Для заказов фильтрация идет по статусам позиций
+#         order_query = order_query.filter(
+#             items__p_status=order_status
+#         ).distinct()
+#
+#     # Получаем данные
+#     user_invoices = invoice_query.order_by('-date')
+#     user_orders = order_query.order_by('-created_at')
+#     user_role = get_user_role_from_request(request)
+#
+#     # Подготовка контекста
+#     context = {
+#         'current_year': datetime.now().year,
+#         'start_date': start_date,
+#         'end_date': end_date,
+#         'invoice_status': invoice_status,
+#         'order_status': order_status,
+#         'orgs_count': user_orgs.count(),
+#         'orders_count': user_orders.count(),
+#         'invoices_count': user_invoices.count(),
+#         'total_invoices_amount': user_invoices.aggregate(total=Sum('amount'))['total'] or 0,
+#         'invoices': user_invoices,
+#         'orders': user_orders,
+#         'organizations': user_orgs,
+#         'user_role': user_role,
+#     }
+#
+#     return render(request, 'index.html', context)
 
 
 class OrganizationCreateView(LoginRequiredMixin, CreateView):
@@ -1094,35 +1096,4 @@ def debug_users(request):
     })
 
 
-@login_required
-def chat_view(request):
-    """Основная страница чата"""
-    return render(request, 'chat/chat.html')
 
-
-@login_required
-def get_available_users(request):
-    """API для получения списка пользователей для создания чата"""
-    users = User.objects.exclude(id=request.user.id).select_related('userstatus')
-    user_data = []
-
-    for user in users:
-        try:
-            status = user.userstatus
-            is_online = status.is_online
-            last_seen = status.last_seen
-        except UserStatus.DoesNotExist:
-            is_online = False
-            last_seen = None
-
-        user_data.append({
-            'id': user.id,
-            'username': user.username,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-            'is_online': is_online,
-            'last_seen': last_seen
-        })
-
-    return JsonResponse({'users': user_data})

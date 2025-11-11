@@ -1,14 +1,16 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 from .views import (
-    custom_login, index, glass_info, update_glass_status, update_workshop,
+    custom_login, glass_info, update_glass_status,
     OrderUploadView, orders_list, order_detail, update_order_item_status,
     invoice_add, invoice_detail, invoices_list,
     OrganizationCreateView, OrganizationUpdateView, OrganizationListView, OrganizationDetailView,
     create_legal_entity, create_contract,
     save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users
 )
-
+from .views import certificates
+from .views.orders import update_workshop
+from .views.base import index
 urlpatterns = [
     # Auth
     path('login/', custom_login, name='login'),
@@ -52,6 +54,20 @@ urlpatterns = [
     path('shipments/delete/<int:shipment_id>/', delete_shipment, name='delete_shipment'),
     path('calendar/', calendar_view, name='calendar'),
 
+# Certificate URLs
+    path('certificates/', certificates.CertificateListView.as_view(), name='certificate_list'),
+    path('certificates/create/', certificates.CertificateCreateView.as_view(), name='certificate_create'),
+    path('certificates/<int:pk>/', certificates.CertificateDetailView.as_view(), name='certificate_detail'),
+    path('certificates/<int:pk>/edit/', certificates.CertificateUpdateView.as_view(), name='certificate_edit'),
+    path('certificates/<int:pk>/delete/', certificates.CertificateDeleteView.as_view(), name='certificate_delete'),
+
+# Nameplate URLs
+    path('get-certificates/', certificates.get_certificates, name='get_certificates'),
+    path('get-nameplates/', certificates.get_nameplates, name='get_nameplates'),
+    path('create-nameplate/', certificates.create_nameplate, name='create_nameplate'),
+    path('get-nameplate-data/', certificates.get_nameplate_data, name='get_nameplate_data'),
+    path('update-nameplate/', certificates.update_nameplate, name='update_nameplate'),
+    path('delete-nameplate/', certificates.delete_nameplate, name='delete_nameplate'),
     # Chat
     # path('chat/', chat_view, name='chat'),
     # path('chat/users/', get_available_users, name='get_available_users'),

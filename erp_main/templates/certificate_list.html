@@ -1,0 +1,378 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+<style>
+    .search-filters {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table th {
+        background: rgba(55, 177, 222, 0.15);
+        border-bottom: 2px solid rgba(55, 177, 222, 0.3);
+        font-weight: 600;
+        color: #2d3748;
+        padding: 1rem 0.75rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        text-align: center;
+    }
+
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        text-align: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table tbody tr {
+        transition: var(--transition-smooth);
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(55, 177, 222, 0.08);
+        transform: translateX(4px);
+    }
+
+    .certificate-number {
+        font-weight: 600;
+        color: #4F97C7;
+        transition: var(--transition-smooth);
+    }
+
+    .certificate-number:hover {
+        color: #3a7bb0;
+        transform: translateX(2px);
+    }
+
+    .file-download {
+        color: #4F97C7;
+        transition: var(--transition-smooth);
+        text-decoration: none;
+    }
+
+    .file-download:hover {
+        color: #3a7bb0;
+        transform: scale(1.1);
+    }
+
+    .kind-badge, .type-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .kind-door { background: rgba(79, 151, 199, 0.15); color: #4F97C7; }
+    .kind-gate { background: rgba(32, 201, 151, 0.15); color: #20c997; }
+    .kind-hatch { background: rgba(253, 126, 20, 0.15); color: #fd7e14; }
+    .kind-transom { background: rgba(111, 66, 193, 0.15); color: #6f42c1; }
+
+    .type-tech { background: rgba(108, 117, 125, 0.15); color: #6c757d; }
+    .type-ei-60 { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
+    .type-eis-60 { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+    .type-eiws-60 { background: rgba(25, 135, 84, 0.15); color: #198754; }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-item {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: var(--transition-smooth);
+    }
+
+    .stat-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+
+<div class="container-fluid my-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="page-title mb-3">Сертификаты продукции</h1>
+                <a href="{% url 'certificate_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Добавить сертификат
+                </a>
+            </div>
+
+            <!-- Statistics Summary -->
+
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filters">
+        <form method="GET" action="{% url 'certificate_list' %}" id="searchForm">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">Поиск по номеру или названию</label>
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Введите номер, вид или тип изделия..."
+                           value="{{ search_query }}">
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">Юридическое лицо</label>
+                    <select name="legal_entity" class="form-select">
+                        <option value="">Все юридические лица</option>
+                        {% for entity in legal_entities %}
+                            <option value="{{ entity.id }}"
+                                    {% if selected_legal_entity == entity.id|stringformat:"i" %}selected{% endif %}>
+                                {{ entity.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-2"></i>Применить
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Certificates Table -->
+    <div class="table-container">
+        <div class="table-responsive" style="max-height: 600px;">
+            <table class="table table-hover bi-align-middle">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Вид изделия</th>
+                        <th>Тип изделия</th>
+                        <th>Юридическое лицо</th>
+                        <th>Скан-копия</th>
+                        <th>Шаблоны паспортов</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for certificate in certificates %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'certificate_detail' certificate.id %}"
+                               class="certificate-number text-decoration-none">
+                                {{ certificate.numbers|default:"—" }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="kind-badge kind-{{ certificate.p_kind }}">
+                                {{ certificate.get_p_kind_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="type-badge type-{{ certificate.p_type }}">
+                                {{ certificate.get_p_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">
+                                {{ certificate.legal_entity.name }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            {% if certificate.scan_copy %}
+                                <a href="{{ certificate.scan_copy.url }}"
+                                   target="_blank"
+                                   class="file-download"
+                                   title="Скачать скан-копию">
+                                    <i class="bi bi-download fs-5"></i>
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if certificate.passport_templates %}
+                                <a href="{{ certificate.passport_templates.url }}"
+                                   target="_blank"
+                                   class="file-download"
+                                   title="Скачать шаблоны паспортов">
+                                    <i class="bi bi-download fs-5"></i>
+                                </a>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'certificate_detail' certificate.id %}"
+                                   class="btn btn-outline-primary"
+                                   title="Просмотреть">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'certificate_edit' certificate.id %}"
+                                   class="btn btn-outline-secondary"
+                                   title="Редактировать">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'certificate_delete' certificate.id %}"
+                                   class="btn btn-outline-danger"
+                                   title="Удалить">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="bi bi-file-earmark-x"></i>
+                                <h5>Сертификаты не найдены</h5>
+                                <p class="text-muted">
+                                    {% if search_query or selected_legal_entity %}
+                                        Попробуйте изменить параметры поиска
+                                    {% else %}
+                                        <a href="{% url 'certificate_create' %}" class="btn btn-primary mt-2">
+                                            <i class="bi bi-plus-circle me-2"></i>Добавить первый сертификат
+                                        </a>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if certificates.paginator.num_pages > 1 %}
+    <div class="pagination-container mt-4">
+        <div class="d-flex justify-content-center align-items-center flex-wrap">
+            {% if certificates.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                   class="page-btn">
+                    <i class="bi bi-chevron-double-left"></i> Первая
+                </a>
+                <a href="?page={{ certificates.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                   class="page-btn">
+                    <i class="bi bi-chevron-left"></i> Предыдущая
+                </a>
+            {% endif %}
+
+            {% for i in certificates.paginator.page_range %}
+                {% if certificates.number == i %}
+                    <span class="page-btn active">{{ i }}</span>
+                {% elif i > certificates.number|add:'-3' and i < certificates.number|add:'3' %}
+                    <a href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                       class="page-btn">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if certificates.has_next %}
+                <a href="?page={{ certificates.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                   class="page-btn">
+                    Следующая <i class="bi bi-chevron-right"></i>
+                </a>
+                <a href="?page={{ certificates.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                   class="page-btn">
+                    Последняя <i class="bi bi-chevron-double-right"></i>
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="text-center mt-2 text-muted">
+            Показано {{ certificates.start_index }} - {{ certificates.end_index }} из {{ certificates.paginator.count }} сертификатов
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+class CertificateListManager {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.setupFilters();
+    }
+
+    setupFilters() {
+        const form = document.getElementById('searchForm');
+        const legalEntitySelect = form.querySelector('select[name="legal_entity"]');
+
+        if (legalEntitySelect) {
+            legalEntitySelect.addEventListener('change', () => {
+                form.submit();
+            });
+        }
+
+        const searchInput = form.querySelector('input[name="search"]');
+        if (searchInput) {
+            let timeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    form.submit();
+                }, 500);
+            });
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new CertificateListManager();
+});
+</script>
+{% endblock %}
