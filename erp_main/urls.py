@@ -6,7 +6,7 @@ from .views import (
     invoice_add, invoice_detail, invoices_list,
     OrganizationCreateView, OrganizationUpdateView, OrganizationListView, OrganizationDetailView,
     create_legal_entity, create_contract,
-    save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users
+    save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport
 )
 from .views import certificates
 from .views.orders import update_workshop
@@ -68,6 +68,10 @@ urlpatterns = [
     path('get-nameplate-data/', certificates.get_nameplate_data, name='get_nameplate_data'),
     path('update-nameplate/', certificates.update_nameplate, name='update_nameplate'),
     path('delete-nameplate/', certificates.delete_nameplate, name='delete_nameplate'),
+
+#Passport
+    path('check-nameplates/', passport.check_nameplates, name='check_nameplates'),
+    path('generate-passports/', passport.generate_passports, name='generate_passports'),
     # Chat
     # path('chat/', chat_view, name='chat'),
     # path('chat/users/', get_available_users, name='get_available_users'),

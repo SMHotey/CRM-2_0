@@ -307,7 +307,7 @@ class Certificate(models.Model):
     p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
     legal_entity = models.ForeignKey(LegalEntity, related_name='certificates', on_delete=models.CASCADE)
     scan_copy = models.FileField(upload_to='uploads/certificates/', blank=True, null=True)
-    passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/', blank=True, null=True)
+    passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/',verbose_name='Шаблон паспорта', blank=True, null=True)
 
 
 class OrderItem(models.Model):

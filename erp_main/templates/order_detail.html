@@ -650,6 +650,42 @@
             </div>
         </div>
     </div>
+<!-- Добавьте этот блок после блока "Содержимое заказа" и перед закрывающим </div> -->
+
+<!-- Опции заказа Card -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Опции заказа</strong>
+        <button id="toggleOptions" class="btn btn-primary btn-sm">
+            <i class="bi bi-chevron-down me-1"></i>Развернуть
+        </button>
+    </div>
+    <div id="orderOptions" class="collapse-section">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-success btn-lg" id="generatePassportsBtn">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>Формировать паспорта
+                        </button>
+                        <small class="text-muted mt-2">
+                            Формирует паспорта для всех позиций типа EI-60, EIS-60, EIWS-60
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle me-2"></i>Информация</h6>
+                        <p class="mb-0 small">
+                            Для формирования паспортов необходимо, чтобы все позиции EI-60, EIS-60, EIWS-60
+                            имели назначенные номера шильдов.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 <script>
@@ -668,6 +704,7 @@ class OrderDetailManager {
         this.setupFileUpload();
         this.setupNameplateModal();
         this.collapseAllSections();
+        this.setupPassportGeneration();
     }
 
     setupEventListeners() {
@@ -697,7 +734,61 @@ class OrderDetailManager {
             }
         });
     }
+    setupPassportGeneration() {
+    document.getElementById('toggleOptions').addEventListener('click', () =>
+        this.toggleSection('toggleOptions', 'orderOptions'));
 
+    document.getElementById('generatePassportsBtn').addEventListener('click', () =>
+        this.generatePassports());
+}
+
+async generatePassports() {
+    this.showLoading(true);
+
+    try {
+        // Проверяем наличие шильдов
+        const response = await fetch(`/erp_main/check-nameplates/?order_id={{ order.id }}`);
+        const result = await response.json();
+
+        if (!result.has_all_nameplates) {
+            // Показываем ошибку с перечнем позиций
+            let errorMessage = 'Укажите номера шильдов для позиций: ';
+            errorMessage += result.missing_items.map(item =>
+                `№${item.position_num} (${item.p_kind} - ${item.p_type})`
+            ).join(', ');
+
+            this.showToast('error', 'Ошибка', errorMessage);
+            return;
+        }
+
+        // Если все шильды есть, формируем паспорта
+        const downloadResponse = await fetch(`/erp_main/generate-passports/?order_id={{ order.id }}`);
+
+        if (downloadResponse.ok) {
+            // Создаем blob и скачиваем файл
+            const blob = await downloadResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `passports_order_{{ order.id }}.docx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            this.showToast('success', 'Успех', 'Паспорта успешно сформированы и скачаны');
+        } else {
+            throw new Error('Ошибка при формировании паспортов');
+        }
+
+    } catch (error) {
+        console.error('Error generating passports:', error);
+        this.showToast('error', 'Ошибка', error.message || 'Не удалось сформировать паспорта');
+    } finally {
+        this.showLoading(false);
+    }
+}
     setupNameplateModal() {
         // Add nameplate buttons
         document.querySelectorAll('.add-nameplate-btn').forEach(btn => {

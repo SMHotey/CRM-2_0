@@ -1,0 +1,122 @@
+Error in generate_passports: 'nameplates__certificate__passport_templates' does not resolve to an item that supports prefetching - this is an invalid parameter to prefetch_related().
+Internal Server Error: /erp_main/generate-passports/
+"GET /erp_main/generate-passports/?order_id=7 HTTP/1.1" 500 308
+Ошибка при обработке: expected token 'end of print statement', got 'шильда'
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\erp_main\views\passport.py", line 109, in generate_passports
+    doc.render(context)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 486, in render
+    xml_src = self.build_xml(context, jinja_env)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 433, in build_xml
+    xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 319, in render_xml_part
+    raise exc
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 309, in render_xml_part
+    template = Template(src_xml)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1214, in __new__
+    return env.from_string(source, template_class=cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1111, in from_string
+    return cls.from_code(self, self.compile(source), gs, None)
+                               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "<unknown>", line 152, in template
+jinja2.exceptions.TemplateSyntaxError: expected token 'end of print statement', got 'шильда'
+Ошибка при обработке: expected token 'end of print statement', got 'шильда'
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\erp_main\views\passport.py", line 109, in generate_passports
+    doc.render(context)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 486, in render
+    xml_src = self.build_xml(context, jinja_env)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 433, in build_xml
+    xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 319, in render_xml_part
+    raise exc
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 309, in render_xml_part
+    template = Template(src_xml)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1214, in __new__
+    return env.from_string(source, template_class=cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1111, in from_string
+    return cls.from_code(self, self.compile(source), gs, None)
+                               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "<unknown>", line 152, in template
+jinja2.exceptions.TemplateSyntaxError: expected token 'end of print statement', got 'шильда'
+Ошибка при обработке: expected token 'end of print statement', got 'шильда'
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\erp_main\views\passport.py", line 109, in generate_passports
+    doc.render(context)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 486, in render
+    xml_src = self.build_xml(context, jinja_env)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 433, in build_xml
+    xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 319, in render_xml_part
+    raise exc
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 309, in render_xml_part
+    template = Template(src_xml)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1214, in __new__
+    return env.from_string(source, template_class=cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1111, in from_string
+    return cls.from_code(self, self.compile(source), gs, None)
+                               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "<unknown>", line 152, in template
+jinja2.exceptions.TemplateSyntaxError: expected token 'end of print statement', got 'шильда'
+Ошибка при обработке: expected token 'end of print statement', got 'шильда'
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\erp_main\views\passport.py", line 109, in generate_passports
+    doc.render(context)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 486, in render
+    xml_src = self.build_xml(context, jinja_env)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 433, in build_xml
+    xml = self.render_xml_part(xml, self.docx._part, context, jinja_env)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 319, in render_xml_part
+    raise exc
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\docxtpl\template.py", line 309, in render_xml_part
+    template = Template(src_xml)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1214, in __new__
+    return env.from_string(source, template_class=cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 1111, in from_string
+    return cls.from_code(self, self.compile(source), gs, None)
+                               ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "<unknown>", line 152, in template
+jinja2.exceptions.TemplateSyntaxError: expected token 'end of print statement', got 'шильда'
+Error in generate_passports: Composer.append() got an unexpected keyword argument 'continuous'
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\erp_main\views\passport.py", line 140, in generate_passports
+    final_buffer = merge_documents(generated_docs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\erp_main\views\passport.py", line 171, in merge_documents
+    composer.append(temp_doc, continuous=False)  # continuous=False добавляет разрыв страницы
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Composer.append() got an unexpected keyword argument 'continuous'
+Internal Server Error: /erp_main/generate-passports/
+"GET /erp_main/generate-passports/?order_id=7 HTTP/1.1" 500 116
