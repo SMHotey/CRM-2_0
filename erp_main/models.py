@@ -7,83 +7,15 @@ from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.templatetags.static import static
 
-
 def validate_numeric_only(value):
     if not re.match(r'^\d{6,}$', value) and value is not None:
         raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
 
 
-class Organization(models.Model):
-    FOOTING_CHOICES = (
-        ('ustav', 'устава'),
-        ('attorney', 'доверенности')
-    )
-    KIND_CHOICES = (
-        ('ooo', 'ООО'),
-        ('ao', 'АО'),
-        ('zao', 'ЗАО'),
-        ('ip', 'ИП'),
-    )
-
-    kind = models.CharField(max_length=100, blank=True, null=True, choices=KIND_CHOICES)
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    name_fl = models.CharField(max_length=15, blank=True, null=True)
-    user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
-    ceo_footing = models.CharField(max_length=30, choices=FOOTING_CHOICES)
-    name = models.CharField(max_length=100, blank=True, null=True)
-    inn = models.CharField(max_length=15, blank=True, null=True)
-    ogrn = models.CharField(max_length=15, blank=True, null=True)
-    kpp = models.CharField(max_length=15, blank=True, null=True)
-    r_s = models.CharField(max_length=25, blank=True, null=True)
-    bank = models.CharField(max_length=300, blank=True, null=True)
-    bik = models.CharField(max_length=10, blank=True, null=True)
-    k_s = models.CharField(max_length=25, blank=True, null=True)
-    address = models.CharField(max_length=150, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    ceo_title = models.CharField(max_length=30, blank=True, null=True)
-    ceo_name = models.CharField(max_length=150, blank=True, null=True)
-
-
-    def __str__(self):
-        if self.name_fl:
-            return f'{self.name_fl} ({self.phone_number})'
-        return self.name
-
-    class Meta:
-        verbose_name_plural = 'Организации'
-
-    @property
-    def last_order(self):
-        return (
-            Order.objects.filter(invoice__organization=self.id)
-            .order_by('-created_at')
-            .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
-        )
-
-    @property
-    def ready_for_contract(self):
-        fields = [
-            self.ceo_footing,
-            self.name,
-            self.inn,
-            self.ogrn,
-            self.kpp,
-            self.r_s,
-            self.bank,
-            self.bik,
-            self.k_s,
-            self.address,
-            self.email,
-            self.ceo_title,
-            self.ceo_name
-        ]
-        return all(field not in (None, '') for field in fields)
-
-
 class LegalEntity(models.Model):
     name = models.CharField(max_length=255)
     inn = models.CharField(max_length=12, blank=True, null=True)
-    ogrn = models.CharField(max_length=15,blank=True, null=True)
+    ogrn = models.CharField(max_length=15, blank=True, null=True)
     kpp = models.CharField(max_length=9, blank=True, null=True)
     r_s = models.CharField(max_length=20, blank=True, null=True)
     bank = models.CharField(max_length=255, blank=True, null=True)
@@ -101,6 +33,186 @@ class LegalEntity(models.Model):
         verbose_name_plural = 'Юридические лица'
 
 
+class ContractTemplate(models.Model):
+    CONTRACT_TYPE_CHOICES = (
+        ('legal_entity', 'Юридическое лицо'),
+        ('individual_entrepreneur', 'Индивидуальный предприниматель'),
+        ('physical_person', 'Физическое лицо'),
+    )
+
+    name = models.CharField(max_length=100)
+    contract_type = models.CharField(max_length=30, choices=CONTRACT_TYPE_CHOICES,default='legal_entity', null=True, blank=True)
+    legal_entity = models.ForeignKey(LegalEntity, on_delete=models.CASCADE, null=True, blank=True)
+    organization_type = models.CharField(max_length=100, choices=(
+        ('ooo', 'ООО'),
+        ('ao', 'АО'),
+        ('zao', 'ЗАО'),
+    ), null=True, blank=True)
+    footing_type = models.CharField(max_length=10, choices=(
+        ('ustav', 'устава'),
+        ('attorney', 'доверенности')
+    ), null=True, blank=True)
+    file = models.FileField(upload_to='contract_templates/')
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+
+class Organization(models.Model):
+    ORGANIZATION_TYPE_CHOICES = (
+        ('legal_entity', 'Юридическое лицо'),
+        ('individual_entrepreneur', 'Индивидуальный предприниматель'),
+        ('physical_person', 'Физическое лицо'),
+    )
+
+    FOOTING_CHOICES = (
+        ('ustav', 'устава'),
+        ('attorney', 'доверенности')
+    )
+
+    KIND_CHOICES = (
+        ('ooo', 'ООО'),
+        ('ao', 'АО'),
+        ('zao', 'ЗАО'),
+    )
+
+    # Основные поля
+    organization_type = models.CharField(max_length=30, choices=ORGANIZATION_TYPE_CHOICES)
+    user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
+    legal_entity = models.ForeignKey(LegalEntity, on_delete=models.SET_NULL, null=True, blank=True)
+    history = models.JSONField(default=dict, blank=True)  # Для хранения истории изменений
+
+    # Поля для юридического лица
+    kind = models.CharField(max_length=100, blank=True, null=True, choices=KIND_CHOICES)
+    name = models.CharField(max_length=100, blank=True, null=True)
+    inn = models.CharField(max_length=15, blank=True, null=True, unique=True)
+
+    # Поля для ИП
+    name_fl = models.CharField(max_length=150, blank=True, null=True)  # ФИО для ИП и физлиц
+    ogrnip = models.CharField(max_length=15, blank=True, null=True)  # ОГРНИП
+
+    # Поля для физического лица
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    passport_scan = models.FileField(upload_to='passport_scans/', null=True, blank=True)
+
+    # Дополнительные поля для всех типов
+    ceo_footing = models.CharField(max_length=30, choices=FOOTING_CHOICES, blank=True, null=True)
+    attorney_number = models.CharField(max_length=50, blank=True, null=True)
+    attorney_date = models.DateField(blank=True, null=True)
+    attorney_file = models.FileField(upload_to='attorney_files/', null=True, blank=True)
+    ogrn = models.CharField(max_length=15, blank=True, null=True)
+    kpp = models.CharField(max_length=15, blank=True, null=True)
+    address = models.CharField(max_length=150, blank=True, null=True)
+    postal_address = models.CharField(max_length=150, blank=True, null=True)
+    ceo_title = models.CharField(max_length=30, blank=True, null=True)
+    ceo_name = models.CharField(max_length=150, blank=True, null=True)
+    contract_template = models.ForeignKey(ContractTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+    custom_contract_template = models.FileField(upload_to='custom_contracts/', null=True, blank=True)
+
+    def __str__(self):
+        if self.organization_type == 'physical_person':
+            return f'{self.name_fl} ({self.phone_number})'
+        elif self.organization_type == 'individual_entrepreneur':
+            return f'ИП {self.name_fl}'
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'Организации'
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        if is_new:
+            # Первая запись в истории при создании
+            self.history = {
+                'created': {
+                    'datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'user': self.user.username,
+                    'user_id': self.user.id
+                }
+            }
+        else:
+            # Логирование изменений будет в представлениях
+            pass
+
+        super().save(*args, **kwargs)
+
+    def add_history_record(self, field, old_value, new_value):
+        """Добавляет запись в историю изменений"""
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if 'changes' not in self.history:
+            self.history['changes'] = {}
+
+        self.history['changes'][timestamp] = {
+            'field': field,
+            'old_value': old_value,
+            'new_value': new_value
+        }
+        self.save()
+
+    @property
+    def last_order(self):
+        from .models import Order
+        return (
+            Order.objects.filter(invoice__organization=self.id)
+            .order_by('-created_at')
+            .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
+        )
+
+    @property
+    def ready_for_contract(self):
+        # Проверяем обязательные поля в зависимости от типа организации
+        if self.organization_type == 'legal_entity':
+            required_fields = [self.kind, self.name, self.inn, self.legal_entity]
+        elif self.organization_type == 'individual_entrepreneur':
+            required_fields = [self.name_fl, self.inn, self.legal_entity]
+        elif self.organization_type == 'physical_person':
+            required_fields = [self.name_fl, self.phone_number]
+        else:
+            return False
+
+        return all(field not in (None, '') for field in required_fields)
+
+
+class BankAccount(models.Model):
+    organization = models.ForeignKey(Organization, related_name='bank_accounts', on_delete=models.CASCADE)
+    r_s = models.CharField(max_length=25)
+    bank = models.CharField(max_length=300)
+    bik = models.CharField(max_length=10)
+    k_s = models.CharField(max_length=25)
+
+    def __str__(self):
+        return f"{self.r_s} - {self.bank}"
+
+
+class OrganizationEmail(models.Model):
+    organization = models.ForeignKey(Organization, related_name='emails', on_delete=models.CASCADE)
+    email = models.EmailField()
+
+    def __str__(self):
+        return self.email
+
+
+class Document(models.Model):
+    DOCUMENT_TYPES = (
+        ('xlsx', 'Excel'),
+        ('docx', 'Word'),
+        ('pdf', 'PDF'),
+        ('jpeg', 'JPEG'),
+    )
+
+    organization = models.ForeignKey(Organization, related_name='documents', on_delete=models.CASCADE, null=True,
+                                     blank=True)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
+    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, null=True, blank=True)
+    file = models.FileField(upload_to='documents/')
+    document_type = models.CharField(max_length=10, choices=DOCUMENT_TYPES)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.get_document_type_display()} - {self.file.name}"
+
 class Invoice(models.Model):
     number = models.CharField(max_length=5, blank=True, null=True)
     organization = models.ForeignKey(Organization, related_name='organization', on_delete=models.CASCADE)
@@ -115,7 +227,6 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False, blank=True, null=True)
     change_date = models.DateField(blank=True, null=True)
     closing_document = models.FileField(upload_to='closing_documents/', blank=True, null=True)
-
 
     def save(self, *args, **kwargs):
         self.is_paid = self.payed_amount >= self.amount
@@ -136,21 +247,12 @@ class Invoice(models.Model):
     def percent(self):
         return int(self.payed_amount * 100 / self.amount)
 
-
-
-#def order_file_upload_to(instance, filename):
-#        # Создает уникальный путь для каждого загружаемого файла
-#    return os.path.join('uploads', f"{now().strftime('%Y%m%d_%H%M%S')}_{filename}")
-
-
 class Order(models.Model):
-#    internal_order_number = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey(Invoice, related_name='invoice', blank=True, null=True, on_delete=models.CASCADE)
     due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
-
 
     def get_items_filtered(self):
         return self.items.exclude(p_status__in=['changed',])
@@ -231,7 +333,7 @@ class Order(models.Model):
         return self.get_items_filtered().filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
-    def status(self): # раскидываем позиции по статусам
+    def status(self):
         in_query = self.get_items_filtered().filter(p_status='in_query').aggregate(total=Sum('p_quantity'))['total'] or 0
         product = self.get_items_filtered().filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
         ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
@@ -252,7 +354,7 @@ class Order(models.Model):
         elif canceled > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'отменен'
         else:
-            return f'частично не готов' # дополнительная логика обработки заявок со смешанным статусом позиций
+            return f'частично не готов'
 
     @property
     def workshop(self):
@@ -271,23 +373,12 @@ class Order(models.Model):
 
         return icon_path
 
-#    def save(self, *args, **kwargs):  # Переопределение метода save класса models.Model
-#        if not self.internal_order_number:  # Проверка, если внутренний номер не установлен
-#            self.internal_order_number = self.generate_internal_order_number()
-#        super().save(*args, **kwargs)
-
-#    @staticmethod
-#    def generate_internal_order_number():
-#        return datetime.now().strftime('%Y%m%d%H%M%S')
-
-
 class OrderChangeHistory(models.Model):
     order = models.ForeignKey(Order, related_name='changes', on_delete=models.CASCADE)
     order_file = models.FileField(upload_to='uploads/', blank=True, null=True)
     changed_at = models.DateTimeField(auto_now_add=True)
     changed_by = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField(blank=True, null=True)
-
 
 class Certificate(models.Model):
     KIND_CHOICE = (
@@ -308,7 +399,6 @@ class Certificate(models.Model):
     legal_entity = models.ForeignKey(LegalEntity, related_name='certificates', on_delete=models.CASCADE)
     scan_copy = models.FileField(upload_to='uploads/certificates/', blank=True, null=True)
     passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/',verbose_name='Шаблон паспорта', blank=True, null=True)
-
 
 class OrderItem(models.Model):
     KIND_CHOICE = (
@@ -347,36 +437,35 @@ class OrderItem(models.Model):
     p_construction = models.CharField(max_length=10, choices=CONSTRUCTION_CHOICE, blank=True, null=True, verbose_name='конструктив изделия')
     p_width = models.IntegerField(default=0, verbose_name='ширина изделия')
     p_height = models.IntegerField(default=0, verbose_name='высота изделия')
-    p_open = models.CharField(max_length=2, blank=True, null=True, verbose_name='открывание') # открывание
-    p_active_trim = models.CharField(max_length=5, blank=True, null=True, verbose_name='ширина активной створки') # активная створка
-    p_furniture = models.CharField(max_length=100, blank=True, null=True, verbose_name='фурнитура') # словарь: код - количество по замку, ручке и ц/м
-    p_ral = models.CharField(max_length=50, blank=True, null=True, verbose_name='RAL') # расписать по элементам (возможные вариации, опции цвета)
-    p_platband = models.CharField(max_length=50, blank=True, null=True, verbose_name='наличник') # наличники: размер с каждой стороны
-    p_door_closer = models.CharField(max_length=50, blank=True, null=True, verbose_name='доводчик') # доводчик
-    p_step = models.CharField(max_length=20, blank=True, null=True, verbose_name='порог') # порог
-    p_metal = models.CharField(max_length=50, blank=True, null=True, verbose_name='толщина металла') # возможные компановки толщины металла изделия
-    p_vent_grate = models.CharField(max_length=50, blank=True, null=True, verbose_name='вент.решетка') # вент. решетки (тип, размер, толщина, кол-во)
-    p_plate = models.CharField(max_length=100, blank=True, null=True, verbose_name='отбойная пластина') # отбойная пластина (высота, отступ от низа, сторонность)
+    p_open = models.CharField(max_length=2, blank=True, null=True, verbose_name='открывание')
+    p_active_trim = models.CharField(max_length=5, blank=True, null=True, verbose_name='ширина активной створки')
+    p_furniture = models.CharField(max_length=100, blank=True, null=True, verbose_name='фурнитура')
+    p_ral = models.CharField(max_length=50, blank=True, null=True, verbose_name='RAL')
+    p_platband = models.CharField(max_length=50, blank=True, null=True, verbose_name='наличник')
+    p_door_closer = models.CharField(max_length=50, blank=True, null=True, verbose_name='доводчик')
+    p_step = models.CharField(max_length=20, blank=True, null=True, verbose_name='порог')
+    p_metal = models.CharField(max_length=50, blank=True, null=True, verbose_name='толщина металла')
+    p_vent_grate = models.CharField(max_length=50, blank=True, null=True, verbose_name='вент.решетка')
+    p_plate = models.CharField(max_length=100, blank=True, null=True, verbose_name='отбойная пластина')
     p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
     p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE, verbose_name='статус')
     position_num = models.CharField(max_length=5, verbose_name='номер позиции')
-    nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')  # номерной диапзон шильдов для позиции
+    nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
     p_comment = models.TextField(max_length=255, blank=True, null=True, default='', verbose_name='комментарий')
-    firm_plate = models.BooleanField(default=True, verbose_name='фирменный шильд')  # фирменный шильд
-    mounting_plates = models.CharField(max_length=50, default=False, blank=True, null=True, verbose_name='монтажные уши')  # монтажные уши: размер, кол-во
-    workshop = models.IntegerField(default=0, verbose_name='цех') # цех
+    firm_plate = models.BooleanField(default=True, verbose_name='фирменный шильд')
+    mounting_plates = models.CharField(max_length=50, default=False, blank=True, null=True, verbose_name='монтажные уши')
+    workshop = models.IntegerField(default=0, verbose_name='цех')
 
     @property
     def d_glass(self):
         if self.p_glass != '{}':
             data = ast.literal_eval(self.p_glass)
             result = '<br>'.join(f"({key[0]}x{key[1]}): {value}" for key, value in data.items())
-            return result  # Убираем фигурные скобки
+            return result
         else:
             return 'нет'
-
 
 class GlassInfo(models.Model):
     KIND_CHOICE = (
@@ -399,7 +488,6 @@ class GlassInfo(models.Model):
         ('ordered', 'заказано'),
         ('ready', 'изготовлено'),
         ('received', 'получено'),
-
     )
 
     kind = models.CharField(max_length=20, blank=True, null=True,choices=KIND_CHOICE)
@@ -413,10 +501,8 @@ class GlassInfo(models.Model):
     comment = models.TextField(max_length=255, blank=True, null=True, default='')
 
     def __hash__(self):
-        """Метод для хэширования объекта"""
         if self.pk:
             return hash(self.pk)
-        # Если объект еще не сохранен, используем id объекта в памяти
         return hash(id(self))
 
     def __eq__(self, other):
@@ -432,29 +518,27 @@ class GlassInfo(models.Model):
                 self.comment == other.comment
         )
 
-
 class Nameplate(models.Model):
     order_item = models.ForeignKey(
         OrderItem,
         related_name='nameplates',
         on_delete=models.CASCADE,
-        db_column='order_item_id'  # Явно указываем имя столбца
+        db_column='order_item_id'
     )
     certificate = models.ForeignKey(
         Certificate,
         related_name='nameplates',
         on_delete=models.CASCADE,
-        db_column='certificate_id'  # Явно указываем имя столбца
+        db_column='certificate_id'
     )
     first_value = models.IntegerField(blank=True, null=True)
     end_value = models.IntegerField(blank=True, null=True)
     issue_date = models.DateField(blank=True, null=True, verbose_name='Дата выдачи')
-#    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Шильд'
         verbose_name_plural = 'Шильды'
-        db_table = 'erp_main_nameplate'  # Явно указываем имя таблицы
+        db_table = 'erp_main_nameplate'
 
     def __str__(self):
         if self.end_value:
@@ -462,14 +546,12 @@ class Nameplate(models.Model):
         else:
             return f"Шильд {self.first_value}"
 
-
 class Contract(models.Model):
     number = models.CharField(unique=True, max_length=100, blank=True, null=True)
     organization = models.ForeignKey(Organization, related_name='contracts', on_delete=models.CASCADE)
     legal_entity = models.ForeignKey(LegalEntity, related_name='contracts', on_delete=models.CASCADE)
     file = models.FileField(upload_to='contracts/')
     days = models.IntegerField(blank=True, null=True)
-
 
 class Shipment(models.Model):
     SHIPMENT_TYPES = [
@@ -492,18 +574,3 @@ class Shipment(models.Model):
 
     def can_edit(self, user):
         return user.is_superuser or self.user == user
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

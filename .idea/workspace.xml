@@ -4,18 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="добавлены шильды и сертификаты">
-      <change afterPath="$PROJECT_DIR$/django_errors.log" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/views/passport.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/passports/Паспорт ЗМДД Дверь EI60.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/certificates/passport_templates/Паспорт_ЗМДД_Дверь_EI60.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/certificates/passport_templates/Паспорт_ЗМДД_Дверь_EI60_11Yt3XP.docx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/certificates/passport_templates/Паспорт_ЗМДД_Дверь_EI60_qs5WgjI.docx" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="логика формирования паспортов">
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0005_contracttemplate_contract_type_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organization_duplicate_handler.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Елего_-_472_на_запуск_B4JxqAG.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Journal_4_0/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/django_errors.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views/organizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/organizations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,8 +29,8 @@
       <list>
         <option value="CSS File" />
         <option value="JavaScript File" />
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -473,15 +472,9 @@
       <workItem from="1762756949874" duration="21638000" />
       <workItem from="1762784697658" duration="793000" />
       <workItem from="1762843170642" duration="23983000" />
-      <workItem from="1762930161829" duration="15123000" />
-    </task>
-    <task id="LOCAL-00017" summary="добавлен расчет сроков готовности">
-      <option name="closed" value="true" />
-      <created>1729176275562</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1729176275562</updated>
+      <workItem from="1762930161829" duration="15827000" />
+      <workItem from="1763015856716" duration="12297000" />
+      <workItem from="1763036700209" duration="5682000" />
     </task>
     <task id="LOCAL-00018" summary="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции">
       <option name="closed" value="true" />
@@ -867,7 +860,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762871574655</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="логика формирования паспортов">
+      <option name="closed" value="true" />
+      <created>1762954997989</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1762954997990</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -886,7 +887,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="корректировка отображения значков и статусов" />
     <MESSAGE value="правки по дизайну orders_list" />
     <MESSAGE value="правки по дизайну2 orders_list" />
     <MESSAGE value="правки по дизайну" />
@@ -911,12 +911,13 @@
     <MESSAGE value="новый дизайн" />
     <MESSAGE value="дизайн_2" />
     <MESSAGE value="добавлены шильды и сертификаты" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавлены шильды и сертификаты" />
+    <MESSAGE value="логика формирования паспортов" />
+    <option name="LAST_COMMIT_MESSAGE" value="логика формирования паспортов" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Journal_4_0$fix_bom.coverage" NAME="fix_bom Coverage Results" MODIFIED="1746434437970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$test.coverage" NAME="test Coverage Results" MODIFIED="1746433440343" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1762954489090" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1763044343615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1737014151421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
     <SUITE FILE_PATH="coverage/Journal_4_0$project_to_text.coverage" NAME="project_to_text Coverage Results" MODIFIED="1760700103058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745936517854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />

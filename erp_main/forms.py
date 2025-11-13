@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-
-
-from erp_main.models import Organization, Invoice, Order, LegalEntity, OrderItem, Shipment, Certificate
+from .models import Organization, Invoice, Order, LegalEntity, OrderItem, Shipment, Certificate , BankAccount, OrganizationEmail, LegalEntity, ContractTemplate
+import json
 
 
 # class UserCreationForm(forms.ModelForm):
@@ -53,68 +52,165 @@ class LegalEntityForm(forms.ModelForm):
 
 
 class OrganizationForm(forms.ModelForm):
-    TYPE_CHOICES = (
-        ('organization', 'Юридическое лицо'),
-        ('individual', 'Физическое лицо'),
+    ORGANIZATION_TYPE_CHOICES = (
+        ('legal_entity', 'Юридическое лицо'),
+        ('individual_entrepreneur', 'Индивидуальный предприниматель'),
+        ('physical_person', 'Физическое лицо'),
     )
-    type = forms.ChoiceField(choices=TYPE_CHOICES, widget=forms.RadioSelect, label='Тип организации', required=False)
+
+    organization_type = forms.ChoiceField(
+        choices=ORGANIZATION_TYPE_CHOICES,
+        widget=forms.RadioSelect(attrs={'class': 'type-radio'}),
+        label='Тип контрагента'
+    )
+
+    # Поля для множественных email
+    emails = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        help_text="Список email адресов через запятую"
+    )
+
+    # Поля для банковских счетов
+    bank_accounts = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+        help_text="JSON с банковскими счетами"
+    )
 
     class Meta:
         model = Organization
-        fields = ['type', 'name', 'inn', 'phone_number', 'name_fl', 'ceo_footing', 'ogrn', 'kpp',
-                  'r_s', 'bank', 'bik', 'k_s', 'address', 'email', 'ceo_title', 'ceo_name']
+        fields = [
+            'organization_type', 'kind', 'name', 'inn', 'legal_entity',
+            'name_fl', 'ogrnip', 'phone_number', 'passport_scan',
+            'ceo_footing', 'attorney_number', 'attorney_date', 'attorney_file',
+            'ogrn', 'kpp', 'address', 'postal_address', 'ceo_title', 'ceo_name',
+            'contract_template', 'custom_contract_template'
+        ]
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Наименование'}),
-            'inn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ИНН'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер телефона'}),
-            'name_fl': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Имя, фамилия'}),
+            'kind': forms.Select(attrs={'class': 'form-select'}),
+            'name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Название организации'}),
+            'inn': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '10 или 12 цифр'}),
+            'legal_entity': forms.Select(attrs={'class': 'form-select'}),
+            'name_fl': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'ФИО'}),
+            'ogrnip': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '15 цифр'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '+7 XXX XXX-XX-XX'}),
             'ceo_footing': forms.Select(attrs={'class': 'form-select'}),
-            'ogrn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ОГРН'}),
-            'kpp': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'КПП'}),
-            'r_s': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Р/с'}),
-            'bank': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Банк'}),
-            'bik': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'БИК'}),
-            'k_s': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'К/с'}),
-            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Адрес'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
-            'ceo_title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Должность'}),
-            'ceo_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО'}),
+            'attorney_number': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Номер доверенности'}),
+            'attorney_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
+            'ogrn': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '13 или 15 цифр'}),
+            'kpp': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '9 цифр'}),
+            'address': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Юридический адрес'}),
+            'postal_address': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Почтовый адрес'}),
+            'ceo_title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Генеральный директор'}),
+            'ceo_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'ФИО руководителя'}),
+            'contract_template': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            # Скрываем поле type при редактировании
-            self.fields['type'].widget = forms.HiddenInput()
-            self.fields['type'].required = False
-        else:
-            # При создании новой организации делаем поле обязательным
-            self.fields['type'].required = True
-        self.fields['name_fl'].label = ''
-        self.fields['phone_number'].label = ''
-        self.fields['inn'].label = ''
-        self.fields['name'].label = ''
+        self.fields['legal_entity'].queryset = LegalEntity.objects.all()
+        self.fields['contract_template'].queryset = ContractTemplate.objects.all()
+
+        if self.instance.pk:
+            # Предзаполняем emails для существующей организации
+            emails = list(self.instance.emails.values_list('email', flat=True))
+            self.initial['emails'] = ','.join(emails)
+
+            # Предзаполняем банковские счета
+            bank_accounts = list(self.instance.bank_accounts.values('r_s', 'bank', 'bik', 'k_s'))
+            self.initial['bank_accounts'] = json.dumps(bank_accounts)
 
     def clean(self):
         cleaned_data = super().clean()
-        # Для новой организации проверяем тип
-        if not self.instance.pk:
-            type_ = cleaned_data.get('type')
-            if not type_:
-                raise forms.ValidationError("Необходимо выбрать тип организации")
+        org_type = cleaned_data.get('organization_type')
 
-            if type_ == 'organization':
-                if not cleaned_data.get('inn'):
-                    self.add_error('inn', 'ИНН обязательно для юридического лица.')
-                if not cleaned_data.get('name'):
-                    self.add_error('name', 'Наименование обязательно для юридического лица.')
-            elif type_ == 'individual':
-                if not cleaned_data.get('name_fl'):
-                    self.add_error('name_fl', 'Имя обязательно для физического лица.')
-                if not cleaned_data.get('phone_number'):
-                    self.add_error('phone_number', 'Номер телефона обязателен для физического лица.')
+        if org_type == 'legal_entity':
+            if not cleaned_data.get('kind'):
+                self.add_error('kind', "Для юридического лица тип организации обязателен")
+            if not cleaned_data.get('name'):
+                self.add_error('name', "Для юридического лица название организации обязательно")
+            if not cleaned_data.get('inn'):
+                self.add_error('inn', "Для юридического лица ИНН обязателен")
+            if not cleaned_data.get('legal_entity'):
+                self.add_error('legal_entity', "Для юридического лица выбор юридического лица обязателен")
+
+        elif org_type == 'individual_entrepreneur':
+            if not cleaned_data.get('name_fl'):
+                self.add_error('name_fl', "Для ИП ФИО обязательно")
+            if not cleaned_data.get('inn'):
+                self.add_error('inn', "Для ИП ИНН обязателен")
+            if not cleaned_data.get('legal_entity'):
+                self.add_error('legal_entity', "Для ИП выбор юридического лица обязателен")
+
+        elif org_type == 'physical_person':
+            if not cleaned_data.get('name_fl'):
+                self.add_error('name_fl', "Для физического лица ФИО обязательно")
+            if not cleaned_data.get('phone_number'):
+                self.add_error('phone_number', "Для физического лица номер телефона обязателен")
+
+        # Валидация emails
+        emails_str = cleaned_data.get('emails', '')
+        if emails_str:
+            emails_list = [email.strip() for email in emails_str.split(',') if email.strip()]
+            for email in emails_list:
+                try:
+                    forms.EmailField().clean(email)
+                except forms.ValidationError:
+                    self.add_error(None, f"Некорректный email адрес: {email}")
+
+        # Проверка ИНН на уникальность
+        inn = cleaned_data.get('inn')
+        if inn and org_type in ['legal_entity', 'individual_entrepreneur']:
+            existing_org = Organization.objects.filter(inn=inn).first()
+            if existing_org and (not self.instance.pk or self.instance.pk != existing_org.pk):
+                self.add_error('inn', f"Организация с ИНН {inn} уже существует")
 
         return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        if self.user:
+            instance.user = self.user
+
+        if commit:
+            instance.save()
+
+            # Сохраняем emails
+            emails_str = self.cleaned_data.get('emails', '')
+            emails_list = [email.strip() for email in emails_str.split(',') if email.strip()]
+
+            # Удаляем старые emails
+            instance.emails.all().delete()
+
+            # Создаем новые
+            for email in emails_list:
+                OrganizationEmail.objects.create(organization=instance, email=email)
+
+            # Сохраняем банковские счета
+            bank_accounts_str = self.cleaned_data.get('bank_accounts', '[]')
+            try:
+                bank_accounts_data = json.loads(bank_accounts_str)
+
+                # Удаляем старые счета
+                instance.bank_accounts.all().delete()
+
+                # Создаем новые
+                for account_data in bank_accounts_data:
+                    if account_data.get('r_s') or account_data.get('bank'):
+                        BankAccount.objects.create(
+                            organization=instance,
+                            r_s=account_data.get('r_s', ''),
+                            bank=account_data.get('bank', ''),
+                            bik=account_data.get('bik', ''),
+                            k_s=account_data.get('k_s', '')
+                        )
+            except json.JSONDecodeError:
+                pass
+
+        return instance
 
 
 class InvoiceForm(forms.ModelForm):

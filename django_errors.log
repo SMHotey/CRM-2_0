@@ -120,3 +120,644 @@ Traceback (most recent call last):
 TypeError: Composer.append() got an unexpected keyword argument 'continuous'
 Internal Server Error: /erp_main/generate-passports/
 "GET /erp_main/generate-passports/?order_id=7 HTTP/1.1" 500 116
+Internal Server Error: /erp_main/
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 883, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'Invoice' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 239, in __get__
+    rel_obj = self.field.get_cached_value(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'organization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'erp_main_organization.postal_address' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\erp_main\views\base.py", line 96, in index
+    return render(request, 'index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 466, in render
+    args = [arg.resolve(context) for arg in self.args]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 466, in <listcomp>
+    args = [arg.resolve(context) for arg in self.args]
+            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 718, in resolve
+    obj = self.var.resolve(context)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 850, in resolve
+    value = self._resolve_lookup(context)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 893, in _resolve_lookup
+    current = getattr(current, bit)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 257, in __get__
+    rel_obj = self.get_object(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 220, in get_object
+    return qs.get(self.field.get_reverse_related_filter(instance))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1574, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'erp_main_organization.postal_address' in 'field list'")
+"GET /erp_main/ HTTP/1.1" 500 330787
+Internal Server Error: /erp_main/organizations/add/
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 244, in _get_session
+    return self._session_cache
+           ^^^^^^^^^^^^^^^^^^^
+AttributeError: 'SessionStore' object has no attribute '_session_cache'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\__init__.py", line 121, in Connect
+    return Connection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 200, in __init__
+    super().__init__(*args, **kwargs2)
+MySQLdb.OperationalError: (2002, "Can't connect to server on 'localhost' (2)")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\views\generic\base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\erp_main\views\mixins.py", line 42, in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\mixins.py", line 71, in dispatch
+    if not request.user.is_authenticated:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\functional.py", line 251, in inner
+    self._setup()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\functional.py", line 404, in _setup
+    self._wrapped = self._setupfunc()
+                    ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\middleware.py", line 37, in <lambda>
+    request.user = SimpleLazyObject(lambda: get_user(request))
+                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\middleware.py", line 17, in get_user
+    request._cached_user = auth.get_user(request)
+                           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\__init__.py", line 209, in get_user
+    user_id = _get_user_session_key(request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\__init__.py", line 62, in _get_user_session_key
+    return get_user_model()._meta.pk.to_python(request.session[SESSION_KEY])
+                                               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 55, in __getitem__
+    return self._session[key]
+           ^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\sessions\backends\base.py", line 249, in _get_session
+    self._session_cache = self.load()
+                          ^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 55, in load
+    s = self._get_session_from_db()
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\sessions\backends\db.py", line 34, in _get_session_from_db
+    return self.model.objects.get(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1572, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 279, in ensure_connection
+    self.connect()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\base\base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\utils\asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 256, in get_new_connection
+    connection = Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\__init__.py", line 121, in Connect
+    return Connection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 200, in __init__
+    super().__init__(*args, **kwargs2)
+django.db.utils.OperationalError: (2002, "Can't connect to server on 'localhost' (2)")
+"POST /erp_main/organizations/add/ HTTP/1.1" 500 287990
+Internal Server Error: /erp_main/
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 883, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'Invoice' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 239, in __get__
+    rel_obj = self.field.get_cached_value(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'organization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'erp_main_organization.organization_type' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\erp_main\views\base.py", line 96, in index
+    return render(request, 'index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 466, in render
+    args = [arg.resolve(context) for arg in self.args]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 466, in <listcomp>
+    args = [arg.resolve(context) for arg in self.args]
+            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 718, in resolve
+    obj = self.var.resolve(context)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 850, in resolve
+    value = self._resolve_lookup(context)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 893, in _resolve_lookup
+    current = getattr(current, bit)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 257, in __get__
+    rel_obj = self.get_object(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 220, in get_object
+    return qs.get(self.field.get_reverse_related_filter(instance))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1574, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'erp_main_organization.organization_type' in 'field list'")
+"GET /erp_main/ HTTP/1.1" 500 337108
+Internal Server Error: /erp_main/
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 883, in _resolve_lookup
+    current = current[bit]
+              ~~~~~~~^^^^^
+TypeError: 'Invoice' object is not subscriptable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 239, in __get__
+    rel_obj = self.field.get_cached_value(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'organization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+MySQLdb.OperationalError: (1054, "Unknown column 'erp_main_organization.organization_type' in 'field list'")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\contrib\auth\decorators.py", line 60, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\erp_main\views\base.py", line 96, in index
+    return render(request, 'index.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 1008, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 969, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 466, in render
+    args = [arg.resolve(context) for arg in self.args]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\defaulttags.py", line 466, in <listcomp>
+    args = [arg.resolve(context) for arg in self.args]
+            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 718, in resolve
+    obj = self.var.resolve(context)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 850, in resolve
+    value = self._resolve_lookup(context)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\template\base.py", line 893, in _resolve_lookup
+    current = getattr(current, bit)
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 257, in __get__
+    rel_obj = self.get_object(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 220, in get_object
+    return qs.get(self.field.get_reverse_related_filter(instance))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 645, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 382, in __len__
+    self._fetch_all()
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 1928, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1574, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\django\db\backends\mysql\base.py", line 76, in execute
+    return self.cursor.execute(query, args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 179, in execute
+    res = self._query(mogrified_query)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\cursors.py", line 330, in _query
+    db.query(q)
+  File "C:\Users\User01\CRM-2_0\.venv\Lib\site-packages\MySQLdb\connections.py", line 280, in query
+    _mysql.connection.query(self, query)
+django.db.utils.OperationalError: (1054, "Unknown column 'erp_main_organization.organization_type' in 'field list'")
+"GET /erp_main/ HTTP/1.1" 500 337245

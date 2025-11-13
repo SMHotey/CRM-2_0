@@ -3,12 +3,16 @@
 
 <div class="organization-create-container">
     <div class="organization-create-header">
-        <h1 id="form-title" class="organization-create-title">Добавить организацию</h1>
-        <p id="form-subtitle" class="organization-create-subtitle">Заполните информацию о контрагенте</p>
+        <h1 id="form-title" class="organization-create-title">Добавить контрагента</h1>
+        <p id="form-subtitle" class="organization-create-subtitle">Выберите тип контрагента и заполните информацию</p>
     </div>
 
-    <form method="post" id="organization-form" class="organization-form" novalidate>
+    <form method="post" id="organization-form" class="organization-form" novalidate enctype="multipart/form-data">
         {% csrf_token %}
+
+        <!-- Скрытые поля для emails и банковских счетов -->
+        {{ form.emails }}
+        {{ form.bank_accounts }}
 
         {% if form.non_field_errors %}
             <div class="alert alert-error" role="alert">
@@ -24,28 +28,41 @@
             </div>
         {% endif %}
 
-        <!-- Тип организации -->
+        <!-- Тип контрагента -->
         <div class="form-section">
             <div class="section-header">
                 <h3 class="section-title">Тип контрагента</h3>
             </div>
             <div class="type-selector">
                 <label class="type-option">
-                    <input type="radio" name="type" value="organization" checked onchange="toggleFields()">
+                    <input type="radio" name="organization_type" value="legal_entity" checked onchange="toggleOrganizationType()">
                     <div class="type-card">
                         <div class="type-icon">🏢</div>
                         <div class="type-content">
                             <h4>Юридическое лицо</h4>
+                            <p>ООО, АО, ЗАО</p>
                         </div>
                         <div class="type-check"></div>
                     </div>
                 </label>
                 <label class="type-option">
-                    <input type="radio" name="type" value="individual" onchange="toggleFields()">
+                    <input type="radio" name="organization_type" value="individual_entrepreneur" onchange="toggleOrganizationType()">
+                    <div class="type-card">
+                        <div class="type-icon">📊</div>
+                        <div class="type-content">
+                            <h4>Индивидуальный предприниматель</h4>
+                            <p>ИП</p>
+                        </div>
+                        <div class="type-check"></div>
+                    </div>
+                </label>
+                <label class="type-option">
+                    <input type="radio" name="organization_type" value="physical_person" onchange="toggleOrganizationType()">
                     <div class="type-card">
                         <div class="type-icon">👤</div>
                         <div class="type-content">
                             <h4>Физическое лицо</h4>
+                            <p>ФЛ</p>
                         </div>
                         <div class="type-check"></div>
                     </div>
@@ -54,23 +71,20 @@
         </div>
 
         <!-- Поля для юридического лица -->
-        <div id="organization-fields" class="form-section">
+        <div id="legal-entity-fields" class="form-section">
             <div class="section-header">
-                <h3 class="section-title">Информация о компании</h3>
+                <h3 class="section-title">Информация о юридическом лице</h3>
             </div>
             <div class="form-grid">
-                <div class="form-field-group {% if form.inn.errors %}form-field-error{% endif %}">
-                    <label for="{{ form.inn.id_for_label }}" class="form-label">
-                        {{ form.inn.label }}
+                <div class="form-field-group {% if form.kind.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.kind.id_for_label }}" class="form-label">
+                        Тип организации
                         <span class="required-asterisk">*</span>
                     </label>
                     <div class="input-wrapper">
-                        {{ form.inn }}
-                        {% if form.inn.help_text %}
-                            <div class="help-text">{{ form.inn.help_text }}</div>
-                        {% endif %}
+                        {{ form.kind }}
                     </div>
-                    {% for error in form.inn.errors %}
+                    {% for error in form.kind.errors %}
                         <div class="field-error-message">
                             <span class="error-icon">❌</span>
                             {{ error }}
@@ -80,14 +94,11 @@
 
                 <div class="form-field-group {% if form.name.errors %}form-field-error{% endif %}">
                     <label for="{{ form.name.id_for_label }}" class="form-label">
-                        {{ form.name.label }}
+                        Название организации
                         <span class="required-asterisk">*</span>
                     </label>
                     <div class="input-wrapper">
                         {{ form.name }}
-                        {% if form.name.help_text %}
-                            <div class="help-text">{{ form.name.help_text }}</div>
-                        {% endif %}
                     </div>
                     {% for error in form.name.errors %}
                         <div class="field-error-message">
@@ -96,33 +107,110 @@
                         </div>
                     {% endfor %}
                 </div>
-            </div>
 
-            <div class="section-actions">
-                <button type="button" class="btn btn-outline" onclick="toggleAdditionalFields()" id="additional-fields-btn">
-                    <span class="btn-icon">📋</span>
-                    Расширенная информация
-                    <span class="btn-arrow">▼</span>
-                </button>
+                <div class="form-field-group {% if form.inn.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.inn.id_for_label }}" class="form-label">
+                        ИНН
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.inn }}
+                    </div>
+                    {% for error in form.inn.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field-group {% if form.legal_entity.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.legal_entity.id_for_label }}" class="form-label">
+                        Юридическое лицо
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.legal_entity }}
+                    </div>
+                    {% for error in form.legal_entity.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Поля для ИП -->
+        <div id="individual-entrepreneur-fields" style="display:none;" class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Информация об индивидуальном предпринимателе</h3>
+            </div>
+            <div class="form-grid">
+                <div class="form-field-group {% if form.name_fl.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.name_fl.id_for_label }}" class="form-label">
+                        ФИО
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.name_fl }}
+                    </div>
+                    {% for error in form.name_fl.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field-group {% if form.inn.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.inn.id_for_label }}" class="form-label">
+                        ИНН
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.inn }}
+                    </div>
+                    {% for error in form.inn.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field-group {% if form.legal_entity.errors %}form-field-error{% endif %}">
+                    <label for="{{ form.legal_entity.id_for_label }}" class="form-label">
+                        Юридическое лицо
+                        <span class="required-asterisk">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.legal_entity }}
+                    </div>
+                    {% for error in form.legal_entity.errors %}
+                        <div class="field-error-message">
+                            <span class="error-icon">❌</span>
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
         <!-- Поля для физического лица -->
-        <div id="individual-fields" style="display:none;" class="form-section">
+        <div id="physical-person-fields" style="display:none;" class="form-section">
             <div class="section-header">
                 <h3 class="section-title">Информация о физическом лице</h3>
             </div>
             <div class="form-grid">
                 <div class="form-field-group {% if form.name_fl.errors %}form-field-error{% endif %}">
                     <label for="{{ form.name_fl.id_for_label }}" class="form-label">
-                        {{ form.name_fl.label }}
+                        ФИО
                         <span class="required-asterisk">*</span>
                     </label>
                     <div class="input-wrapper">
                         {{ form.name_fl }}
-                        {% if form.name_fl.help_text %}
-                            <div class="help-text">{{ form.name_fl.help_text }}</div>
-                        {% endif %}
                     </div>
                     {% for error in form.name_fl.errors %}
                         <div class="field-error-message">
@@ -134,14 +222,11 @@
 
                 <div class="form-field-group {% if form.phone_number.errors %}form-field-error{% endif %}">
                     <label for="{{ form.phone_number.id_for_label }}" class="form-label">
-                        {{ form.phone_number.label }}
+                        Номер телефона
                         <span class="required-asterisk">*</span>
                     </label>
                     <div class="input-wrapper">
                         {{ form.phone_number }}
-                        {% if form.phone_number.help_text %}
-                            <div class="help-text">{{ form.phone_number.help_text }}</div>
-                        {% endif %}
                     </div>
                     {% for error in form.phone_number.errors %}
                         <div class="field-error-message">
@@ -150,7 +235,25 @@
                         </div>
                     {% endfor %}
                 </div>
+
+                <div class="form-field-group full-width">
+                    <label for="{{ form.passport_scan.id_for_label }}" class="form-label">
+                        Скан паспорта
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.passport_scan }}
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <!-- Кнопка расширенной информации -->
+        <div class="section-actions">
+            <button type="button" class="btn btn-outline" onclick="toggleAdditionalFields()" id="additional-fields-btn">
+                <span class="btn-icon">📋</span>
+                Расширенная информация
+                <span class="btn-arrow">▼</span>
+            </button>
         </div>
 
         <!-- Дополнительные поля -->
@@ -160,84 +263,161 @@
                 <p class="section-description">Банковские реквизиты и контактная информация</p>
             </div>
 
-            <div class="form-grid">
+            <!-- Общие поля для юрлиц и ИП -->
+            <div id="common-additional-fields">
+                <!-- Email адреса -->
+                <div class="form-field-group full-width">
+                    <label class="form-label">Email адреса</label>
+                    <div id="email-container">
+                        <div class="email-input-group">
+                            <input type="email" name="emails[]" class="form-input" placeholder="Введите email">
+                            <button type="button" class="btn-remove" onclick="removeEmailField(this)">✕</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="addEmailField()">
+                        <span class="btn-icon">✉️</span>
+                        Добавить email
+                    </button>
+                </div>
+
+                <!-- Банковские реквизиты -->
+                <div class="form-field-group full-width">
+                    <label class="form-label">Банковские реквизиты</label>
+                    <div id="bank-accounts-container">
+                        <div class="bank-account-group">
+                            <div class="form-grid">
+                                <div class="form-field-group">
+                                    <label class="form-label">Расчетный счет</label>
+                                    <input type="text" name="bank_r_s[]" class="form-input" placeholder="40702810...">
+                                </div>
+                                <div class="form-field-group">
+                                    <label class="form-label">Банк</label>
+                                    <input type="text" name="bank_name[]" class="form-input" placeholder="ПАО Сбербанк">
+                                </div>
+                                <div class="form-field-group">
+                                    <label class="form-label">БИК</label>
+                                    <input type="text" name="bank_bik[]" class="form-input" placeholder="044525225">
+                                </div>
+                                <div class="form-field-group">
+                                    <label class="form-label">Корреспондентский счет</label>
+                                    <input type="text" name="bank_k_s[]" class="form-input" placeholder="301018104...">
+                                </div>
+                            </div>
+                            <button type="button" class="btn-remove" onclick="removeBankAccount(this)">Удалить реквизиты</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="addBankAccount()">
+                        <span class="btn-icon">🏦</span>
+                        Добавить банковские реквизиты
+                    </button>
+                </div>
+            </div>
+
+            <!-- Поля для юрлиц и ИП (кроме физлиц) -->
+            <div id="legal-and-ip-fields">
+                <!-- Подпись на основании -->
                 <div class="form-field-group">
                     <label for="id_ceo_footing" class="form-label">Подпись на основании</label>
                     <div class="input-wrapper">
-                        <select name="ceo_footing" id="id_ceo_footing" class="form-input">
-                            <option value="ustav">Устава</option>
-                            <option value="attorney">Доверенности</option>
-                        </select>
+                        {{ form.ceo_footing }}
                     </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label for="id_ogrn" class="form-label">ОГРН</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="ogrn" id="id_ogrn" class="form-input" />
+                <!-- Доверенность (появляется только при выборе доверенности) -->
+                <div id="attorney-fields" style="display:none;">
+                    <div class="form-grid">
+                        <div class="form-field-group">
+                            <label for="id_attorney_number" class="form-label">Номер доверенности</label>
+                            <div class="input-wrapper">
+                                {{ form.attorney_number }}
+                            </div>
+                        </div>
+                        <div class="form-field-group">
+                            <label for="id_attorney_date" class="form-label">Дата доверенности</label>
+                            <div class="input-wrapper">
+                                {{ form.attorney_date }}
+                            </div>
+                        </div>
+                        <div class="form-field-group full-width">
+                            <label for="id_attorney_file" class="form-label">Файл доверенности</label>
+                            <div class="input-wrapper">
+                                {{ form.attorney_file }}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label for="id_kpp" class="form-label">КПП</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="kpp" id="id_kpp" class="form-input" />
+                <!-- ОГРН/ОГРНИП -->
+                <div class="form-grid">
+                    <div id="ogrn-field" class="form-field-group">
+                        <label for="id_ogrn" class="form-label">ОГРН</label>
+                        <div class="input-wrapper">
+                            {{ form.ogrn }}
+                        </div>
+                    </div>
+                    <div id="ogrnip-field" class="form-field-group" style="display:none;">
+                        <label for="id_ogrnip" class="form-label">ОГРНИП</label>
+                        <div class="input-wrapper">
+                            {{ form.ogrnip }}
+                        </div>
+                    </div>
+                    <div id="kpp-field" class="form-field-group">
+                        <label for="id_kpp" class="form-label">КПП</label>
+                        <div class="input-wrapper">
+                            {{ form.kpp }}
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label for="id_r_s" class="form-label">Р/с</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="r_s" id="id_r_s" class="form-input" />
+                <!-- Адреса -->
+                <div class="form-grid">
+                    <div class="form-field-group full-width">
+                        <label for="id_address" class="form-label">Юридический адрес</label>
+                        <div class="input-wrapper">
+                            {{ form.address }}
+                        </div>
+                    </div>
+                    <div id="postal-address-field" class="form-field-group full-width">
+                        <label for="id_postal_address" class="form-label">Почтовый адрес</label>
+                        <div class="input-wrapper">
+                            {{ form.postal_address }}
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label for="id_bank" class="form-label">Банк</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="bank" id="id_bank" class="form-input" />
+                <!-- Подписант -->
+                <div class="form-grid">
+                    <div class="form-field-group">
+                        <label for="id_ceo_title" class="form-label">Должность подписанта</label>
+                        <div class="input-wrapper">
+                            {{ form.ceo_title }}
+                        </div>
+                    </div>
+                    <div class="form-field-group">
+                        <label for="id_ceo_name" class="form-label">ФИО подписанта</label>
+                        <div class="input-wrapper">
+                            {{ form.ceo_name }}
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-field-group">
-                    <label for="id_bik" class="form-label">БИК</label>
+                <!-- Шаблон договора -->
+                <div class="form-field-group full-width">
+                    <label for="id_contract_template" class="form-label">Стандартный шаблон договора</label>
                     <div class="input-wrapper">
-                        <input type="text" name="bik" id="id_bik" class="form-input" />
+                        {{ form.contract_template }}
                     </div>
-                </div>
-
-                <div class="form-field-group">
-                    <label for="id_k_s" class="form-label">К/с</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="k_s" id="id_k_s" class="form-input" />
-                    </div>
+                    <div class="help-text" id="auto-template-info"></div>
                 </div>
 
                 <div class="form-field-group full-width">
-                    <label for="id_address" class="form-label">Адрес</label>
+                    <label for="id_custom_contract_template" class="form-label">Или загрузите свой шаблон</label>
                     <div class="input-wrapper">
-                        <input type="text" name="address" id="id_address" class="form-input" />
+                        {{ form.custom_contract_template }}
                     </div>
-                </div>
-
-                <div class="form-field-group">
-                    <label for="id_email" class="form-label">Email</label>
-                    <div class="input-wrapper">
-                        <input type="email" name="email" id="id_email" class="form-input" />
-                    </div>
-                </div>
-
-                <div class="form-field-group">
-                    <label for="id_ceo_title" class="form-label">Должность</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="ceo_title" id="id_ceo_title" class="form-input" />
-                    </div>
-                </div>
-
-                <div class="form-field-group">
-                    <label for="id_ceo_name" class="form-label">ФИО</label>
-                    <div class="input-wrapper">
-                        <input type="text" name="ceo_name" id="id_ceo_name" class="form-input" />
+                    <div class="help-text">
+                        <strong>Инструкция:</strong> Загрузите файл в формате .docx.
+                        В шаблоне можно использовать переменные: {{organization_name}}, {{inn}} и другие.
                     </div>
                 </div>
             </div>
@@ -245,7 +425,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary btn-submit">
-                <span class="btn-text">Сохранить организацию</span>
+                <span class="btn-text">Сохранить контрагента</span>
                 <span class="btn-loading" style="display: none;">
                     <span class="spinner"></span>
                     Сохранение...
@@ -257,7 +437,7 @@
 
 <style>
 .organization-create-container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
@@ -282,7 +462,7 @@
 
 .organization-form {
     background: white;
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
@@ -316,11 +496,22 @@
     margin: 0;
 }
 
-/* Type Selector */
 .type-selector {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+    .type-selector {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .type-selector {
+        grid-template-columns: 1fr;
+    }
 }
 
 .type-option {
@@ -341,6 +532,8 @@
     display: flex;
     align-items: flex-start;
     gap: 1rem;
+    min-height: 120px;
+    height: 100%;
 }
 
 .type-card:hover {
@@ -359,16 +552,23 @@
     flex-shrink: 0;
 }
 
+.type-content {
+    flex: 1;
+    min-width: 0;
+}
+
 .type-content h4 {
     margin: 0 0 0.25rem 0;
     font-weight: 600;
     color: #2d3748;
+    word-wrap: break-word;
 }
 
 .type-content p {
     margin: 0;
     font-size: 0.875rem;
     color: #718096;
+    word-wrap: break-word;
 }
 
 .type-check {
@@ -397,7 +597,6 @@
     transform: translate(-50%, -50%);
 }
 
-/* Form Grid */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -484,7 +683,6 @@
     margin-top: 0.25rem;
 }
 
-/* Section Actions */
 .section-actions {
     margin-top: 1.5rem;
 }
@@ -522,7 +720,6 @@
     transform: rotate(180deg);
 }
 
-/* Additional Section */
 .additional-section {
     background: #f7fafc;
     border-radius: 12px;
@@ -531,7 +728,6 @@
     border: 1px solid #e2e8f0;
 }
 
-/* Form Actions */
 .form-actions {
     margin-top: 2rem;
     padding-top: 1.5rem;
@@ -590,7 +786,6 @@
     }
 }
 
-/* Alert Styles */
 .alert {
     padding: 1rem;
     border-radius: 8px;
@@ -618,6 +813,40 @@
     margin: 0.5rem 0 0 0;
     padding-left: 1.25rem;
 }
+
+/* Стили для динамических полей */
+.email-input-group, .bank-account-group {
+    position: relative;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+}
+
+.btn-remove {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.btn-remove:hover {
+    background: #c53030;
+}
+
+/* Стили для заблокированных полей */
+.form-input:read-only {
+    background-color: #f7fafc;
+    color: #718096;
+    cursor: not-allowed;
+}
 </style>
 
 <script>
@@ -640,39 +869,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     styleFormFields();
 
+    // Загрузка предзаполненных данных
+    loadInitialData();
+
     form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Собираем данные из динамических полей
+        collectDynamicData();
+
         // Валидация перед отправкой
-        let isValid = true;
-        const isIndividual = document.querySelector('input[name="type"]:checked').value === 'individual';
-
-        if (isIndividual) {
-            const nameFlField = document.querySelector('input[name="name_fl"]');
-            const phoneNumberField = document.querySelector('input[name="phone_number"]');
-
-            if (!nameFlField.value.trim()) {
-                isValid = false;
-                nameFlField.closest('.form-field-group').classList.add('form-field-error');
-            }
-            if (!phoneNumberField.value.trim()) {
-                isValid = false;
-                phoneNumberField.closest('.form-field-group').classList.add('form-field-error');
-            }
-        } else {
-            const innField = document.querySelector('input[name="inn"]');
-            const nameField = document.querySelector('input[name="name"]');
-
-            if (!innField.value.trim()) {
-                isValid = false;
-                innField.closest('.form-field-group').classList.add('form-field-error');
-            }
-            if (!nameField.value.trim()) {
-                isValid = false;
-                nameField.closest('.form-field-group').classList.add('form-field-error');
-            }
-        }
+        let isValid = validateForm();
 
         if (!isValid) {
-            e.preventDefault();
             return;
         }
 
@@ -680,6 +889,9 @@ document.addEventListener('DOMContentLoaded', function() {
         btnText.style.display = 'none';
         btnLoading.style.display = 'flex';
         submitBtn.disabled = true;
+
+        // Отправляем форму
+        this.submit();
     });
 
     // Динамическая валидация при вводе
@@ -694,40 +906,213 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function toggleFields() {
-    const isIndividual = document.querySelector('input[name="type"]:checked').value === 'individual';
-    const organizationFields = document.getElementById('organization-fields');
-    const individualFields = document.getElementById('individual-fields');
+function validateForm() {
+    let isValid = true;
+    const orgType = document.querySelector('input[name="organization_type"]:checked').value;
+
+    // Сбрасываем ошибки
+    document.querySelectorAll('.form-field-error').forEach(el => {
+        el.classList.remove('form-field-error');
+    });
+
+    if (orgType === 'legal_entity') {
+        const kindField = document.querySelector('select[name="kind"]');
+        const nameField = document.querySelector('input[name="name"]');
+        const innField = document.querySelector('input[name="inn"]');
+        const legalEntityField = document.querySelector('select[name="legal_entity"]');
+
+        if (!kindField.value) {
+            isValid = false;
+            kindField.closest('.form-field-group').classList.add('form-field-error');
+        }
+        if (!nameField.value.trim()) {
+            isValid = false;
+            nameField.closest('.form-field-group').classList.add('form-field-error');
+        }
+        if (!innField.value.trim()) {
+            isValid = false;
+            innField.closest('.form-field-group').classList.add('form-field-error');
+        }
+        if (!legalEntityField.value) {
+            isValid = false;
+            legalEntityField.closest('.form-field-group').classList.add('form-field-error');
+        }
+    } else if (orgType === 'individual_entrepreneur') {
+        const nameFlField = document.querySelector('input[name="name_fl"]');
+        const innField = document.querySelector('input[name="inn"]');
+        const legalEntityField = document.querySelector('select[name="legal_entity"]');
+
+        if (!nameFlField.value.trim()) {
+            isValid = false;
+            nameFlField.closest('.form-field-group').classList.add('form-field-error');
+        }
+        if (!innField.value.trim()) {
+            isValid = false;
+            innField.closest('.form-field-group').classList.add('form-field-error');
+        }
+        if (!legalEntityField.value) {
+            isValid = false;
+            legalEntityField.closest('.form-field-group').classList.add('form-field-error');
+        }
+    } else if (orgType === 'physical_person') {
+        const nameFlField = document.querySelector('input[name="name_fl"]');
+        const phoneNumberField = document.querySelector('input[name="phone_number"]');
+
+        if (!nameFlField.value.trim()) {
+            isValid = false;
+            nameFlField.closest('.form-field-group').classList.add('form-field-error');
+        }
+        if (!phoneNumberField.value.trim()) {
+            isValid = false;
+            phoneNumberField.closest('.form-field-group').classList.add('form-field-error');
+        }
+    }
+
+    return isValid;
+}
+
+function loadInitialData() {
+    // Загрузка предзаполненных emails
+    const emailsField = document.getElementById('id_emails');
+    if (emailsField && emailsField.value) {
+        const emails = emailsField.value.split(',');
+        const emailContainer = document.getElementById('email-container');
+        emailContainer.innerHTML = '';
+
+        emails.forEach(email => {
+            if (email.trim()) {
+                addEmailField(email.trim());
+            }
+        });
+    }
+
+    // Загрузка предзаполненных банковских счетов
+    const bankAccountsField = document.getElementById('id_bank_accounts');
+    if (bankAccountsField && bankAccountsField.value) {
+        try {
+            const bankAccounts = JSON.parse(bankAccountsField.value);
+            const bankContainer = document.getElementById('bank-accounts-container');
+            bankContainer.innerHTML = '';
+
+            bankAccounts.forEach(account => {
+                addBankAccount(account);
+            });
+        } catch (e) {
+            console.error('Error parsing bank accounts:', e);
+        }
+    }
+}
+
+function collectDynamicData() {
+    // Собираем emails
+    const emailInputs = document.querySelectorAll('input[name="emails[]"]');
+    const emails = Array.from(emailInputs)
+        .map(input => input.value.trim())
+        .filter(email => email);
+
+    document.getElementById('id_emails').value = emails.join(',');
+
+    // Собираем банковские счета
+    const bankAccounts = [];
+    document.querySelectorAll('.bank-account-group').forEach(group => {
+        const r_s = group.querySelector('input[name="bank_r_s[]"]').value.trim();
+        const bank = group.querySelector('input[name="bank_name[]"]').value.trim();
+        const bik = group.querySelector('input[name="bank_bik[]"]').value.trim();
+        const k_s = group.querySelector('input[name="bank_k_s[]"]').value.trim();
+
+        if (r_s || bank) {
+            bankAccounts.push({
+                r_s: r_s,
+                bank: bank,
+                bik: bik,
+                k_s: k_s
+            });
+        }
+    });
+
+    document.getElementById('id_bank_accounts').value = JSON.stringify(bankAccounts);
+}
+
+function toggleOrganizationType() {
+    const orgType = document.querySelector('input[name="organization_type"]:checked').value;
+
+    // Скрываем все основные поля
+    document.getElementById('legal-entity-fields').style.display = 'none';
+    document.getElementById('individual-entrepreneur-fields').style.display = 'none';
+    document.getElementById('physical-person-fields').style.display = 'none';
+
+    // Скрываем расширенную информацию
+    document.getElementById('additional-fields').style.display = 'none';
+    document.getElementById('additional-fields-btn').innerHTML = '<span class="btn-icon">📋</span>Расширенная информация<span class="btn-arrow">▼</span>';
+
+    // Показываем соответствующие поля
+    if (orgType === 'legal_entity') {
+        document.getElementById('legal-entity-fields').style.display = 'block';
+        document.getElementById('common-additional-fields').style.display = 'block';
+        document.getElementById('legal-and-ip-fields').style.display = 'block';
+        document.getElementById('ogrn-field').style.display = 'block';
+        document.getElementById('ogrnip-field').style.display = 'none';
+        document.getElementById('kpp-field').style.display = 'block';
+        document.getElementById('postal-address-field').style.display = 'block';
+
+        // Разблокируем поле почтового адреса
+        const postalAddressField = document.getElementById('id_postal_address');
+        if (postalAddressField) {
+            postalAddressField.readOnly = false;
+            postalAddressField.style.backgroundColor = 'white';
+        }
+    } else if (orgType === 'individual_entrepreneur') {
+        document.getElementById('individual-entrepreneur-fields').style.display = 'block';
+        document.getElementById('common-additional-fields').style.display = 'block';
+        document.getElementById('legal-and-ip-fields').style.display = 'block';
+        document.getElementById('ogrn-field').style.display = 'none';
+        document.getElementById('ogrnip-field').style.display = 'block';
+        document.getElementById('kpp-field').style.display = 'none';
+        document.getElementById('postal-address-field').style.display = 'block';
+
+        // Для ИП почтовый адрес всегда совпадает с юридическим
+        syncAddresses();
+    } else if (orgType === 'physical_person') {
+        document.getElementById('physical-person-fields').style.display = 'block';
+        document.getElementById('common-additional-fields').style.display = 'none';
+        document.getElementById('legal-and-ip-fields').style.display = 'none';
+    }
+
+    updateFormTitle(orgType);
+}
+
+function syncAddresses() {
+    const addressField = document.getElementById('id_address');
+    const postalAddressField = document.getElementById('id_postal_address');
+
+    if (addressField && postalAddressField) {
+        // Синхронизируем значения
+        postalAddressField.value = addressField.value;
+
+        // Блокируем поле почтового адреса для ИП
+        postalAddressField.readOnly = true;
+        postalAddressField.style.backgroundColor = '#f7fafc';
+
+        // Обновляем при изменении юридического адреса
+        addressField.addEventListener('input', function() {
+            postalAddressField.value = this.value;
+        });
+    }
+}
+
+function updateFormTitle(orgType) {
     const formTitle = document.getElementById('form-title');
     const formSubtitle = document.getElementById('form-subtitle');
 
-    // Анимация переключения
-    organizationFields.style.display = isIndividual ? 'none' : 'block';
-    individualFields.style.display = isIndividual ? 'block' : 'none';
-
-    // Обновление заголовков
-    formTitle.innerText = isIndividual ? 'Добавить физическое лицо' : 'Добавить организацию';
-    formSubtitle.innerText = isIndividual ? 'Заполните информацию о физическом лице' : 'Заполните информацию о контрагенте';
-
-    updateRequiredFields(isIndividual);
-}
-
-function updateRequiredFields(isIndividual) {
-    const nameFlField = document.querySelector('input[name="name_fl"]');
-    const phoneNumberField = document.querySelector('input[name="phone_number"]');
-    const innField = document.querySelector('input[name="inn"]');
-    const nameField = document.querySelector('input[name="name"]');
-
-    if (isIndividual) {
-        nameFlField.setAttribute('required', '');
-        phoneNumberField.setAttribute('required', '');
-        innField.removeAttribute('required');
-        nameField.removeAttribute('required');
-    } else {
-        innField.setAttribute('required', '');
-        nameField.setAttribute('required', '');
-        nameFlField.removeAttribute('required');
-        phoneNumberField.removeAttribute('required');
+    if (orgType === 'legal_entity') {
+        formTitle.innerText = 'Добавить юридическое лицо';
+        formSubtitle.innerText = 'Заполните информацию о юридическом лице';
+    } else if (orgType === 'individual_entrepreneur') {
+        formTitle.innerText = 'Добавить индивидуального предпринимателя';
+        formSubtitle.innerText = 'Заполните информацию об индивидуальном предпринимателе';
+    } else if (orgType === 'physical_person') {
+        formTitle.innerText = 'Добавить физическое лицо';
+        formSubtitle.innerText = 'Заполните информацию о физическом лице';
     }
 }
 
@@ -748,5 +1133,138 @@ function toggleAdditionalFields() {
         additionalBtn.innerHTML = '<span class="btn-icon">📋</span>Расширенная информация<span class="btn-arrow">▼</span>';
     }
 }
+
+// Функции для работы с email полями
+function addEmailField(value = '') {
+    const container = document.getElementById('email-container');
+    const newEmailGroup = document.createElement('div');
+    newEmailGroup.className = 'email-input-group';
+    newEmailGroup.innerHTML = `
+        <input type="email" name="emails[]" class="form-input" placeholder="Введите email" value="${value}">
+        <button type="button" class="btn-remove" onclick="removeEmailField(this)">✕</button>
+    `;
+    container.appendChild(newEmailGroup);
+}
+
+function removeEmailField(button) {
+    const container = document.getElementById('email-container');
+    if (container.children.length > 1) {
+        button.parentElement.remove();
+    } else {
+        // Если это последнее поле, просто очищаем его
+        button.parentElement.querySelector('input').value = '';
+    }
+}
+
+// Функции для работы с банковскими счетами
+function addBankAccount(accountData = {}) {
+    const container = document.getElementById('bank-accounts-container');
+    const newAccount = document.createElement('div');
+    newAccount.className = 'bank-account-group';
+    newAccount.innerHTML = `
+        <div class="form-grid">
+            <div class="form-field-group">
+                <label class="form-label">Расчетный счет</label>
+                <input type="text" name="bank_r_s[]" class="form-input" placeholder="40702810..." value="${accountData.r_s || ''}">
+            </div>
+            <div class="form-field-group">
+                <label class="form-label">Банк</label>
+                <input type="text" name="bank_name[]" class="form-input" placeholder="ПАО Сбербанк" value="${accountData.bank || ''}">
+            </div>
+            <div class="form-field-group">
+                <label class="form-label">БИК</label>
+                <input type="text" name="bank_bik[]" class="form-input" placeholder="044525225" value="${accountData.bik || ''}">
+            </div>
+            <div class="form-field-group">
+                <label class="form-label">Корреспондентский счет</label>
+                <input type="text" name="bank_k_s[]" class="form-input" placeholder="301018104..." value="${accountData.k_s || ''}">
+            </div>
+        </div>
+        <button type="button" class="btn-remove" onclick="removeBankAccount(this)">Удалить реквизиты</button>
+    `;
+    container.appendChild(newAccount);
+}
+
+function removeBankAccount(button) {
+    const container = document.getElementById('bank-accounts-container');
+    if (container.children.length > 1) {
+        button.parentElement.remove();
+    }
+}
+
+// Функция для автоматического выбора шаблона договора
+function updateContractTemplate() {
+    const orgType = document.querySelector('input[name="organization_type"]:checked').value;
+    const legalEntity = document.getElementById('id_legal_entity').value;
+    const kind = document.getElementById('id_kind').value;
+    const footing = document.getElementById('id_ceo_footing').value;
+
+    if (orgType === 'physical_person') return;
+
+    const params = new URLSearchParams({
+        'organization_type': orgType,
+        'legal_entity': legalEntity,
+        'kind': kind,
+        'ceo_footing': footing
+    });
+
+    fetch(`/api/get-contract-template/?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            const templateSelect = document.getElementById('id_contract_template');
+            const infoElement = document.getElementById('auto-template-info');
+
+            if (data.template_id && templateSelect) {
+                templateSelect.value = data.template_id;
+                infoElement.textContent = `Автоматически выбран шаблон: ${data.template_name}`;
+                infoElement.style.color = '#38a169';
+            } else {
+                infoElement.textContent = 'Подходящий шаблон не найден';
+                infoElement.style.color = '#e53e3e';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching contract template:', error);
+        });
+}
+
+// Обработчики изменений для обновления шаблона
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчики для обновления шаблона договора
+    const legalEntityField = document.getElementById('id_legal_entity');
+    const kindField = document.getElementById('id_kind');
+    const footingField = document.getElementById('id_ceo_footing');
+
+    if (legalEntityField) {
+        legalEntityField.addEventListener('change', updateContractTemplate);
+    }
+    if (kindField) {
+        kindField.addEventListener('change', updateContractTemplate);
+    }
+    if (footingField) {
+        footingField.addEventListener('change', function() {
+            updateContractTemplate();
+            // Показываем/скрываем поля доверенности
+            const attorneyFields = document.getElementById('attorney-fields');
+            if (attorneyFields) {
+                attorneyFields.style.display = this.value === 'attorney' ? 'block' : 'none';
+            }
+        });
+    }
+
+    // Синхронизация адресов для ИП
+    const addressField = document.getElementById('id_address');
+    if (addressField) {
+        addressField.addEventListener('input', function() {
+            const orgType = document.querySelector('input[name="organization_type"]:checked').value;
+            if (orgType === 'individual_entrepreneur') {
+                syncAddresses();
+            }
+        });
+    }
+
+    // Инициализация при загрузке
+    toggleOrganizationType();
+});
 </script>
 {% endblock %}
