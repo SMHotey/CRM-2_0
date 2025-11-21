@@ -172,6 +172,54 @@
             transform: translateX(3px);
         }
 
+        /* Стили для кнопок dropdown-toggle */
+        .dropdown-toggle-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 0.875rem 1rem;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            text-align: left;
+            border-radius: 12px;
+            transition: var(--transition-smooth);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dropdown-toggle-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: var(--transition-smooth);
+        }
+
+        .dropdown-toggle-btn:hover,
+        .dropdown-toggle-btn.active {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .dropdown-toggle-btn:hover::before,
+        .dropdown-toggle-btn.active::before {
+            transform: scaleY(1);
+        }
+
+        .dropdown-toggle-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -637,10 +685,10 @@
                 <ul class="nav flex-column">
                     <!-- Orders Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" >
+                        <button class="dropdown-toggle-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-folder-fill nav-icon"></i>
                             <span class="nav-text">Заказы</span>
-                        </a>
+                        </button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'orders_list' %}">
                                 <i class="bi bi-list-check"></i> Все заказы
@@ -656,16 +704,16 @@
 
                     <!-- Clients Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="dropdown-toggle-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-people-fill nav-icon"></i>
                             <span class="nav-text">Клиенты</span>
-                        </a>
+                        </button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'organization_list' %}">
                                 <i class="bi bi-building"></i> Все клиенты
                             </a></li>
                             {% if user.is_superuser %}
-                            <li><a class="dropdown-item" href="{% url 'create_legal_entity' %}">
+                            <li><a class="dropdown-item" href="{% url 'create_internal_legal_entity' %}">
                                 <i class="bi bi-building-add"></i> Новое ЮЛ
                             </a></li>
                             {% endif %}
@@ -677,10 +725,10 @@
 
                     <!-- Calculations Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="dropdown-toggle-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-calculator-fill nav-icon"></i>
                             <span class="nav-text">Расчеты</span>
-                        </a>
+                        </button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'invoice_add' %}">
                                 <i class="bi bi-file-earmark-plus"></i> Добавить счет
@@ -696,10 +744,10 @@
 
                     <!-- Shipments Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="dropdown-toggle-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-truck-flatbed nav-icon"></i>
                             <span class="nav-text">Отгрузки</span>
-                        </a>
+                        </button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'calendar' %}">
                                 <i class="bi bi-calendar-week"></i> Календарь отгрузок
@@ -707,12 +755,12 @@
                         </ul>
                     </li>
 
-                    <!-- Chat -->
+                    <!-- Certificates Menu -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-calculator-fill nav-icon"></i>
+                        <button class="dropdown-toggle-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-award-fill nav-icon"></i>
                             <span class="nav-text">Сертификаты</span>
-                        </a>
+                        </button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'certificate_create' %}">
                                 <i class="bi bi-file-earmark-plus"></i> Добавить сертификат
@@ -720,7 +768,6 @@
                             <li><a class="dropdown-item" href="{% url 'certificate_list' %}">
                                 <i class="bi bi-files"></i> Все сертификаты
                             </a></li>
-
                         </ul>
                     </li>
                 </ul>
@@ -736,14 +783,14 @@
                     <div class="user-menu">
                         {% if user.is_authenticated %}
                         <div class="dropdown">
-                            <a class="dropdown-toggle d-flex align-items-center text-decoration-none" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="dropdown-toggle d-flex align-items-center text-decoration-none border-0 bg-transparent p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <div class="user-avatar">
                                     {{ user.first_name|first }}{{ user.last_name|first }}
                                 </div>
                                 <span class="ms-2 d-none d-sm-block">
                                     {{ user.first_name }} {{ user.last_name }}
                                 </span>
-                            </a>
+                            </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="#">
                                     <i class="bi bi-person-circle"></i> Профиль

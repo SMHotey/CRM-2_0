@@ -1,127 +1,323 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container my-4">
-    <h1 class="mb-4 text-center">Редактировать организацию: {{ organization.name }}</h1>
-    <form method="post" class="needs-validation" novalidate>
+<div class="organization-create-container">
+    <div class="organization-create-header">
+        <h1 class="organization-create-title">
+            {% if organization.organization_type == 'legal_entity' %}
+                Редактировать юридическое лицо
+            {% elif organization.organization_type == 'individual_entrepreneur' %}
+                Редактировать индивидуального предпринимателя
+            {% else %}
+                Редактировать физическое лицо
+            {% endif %}
+        </h1>
+        <p class="organization-create-subtitle">
+            {{ organization.name|default:organization.name_fl }}
+        </p>
+    </div>
+
+    <form method="post" class="organization-form" novalidate enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.non_field_errors }}
 
-        <!-- Основные поля формы -->
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.name.id_for_label }}" class="form-label">Наименование</label>
-                {{ form.name }}
-                {{ form.name.errors }}
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.inn.id_for_label }}" class="form-label">ИНН</label>
-                {{ form.inn }}
-                {{ form.inn.errors }}
-            </div>
-        </div>
-
-        {% if organization.name_fl %}
-            <!-- Поля для физического лица -->
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">Номер телефона</label>
-                    {{ form.phone_number }}
-                    {{ form.phone_number.errors }}
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.name_fl.id_for_label }}" class="form-label">Имя, фамилия</label>
-                    {{ form.name_fl }}
-                    {{ form.name_fl.errors }}
-                </div>
-            </div>
-        {% else %}
-            <!-- Поля для юридического лица -->
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.ceo_footing.id_for_label }}" class="form-label">Подписант действует на основании</label>
-                    {{ form.ceo_footing }}
-                    {{ form.ceo_footing.errors }}
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.ogrn.id_for_label }}" class="form-label">ОГРН</label>
-                    {{ form.ogrn }}
-                    {{ form.ogrn.errors }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.kpp.id_for_label }}" class="form-label">КПП</label>
-                    {{ form.kpp }}
-                    {{ form.kpp.errors }}
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.r_s.id_for_label }}" class="form-label">Р/с</label>
-                    {{ form.r_s }}
-                    {{ form.r_s.errors }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.bank.id_for_label }}" class="form-label">Банк</label>
-                    {{ form.bank }}
-                    {{ form.bank.errors }}
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.bik.id_for_label }}" class="form-label">БИК</label>
-                    {{ form.bik }}
-                    {{ form.bik.errors }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.k_s.id_for_label }}" class="form-label">К/с</label>
-                    {{ form.k_s }}
-                    {{ form.k_s.errors }}
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.address.id_for_label }}" class="form-label">Адрес</label>
-                    {{ form.address }}
-                    {{ form.address.errors }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
-                    {{ form.email }}
-                    {{ form.email.errors }}
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.ceo_title.id_for_label }}" class="form-label">Должность</label>
-                    {{ form.ceo_title }}
-                    {{ form.ceo_title.errors }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="{{ form.ceo_name.id_for_label }}" class="form-label">ФИО</label>
-                    {{ form.ceo_name }}
-                    {{ form.ceo_name.errors }}
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <strong>Пожалуйста, исправьте ошибки:</strong>
+                    <ul class="alert-list">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         {% endif %}
 
-        <div class="text-center mb-4">
-            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        <!-- Основные поля формы -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Основная информация</h3>
+            </div>
+            <div class="form-grid">
+                {% for field in form %}
+                    {% if field.name not in 'emails,bank_accounts,contract_template,custom_contract_template' %}
+                    <div class="form-field-group {% if field.errors %}form-field-error{% endif %}">
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="required-asterisk">*</span>{% endif %}
+                        </label>
+                        <div class="input-wrapper">
+                            {{ field }}
+                        </div>
+                        {% for error in field.errors %}
+                            <div class="field-error-message">
+                                <span class="error-icon">❌</span>
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Дополнительные поля для юрлиц и ИП -->
+        {% if organization.organization_type != 'physical_person' %}
+        <!-- Emails -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Email адреса</h3>
+            </div>
+            <div id="email-container">
+                {% for email in emails %}
+                <div class="email-input-group">
+                    <input type="email" name="emails[]" class="form-input" placeholder="Введите email" value="{{ email.email }}">
+                    <button type="button" class="btn-remove" onclick="removeEmailField(this)">✕</button>
+                </div>
+                {% empty %}
+                <div class="email-input-group">
+                    <input type="email" name="emails[]" class="form-input" placeholder="Введите email">
+                    <button type="button" class="btn-remove" onclick="removeEmailField(this)">✕</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-outline" onclick="addEmailField()">
+                <span class="btn-icon">✉️</span>
+                Добавить email
+            </button>
+            {{ form.emails }}
+        </div>
+
+        <!-- Банковские реквизиты -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Банковские реквизиты</h3>
+            </div>
+            <div id="bank-accounts-container">
+                {% for account in bank_accounts %}
+                <div class="bank-account-group">
+                    <div class="form-grid">
+                        <div class="form-field-group">
+                            <label class="form-label">Расчетный счет</label>
+                            <input type="text" name="bank_r_s[]" class="form-input" placeholder="40702810..." value="{{ account.r_s }}">
+                        </div>
+                        <div class="form-field-group">
+                            <label class="form-label">Банк</label>
+                            <input type="text" name="bank_name[]" class="form-input" placeholder="ПАО Сбербанк" value="{{ account.bank }}">
+                        </div>
+                        <div class="form-field-group">
+                            <label class="form-label">БИК</label>
+                            <input type="text" name="bank_bik[]" class="form-input" placeholder="044525225" value="{{ account.bik }}">
+                        </div>
+                        <div class="form-field-group">
+                            <label class="form-label">Корреспондентский счет</label>
+                            <input type="text" name="bank_k_s[]" class="form-input" placeholder="301018104..." value="{{ account.k_s }}">
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeBankAccount(this)">Удалить реквизиты</button>
+                </div>
+                {% empty %}
+                <div class="bank-account-group">
+                    <div class="form-grid">
+                        <div class="form-field-group">
+                            <label class="form-label">Расчетный счет</label>
+                            <input type="text" name="bank_r_s[]" class="form-input" placeholder="40702810...">
+                        </div>
+                        <div class="form-field-group">
+                            <label class="form-label">Банк</label>
+                            <input type="text" name="bank_name[]" class="form-input" placeholder="ПАО Сбербанк">
+                        </div>
+                        <div class="form-field-group">
+                            <label class="form-label">БИК</label>
+                            <input type="text" name="bank_bik[]" class="form-input" placeholder="044525225">
+                        </div>
+                        <div class="form-field-group">
+                            <label class="form-label">Корреспондентский счет</label>
+                            <input type="text" name="bank_k_s[]" class="form-input" placeholder="301018104...">
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove" onclick="removeBankAccount(this)">Удалить реквизиты</button>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-outline" onclick="addBankAccount()">
+                <span class="btn-icon">🏦</span>
+                Добавить банковские реквизиты
+            </button>
+            {{ form.bank_accounts }}
+        </div>
+
+        <!-- Шаблоны договоров -->
+        <div class="form-section">
+            <div class="section-header">
+                <h3 class="section-title">Шаблон договора</h3>
+            </div>
+            <div class="form-grid">
+                <div class="form-field-group">
+                    <label for="{{ form.contract_template.id_for_label }}" class="form-label">
+                        Стандартный шаблон
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.contract_template }}
+                    </div>
+                </div>
+                <div class="form-field-group">
+                    <label for="{{ form.custom_contract_template.id_for_label }}" class="form-label">
+                        Свой шаблон
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.custom_contract_template }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                Сохранить изменения
+            </button>
+            <a href="{% url 'organization_detail' organization.pk %}" class="btn btn-outline">
+                Отмена
+            </a>
         </div>
     </form>
 </div>
 
+<!-- Подключаем те же стили что и в organization_add.html -->
+<style>
+.organization-create-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.organization-create-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.organization-create-title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.5rem 0;
+}
+
+.organization-create-subtitle {
+    font-size: 1rem;
+    color: #718096;
+    margin: 0;
+}
+
+.organization-form {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+/* Остальные стили аналогичны organization_add.html */
+</style>
+
+<script>
+// Те же функции JavaScript что и в organization_add.html
+function addEmailField(value = '') {
+    const container = document.getElementById('email-container');
+    const newEmailGroup = document.createElement('div');
+    newEmailGroup.className = 'email-input-group';
+    newEmailGroup.innerHTML = `
+        <input type="email" name="emails[]" class="form-input" placeholder="Введите email" value="${value}">
+        <button type="button" class="btn-remove" onclick="removeEmailField(this)">✕</button>
+    `;
+    container.appendChild(newEmailGroup);
+    updateEmailsHiddenField();
+}
+
+function removeEmailField(button) {
+    const container = document.getElementById('email-container');
+    if (container.children.length > 1) {
+        button.parentElement.remove();
+    } else {
+        button.parentElement.querySelector('input').value = '';
+    }
+    updateEmailsHiddenField();
+}
+
+function addBankAccount(accountData = {}) {
+    const container = document.getElementById('bank-accounts-container');
+    const newAccount = document.createElement('div');
+    newAccount.className = 'bank-account-group';
+    newAccount.innerHTML = `
+        <div class="form-grid">
+            <div class="form-field-group">
+                <label class="form-label">Расчетный счет</label>
+                <input type="text" name="bank_r_s[]" class="form-input" placeholder="40702810..." value="${accountData.r_s || ''}">
+            </div>
+            <div class="form-field-group">
+                <label class="form-label">Банк</label>
+                <input type="text" name="bank_name[]" class="form-input" placeholder="ПАО Сбербанк" value="${accountData.bank || ''}">
+            </div>
+            <div class="form-field-group">
+                <label class="form-label">БИК</label>
+                <input type="text" name="bank_bik[]" class="form-input" placeholder="044525225" value="${accountData.bik || ''}">
+            </div>
+            <div class="form-field-group">
+                <label class="form-label">Корреспондентский счет</label>
+                <input type="text" name="bank_k_s[]" class="form-input" placeholder="301018104..." value="${accountData.k_s || ''}">
+            </div>
+        </div>
+        <button type="button" class="btn-remove" onclick="removeBankAccount(this)">Удалить реквизиты</button>
+    `;
+    container.appendChild(newAccount);
+    updateBankAccountsHiddenField();
+}
+
+function removeBankAccount(button) {
+    const container = document.getElementById('bank-accounts-container');
+    if (container.children.length > 1) {
+        button.parentElement.remove();
+    }
+    updateBankAccountsHiddenField();
+}
+
+function updateEmailsHiddenField() {
+    const emailInputs = document.querySelectorAll('input[name="emails[]"]');
+    const emails = Array.from(emailInputs).map(input => input.value.trim()).filter(email => email);
+    document.getElementById('id_emails').value = emails.join(',');
+}
+
+function updateBankAccountsHiddenField() {
+    const bankAccounts = [];
+    document.querySelectorAll('.bank-account-group').forEach(group => {
+        const r_s = group.querySelector('input[name="bank_r_s[]"]')?.value.trim() || '';
+        const bank = group.querySelector('input[name="bank_name[]"]')?.value.trim() || '';
+        const bik = group.querySelector('input[name="bank_bik[]"]')?.value.trim() || '';
+        const k_s = group.querySelector('input[name="bank_k_s[]"]')?.value.trim() || '';
+
+        if (r_s || bank) {
+            bankAccounts.push({ r_s, bank, bik, k_s });
+        }
+    });
+    document.getElementById('id_bank_accounts').value = JSON.stringify(bankAccounts);
+}
+
+// Обновляем скрытые поля при изменении
+document.addEventListener('input', function(e) {
+    if (e.target.name === 'emails[]') {
+        updateEmailsHiddenField();
+    }
+    if (e.target.name?.startsWith('bank_')) {
+        updateBankAccountsHiddenField();
+    }
+});
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    updateEmailsHiddenField();
+    updateBankAccountsHiddenField();
+});
+</script>
 {% endblock %}

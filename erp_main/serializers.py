@@ -17,15 +17,15 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class LegalEntitySerializer(serializers.ModelSerializer):
+class InternalLegalEntitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = LegalEntity
+        model = InternalLegalEntity
         fields = '__all__'
 
 
 class InvoiceSerializer(serializers.ModelSerializer):
     organization_details = OrganizationSerializer(source='organization', read_only=True)
-    legal_entity_details = LegalEntitySerializer(source='legal_entity', read_only=True)
+    internal_legal_entity_details = InternalLegalEntitySerializer(source='internal_legal_entity', read_only=True)
     percent = serializers.IntegerField(read_only=True)
 
     class Meta:

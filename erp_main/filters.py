@@ -22,7 +22,7 @@ class InvoiceFilter(django_filters.FilterSet):
     date_range = django_filters.DateFromToRangeFilter(field_name='date')
     is_paid = django_filters.BooleanFilter(field_name='is_paid')
     organization = django_filters.NumberFilter(field_name='organization__id')
-    legal_entity = django_filters.NumberFilter(field_name='legal_entity__id')
+    internal_legal_entity = django_filters.NumberFilter(field_name='internal_legal_entity__id')
     number = django_filters.CharFilter(field_name='number', lookup_expr='icontains')
 
     class Meta:

@@ -1,37 +1,369 @@
 import ast
 import re
+
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import models
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.templatetags.static import static
-
-def validate_numeric_only(value):
-    if not re.match(r'^\d{6,}$', value) and value is not None:
-        raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 
-class LegalEntity(models.Model):
-    name = models.CharField(max_length=255)
-    inn = models.CharField(max_length=12, blank=True, null=True)
-    ogrn = models.CharField(max_length=15, blank=True, null=True)
-    kpp = models.CharField(max_length=9, blank=True, null=True)
-    r_s = models.CharField(max_length=20, blank=True, null=True)
-    bank = models.CharField(max_length=255, blank=True, null=True)
-    bik = models.CharField(max_length=9, blank=True, null=True)
-    k_s = models.CharField(max_length=20, blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    ceo_title = models.CharField(max_length=100, blank=True, null=True)
-    ceo_name = models.CharField(max_length=255, blank=True, null=True)
+# def validate_numeric_only(value):
+#     if not re.match(r'^\d{6,}$', value) and value is not None:
+#         raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
+
+
+class DocumentType(models.Model):
+    """Типы документов для разных моделей"""
+    name = models.CharField(max_length=100, verbose_name="Название типа")
+    code = models.CharField(max_length=50, unique=True, verbose_name="Код типа")
+    description = models.TextField(blank=True, verbose_name="Описание")
+
+    # Для каких моделей доступен этот тип документа
+    available_for_models = models.ManyToManyField(
+        ContentType,
+        verbose_name="Доступно для моделей",
+        blank=True
+    )
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'Юридические лица'
+        verbose_name = "Тип документа"
+        verbose_name_plural = "Типы документов"
 
+
+class BaseDocumentModel(models.Model):
+    """Абстрактная базовая модель для всех сущностей с документами"""
+
+    class DocumentTypes:
+        # Общие типы документов
+        OTHER = 'other'
+        ORDER_BLANK = 'order_blank'
+
+        # Для юридических лиц
+        LEGAL_ENTITY_CONTRACT = 'legal_entity_contract'
+        LEGAL_ENTITY_ARTICLES = 'legal_entity_articles'
+        LEGAL_ENTITY_EGRUL = 'legal_entity_egrul'
+        LEGAL_ENTITY_REQUISITES = 'legal_entity_requisites'
+
+        # Для ИП
+        INDIVIDUAL_ENTREPRENEUR_CONTRACT = 'individual_entrepreneur_contract'
+        INDIVIDUAL_ENTREPRENEUR_EGRIP = 'individual_entrepreneur_egrip'
+        INDIVIDUAL_ENTREPRENEUR_REQUISITES = 'individual_entrepreneur_requisites'
+
+        # Для физлиц
+        PHYSICAL_PERSON_PASSPORT = 'physical_person_passport'
+
+    def get_available_document_types(self):
+        """Возвращает доступные типы документов для этой модели"""
+        raise NotImplementedError("Должен быть реализован в дочерних классах")
+
+    class Meta:
+        abstract = True
+
+
+class Documents(models.Model):
+    """Сканы документов всех видов"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    number = models.CharField(max_length=50, null=True, blank=True)
+    date = models.DateField(null=True, blank=True)
+    file = models.FileField(upload_to='documents/')
+
+    # Связь с типом документа
+    document_type = models.ForeignKey(
+        DocumentType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Тип документа"
+    )
+
+    # Generic Foreign Key
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    def clean(self):
+        """Проверяет, что тип документа доступен для связанной модели"""
+        if self.content_object and self.document_type:
+            available_types = self.content_object.get_available_document_types()
+            if self.document_type not in available_types:
+                raise ValidationError(
+                    f"Тип документа '{self.document_type}' недоступен для этой модели"
+                )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.document_type})" if self.document_type else self.name
+
+    class Meta:
+        verbose_name = "Документ"
+        verbose_name_plural = "Документы"
+
+
+class Email(models.Model):
+    """Email адреса для всех типов контрагентов"""
+    email = models.EmailField()
+    is_primary = models.BooleanField(default=False)
+
+    # Полиморфная связь
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
+
+
+class BankDetails(models.Model):
+    """Банковские реквизиты для юрлиц и ИП"""
+    bank_name = models.CharField(max_length=255, verbose_name="Название банка")
+    account_number = models.CharField(max_length=20, verbose_name="Расчетный счет")
+    bik = models.CharField(max_length=9, verbose_name="БИК")
+    correspondent_account = models.CharField(max_length=20, verbose_name="Корреспондентский счет")
+    is_primary = models.BooleanField(default=False, verbose_name="Основной")
+
+    # Полиморфная связь
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
+
+    verbose_name = "Банковские реквизиты"
+    verbose_name_plural = "Банковские реквизиты"
+
+
+class InternalLegalEntity(models.Model):
+    name = models.CharField(max_length=255)
+    inn = models.CharField(max_length=12, blank=True, null=True)
+    ogrn = models.CharField(max_length=15, blank=True, null=True)
+    kpp = models.CharField(max_length=9, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    ceo_title = models.CharField(max_length=100, blank=True, null=True)
+    ceo_name = models.CharField(max_length=255, blank=True, null=True)
+
+    email = GenericRelation(Email, verbose_name="Email адреса")
+    documents = GenericRelation(Documents, verbose_name="Документы по юридическому лицу")
+    bank_details = GenericRelation(BankDetails, verbose_name="Банковские реквизиты")
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'Внутренние юридические лица'
+
+
+
+class Organization(models.Model):
+    """Базовая модель контрагента - теперь НЕ абстрактная"""
+    TYPES = [
+        ('LEGAL', 'Юридическое лицо'),
+        ('INDIVIDUAL', 'Индивидуальный предприниматель'),
+        ('PERSON', 'Физическое лицо'),
+    ]
+
+    type = models.CharField(max_length=20, choices=TYPES)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Менеджер")
+
+    # Делаем поле необязательным в базовой модели
+    internal_legal_entity = models.ForeignKey(
+        InternalLegalEntity,
+        on_delete=models.CASCADE,
+        verbose_name="Внутреннее юридическое лицо",
+        null=True,  # Разрешаем NULL для физлиц
+        blank=True  # Разрешаем пустое значение в формах
+    )
+
+    history = models.JSONField(default=list, verbose_name="История изменений")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    # Общие связи для всех контрагентов
+    emails = GenericRelation(Email, blank=True, null=True, verbose_name="Email адреса")
+    # Связь с документами
+    documents = GenericRelation(Documents,verbose_name="Документы по контрагенту")
+
+
+    class Meta:
+        verbose_name = "Контрагент"
+        verbose_name_plural = "Контрагенты"
+
+    def clean(self):
+        """Валидация для обязательных полей в зависимости от типа"""
+        if self.type in ['LEGAL', 'INDIVIDUAL'] and not self.internal_legal_entity:
+            raise ValidationError({
+                'internal_legal_entity': 'Для данного типа контрагента обязательно нужно выбрать внутреннее юридическое лицо'
+            })
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def add_history_entry(self, user, action, old_value=None, new_value=None):
+        """Добавление записи в историю изменений"""
+        entry = {
+            'timestamp': timezone.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'user': user.username,
+            'action': action,
+            'old_value': str(old_value) if old_value else None,
+            'new_value': str(new_value) if new_value else None
+        }
+        self.history.append(entry)
+        self.save()
+
+    def __str__(self):
+        return f"Контрагент {self.id} ({self.get_type_display()})"
+
+
+class LegalEntity(Organization):
+    """Юридическое лицо - контрагент"""
+    LEGAL_FORMS = [
+        ('OOO', 'ООО'),
+        ('ZAO', 'ЗАО'),
+        ('AO', 'АО'),
+    ]
+
+    LEADER_POSITIONS = [
+        ('director', 'Директор'),
+        ('general_director', 'Генеральный директор'),
+    ]
+
+    legal_form = models.CharField(
+        max_length=10,
+        choices=LEGAL_FORMS,
+        verbose_name="Организационно-правовая форма"
+    )
+    name = models.CharField(max_length=255, verbose_name="Название организации")
+    inn = models.CharField(max_length=12, unique=True, verbose_name="ИНН")
+
+    # Дополнительные поля
+    ogrn = models.CharField(max_length=15, blank=True, null=True, verbose_name="ОГРН")
+    kpp = models.CharField(max_length=9, blank=True, null=True, verbose_name="КПП")
+    legal_address = models.TextField(blank=True, null=True, verbose_name="Юридический адрес")
+    postal_address = models.TextField(blank=True, null=True, verbose_name="Почтовый адрес")
+    leader_position = models.CharField(
+        max_length=20,
+        choices=LEADER_POSITIONS,
+        blank=True,
+        null=True,
+        verbose_name="Должность руководителя"
+    )
+    leader_name = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name="ФИО руководителя"
+    )
+
+    # Связь с банковскими реквизитами
+    bank_details = GenericRelation(BankDetails, verbose_name="Банковские реквизиты")
+
+    def __str__(self):
+        return f"{self.get_legal_form_display()} {self.name}"
+
+    def clean(self):
+        """Дополнительная валидация для ЮЛ"""
+        errors = {}
+
+        if not all([self.legal_form, self.name, self.inn]):
+            errors['__all__'] = "Все обязательные поля должны быть заполнены"
+
+        if not self.internal_legal_entity:
+            errors[
+                'internal_legal_entity'] = "Для юридического лица обязательно нужно выбрать внутреннее юридическое лицо"
+
+        if errors:
+            raise ValidationError(errors)
+
+    class Meta:
+        verbose_name = "Юридическое лицо"
+        verbose_name_plural = "Юридические лица"
+
+
+class IndividualEntrepreneur(Organization):
+    """Индивидуальный предприниматель"""
+    full_name = models.CharField(max_length=255, verbose_name="ФИО ИП")
+    inn = models.CharField(max_length=12, unique=True, verbose_name="ИНН")
+
+    # Дополнительные поля
+    ogrn = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        verbose_name="ОГРНИП"
+    )
+    legal_address = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Юридический адрес"
+    )
+
+    # Связь с банковскими реквизитами
+    bank_details = GenericRelation(BankDetails, verbose_name="Банковские реквизиты")
+    # Связь с документами
+    documents = GenericRelation(Documents,verbose_name="Документы по ИП")
+
+    def __str__(self):
+        return f"ИП {self.full_name}"
+
+    def clean(self):
+        """Дополнительная валидация для ИП"""
+        errors = {}
+
+        if not all([self.full_name, self.inn]):
+            errors['__all__'] = "Все обязательные поля должны быть заполнены"
+
+        if not self.internal_legal_entity:
+            errors['internal_legal_entity'] = "Для ИП обязательно нужно выбрать внутреннее юридическое лицо"
+
+        if errors:
+            raise ValidationError(errors)
+
+    class Meta:
+        verbose_name = "Индивидуальный предприниматель"
+        verbose_name_plural = "Индивидуальные предприниматели"
+
+
+class PhysicalPerson(Organization):
+    """Физическое лицо"""
+    full_name = models.CharField(max_length=255, verbose_name="ФИО")
+    phone = models.CharField(max_length=20, unique=True, verbose_name="Номер телефона")
+
+    # Дополнительные поля
+    passport_scan = models.FileField(
+        upload_to='passport_scans/%Y/%m/%d/',
+        blank=True,
+        null=True,
+        verbose_name="Скан паспорта"
+    )
+    documents = GenericRelation(Documents, blank=True, null=True, verbose_name="Документы по ФЛ")
+    def __str__(self):
+        return self.full_name
+
+    def clean(self):
+        """Валидация для физлица"""
+        if not all([self.full_name, self.phone]):
+            raise ValidationError("Все обязательные поля должны быть заполнены")
+
+    class Meta:
+        verbose_name = "Физическое лицо"
+        verbose_name_plural = "Физические лица"
 
 class ContractTemplate(models.Model):
     CONTRACT_TYPE_CHOICES = (
@@ -42,7 +374,7 @@ class ContractTemplate(models.Model):
 
     name = models.CharField(max_length=100)
     contract_type = models.CharField(max_length=30, choices=CONTRACT_TYPE_CHOICES,default='legal_entity', null=True, blank=True)
-    legal_entity = models.ForeignKey(LegalEntity, on_delete=models.CASCADE, null=True, blank=True)
+    internal_legal_entity = models.ForeignKey(InternalLegalEntity, on_delete=models.CASCADE, null=True, blank=True)
     organization_type = models.CharField(max_length=100, choices=(
         ('ooo', 'ООО'),
         ('ao', 'АО'),
@@ -52,166 +384,14 @@ class ContractTemplate(models.Model):
         ('ustav', 'устава'),
         ('attorney', 'доверенности')
     ), null=True, blank=True)
+    attorney_number = models.CharField(max_length=50, blank=True, null=True)
+    attorney_date = models.DateField(blank=True, null=True)
+    attorney_file = models.FileField(upload_to='attorney_files/', null=True, blank=True)
     file = models.FileField(upload_to='contract_templates/')
     is_default = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
-
-
-class Organization(models.Model):
-    ORGANIZATION_TYPE_CHOICES = (
-        ('legal_entity', 'Юридическое лицо'),
-        ('individual_entrepreneur', 'Индивидуальный предприниматель'),
-        ('physical_person', 'Физическое лицо'),
-    )
-
-    FOOTING_CHOICES = (
-        ('ustav', 'устава'),
-        ('attorney', 'доверенности')
-    )
-
-    KIND_CHOICES = (
-        ('ooo', 'ООО'),
-        ('ao', 'АО'),
-        ('zao', 'ЗАО'),
-    )
-
-    # Основные поля
-    organization_type = models.CharField(max_length=30, choices=ORGANIZATION_TYPE_CHOICES)
-    user = models.ForeignKey(User, related_name='organizations', on_delete=models.CASCADE)
-    legal_entity = models.ForeignKey(LegalEntity, on_delete=models.SET_NULL, null=True, blank=True)
-    history = models.JSONField(default=dict, blank=True)  # Для хранения истории изменений
-
-    # Поля для юридического лица
-    kind = models.CharField(max_length=100, blank=True, null=True, choices=KIND_CHOICES)
-    name = models.CharField(max_length=100, blank=True, null=True)
-    inn = models.CharField(max_length=15, blank=True, null=True, unique=True)
-
-    # Поля для ИП
-    name_fl = models.CharField(max_length=150, blank=True, null=True)  # ФИО для ИП и физлиц
-    ogrnip = models.CharField(max_length=15, blank=True, null=True)  # ОГРНИП
-
-    # Поля для физического лица
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
-    passport_scan = models.FileField(upload_to='passport_scans/', null=True, blank=True)
-
-    # Дополнительные поля для всех типов
-    ceo_footing = models.CharField(max_length=30, choices=FOOTING_CHOICES, blank=True, null=True)
-    attorney_number = models.CharField(max_length=50, blank=True, null=True)
-    attorney_date = models.DateField(blank=True, null=True)
-    attorney_file = models.FileField(upload_to='attorney_files/', null=True, blank=True)
-    ogrn = models.CharField(max_length=15, blank=True, null=True)
-    kpp = models.CharField(max_length=15, blank=True, null=True)
-    address = models.CharField(max_length=150, blank=True, null=True)
-    postal_address = models.CharField(max_length=150, blank=True, null=True)
-    ceo_title = models.CharField(max_length=30, blank=True, null=True)
-    ceo_name = models.CharField(max_length=150, blank=True, null=True)
-    contract_template = models.ForeignKey(ContractTemplate, on_delete=models.SET_NULL, null=True, blank=True)
-    custom_contract_template = models.FileField(upload_to='custom_contracts/', null=True, blank=True)
-
-    def __str__(self):
-        if self.organization_type == 'physical_person':
-            return f'{self.name_fl} ({self.phone_number})'
-        elif self.organization_type == 'individual_entrepreneur':
-            return f'ИП {self.name_fl}'
-        return self.name
-
-    class Meta:
-        verbose_name_plural = 'Организации'
-
-    def save(self, *args, **kwargs):
-        is_new = self.pk is None
-
-        if is_new:
-            # Первая запись в истории при создании
-            self.history = {
-                'created': {
-                    'datetime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'user': self.user.username,
-                    'user_id': self.user.id
-                }
-            }
-        else:
-            # Логирование изменений будет в представлениях
-            pass
-
-        super().save(*args, **kwargs)
-
-    def add_history_record(self, field, old_value, new_value):
-        """Добавляет запись в историю изменений"""
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        if 'changes' not in self.history:
-            self.history['changes'] = {}
-
-        self.history['changes'][timestamp] = {
-            'field': field,
-            'old_value': old_value,
-            'new_value': new_value
-        }
-        self.save()
-
-    @property
-    def last_order(self):
-        from .models import Order
-        return (
-            Order.objects.filter(invoice__organization=self.id)
-            .order_by('-created_at')
-            .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
-        )
-
-    @property
-    def ready_for_contract(self):
-        # Проверяем обязательные поля в зависимости от типа организации
-        if self.organization_type == 'legal_entity':
-            required_fields = [self.kind, self.name, self.inn, self.legal_entity]
-        elif self.organization_type == 'individual_entrepreneur':
-            required_fields = [self.name_fl, self.inn, self.legal_entity]
-        elif self.organization_type == 'physical_person':
-            required_fields = [self.name_fl, self.phone_number]
-        else:
-            return False
-
-        return all(field not in (None, '') for field in required_fields)
-
-
-class BankAccount(models.Model):
-    organization = models.ForeignKey(Organization, related_name='bank_accounts', on_delete=models.CASCADE)
-    r_s = models.CharField(max_length=25)
-    bank = models.CharField(max_length=300)
-    bik = models.CharField(max_length=10)
-    k_s = models.CharField(max_length=25)
-
-    def __str__(self):
-        return f"{self.r_s} - {self.bank}"
-
-
-class OrganizationEmail(models.Model):
-    organization = models.ForeignKey(Organization, related_name='emails', on_delete=models.CASCADE)
-    email = models.EmailField()
-
-    def __str__(self):
-        return self.email
-
-
-class Document(models.Model):
-    DOCUMENT_TYPES = (
-        ('xlsx', 'Excel'),
-        ('docx', 'Word'),
-        ('pdf', 'PDF'),
-        ('jpeg', 'JPEG'),
-    )
-
-    organization = models.ForeignKey(Organization, related_name='documents', on_delete=models.CASCADE, null=True,
-                                     blank=True)
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, null=True, blank=True)
-    invoice = models.ForeignKey('Invoice', on_delete=models.CASCADE, null=True, blank=True)
-    file = models.FileField(upload_to='documents/')
-    document_type = models.CharField(max_length=10, choices=DOCUMENT_TYPES)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.get_document_type_display()} - {self.file.name}"
 
 class Invoice(models.Model):
     number = models.CharField(max_length=5, blank=True, null=True)
@@ -221,7 +401,7 @@ class Invoice(models.Model):
     payed_amount = models.IntegerField(default=0)
     shipping_amount = models.IntegerField(default=0)
     montage_amount = models.IntegerField(default=0)
-    legal_entity = models.ForeignKey(LegalEntity, related_name='legal_entity', on_delete=models.CASCADE)
+    internal_legal_entity = models.ForeignKey(InternalLegalEntity, related_name='invoices', on_delete=models.CASCADE)
     invoice_file = models.FileField(upload_to='invoices/', blank=True, null=True)
     year = models.PositiveIntegerField(editable=False)
     is_paid = models.BooleanField(default=False, blank=True, null=True)
@@ -240,7 +420,7 @@ class Invoice(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['number', 'legal_entity', 'year'], name='unique_field_combination')
+            models.UniqueConstraint(fields=['number', 'internal_legal_entity', 'year'], name='unique_field_combination')
         ]
 
     @property
@@ -373,6 +553,7 @@ class Order(models.Model):
 
         return icon_path
 
+
 class OrderChangeHistory(models.Model):
     order = models.ForeignKey(Order, related_name='changes', on_delete=models.CASCADE)
     order_file = models.FileField(upload_to='uploads/', blank=True, null=True)
@@ -396,7 +577,7 @@ class Certificate(models.Model):
     numbers = models.CharField(max_length=20, blank=True, null=True)
     p_kind = models.CharField(max_length=15, choices=KIND_CHOICE, verbose_name='вид изделия')
     p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
-    legal_entity = models.ForeignKey(LegalEntity, related_name='certificates', on_delete=models.CASCADE)
+    internal_legal_entity = models.ForeignKey(InternalLegalEntity, related_name='certificates', on_delete=models.CASCADE)
     scan_copy = models.FileField(upload_to='uploads/certificates/', blank=True, null=True)
     passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/',verbose_name='Шаблон паспорта', blank=True, null=True)
 
@@ -549,7 +730,7 @@ class Nameplate(models.Model):
 class Contract(models.Model):
     number = models.CharField(unique=True, max_length=100, blank=True, null=True)
     organization = models.ForeignKey(Organization, related_name='contracts', on_delete=models.CASCADE)
-    legal_entity = models.ForeignKey(LegalEntity, related_name='contracts', on_delete=models.CASCADE)
+    internal_legal_entity = models.ForeignKey(InternalLegalEntity, related_name='contracts', on_delete=models.CASCADE)
     file = models.FileField(upload_to='contracts/')
     days = models.IntegerField(blank=True, null=True)
 

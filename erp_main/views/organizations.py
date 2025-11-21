@@ -1,62 +1,329 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView, UpdateView, ListView, DetailView
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.generic import CreateView, UpdateView, View
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.contrib import messages
+from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
+from django.forms import formset_factory
+from ..models import Organization, LegalEntity, IndividualEntrepreneur, PhysicalPerson, Email, BankDetails, \
+    InternalLegalEntity
+from ..forms import LegalEntityForm, IndividualEntrepreneurForm, PhysicalPersonForm, EmailForm, BankDetailsForm
 
-from ..models import Organization, LegalEntity, ContractTemplate
-from ..forms import OrganizationForm, LegalEntityForm
-from .mixins import UserAccessMixin
-
-
-class OrganizationCreateView(UserAccessMixin, CreateView):
-    model = Organization
-    form_class = OrganizationForm
+class OrganizationCreateView(CreateView):
     template_name = 'organization_add.html'
+    success_url = reverse_lazy('organization_list')
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        org_type = self.request.GET.get('type', 'LEGAL')
+
+        # Формы для email и банковских реквизитов
+        EmailFormSet = formset_factory(EmailForm, extra=1)
+        BankDetailsFormSet = formset_factory(BankDetailsForm, extra=1)
+
+        # Получаем доступные InternalLegalEntity для выбора
+        available_legal_entities = InternalLegalEntity.objects.all()
+
+        context.update({
+            'org_type': org_type,
+            'email_formset': EmailFormSet(),
+            'bank_details_formset': BankDetailsFormSet(),
+            'Organization': Organization,
+            'available_legal_entities': available_legal_entities,
+        })
+
+        # Добавляем соответствующую основную форму в зависимости от типа
+        if org_type == 'LEGAL':
+            context['main_form'] = LegalEntityForm()
+        elif org_type == 'INDIVIDUAL':
+            context['main_form'] = IndividualEntrepreneurForm()
+        else:
+            context['main_form'] = PhysicalPersonForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        org_type = request.POST.get('org_type', 'LEGAL')
+
+        # Инициализация форм и формсетов
+        EmailFormSet = formset_factory(EmailForm)
+        BankDetailsFormSet = formset_factory(BankDetailsForm)
+
+        email_formset = EmailFormSet(request.POST, prefix='email')
+        bank_details_formset = BankDetailsFormSet(request.POST, prefix='bank')
+
+        # Выбор основной формы
+        if org_type == 'LEGAL':
+            main_form = LegalEntityForm(request.POST, request.FILES)
+        elif org_type == 'INDIVIDUAL':
+            main_form = IndividualEntrepreneurForm(request.POST, request.FILES)
+        else:
+            main_form = PhysicalPersonForm(request.POST, request.FILES)
+
+        # Для физлиц устанавливаем internal_legal_entity в None
+        if org_type == 'PERSON':
+            main_form.data = main_form.data.copy()
+            main_form.data['internal_legal_entity'] = ''
+
+        if main_form.is_valid() and email_formset.is_valid():
+            # Для ЮЛ и ИП проверяем банковские реквизиты
+            if org_type in ['LEGAL', 'INDIVIDUAL']:
+                if not bank_details_formset.is_valid():
+                    return self.form_invalid(
+                        main_form, email_formset, bank_details_formset, org_type
+                    )
+
+            try:
+                with transaction.atomic():
+                    # Сохраняем основную форму
+                    organization = main_form.save(commit=False)
+                    organization.type = org_type
+                    organization.user = request.user
+
+                    # Для физлиц устанавливаем internal_legal_entity в None
+                    if org_type == 'PERSON':
+                        organization.internal_legal_entity = None
+
+                    organization.save()
+
+                    # Сохраняем email адреса
+                    self.save_emails(email_formset, organization)
+
+                    # Сохраняем банковские реквизиты для ЮЛ и ИП
+                    if org_type in ['LEGAL', 'INDIVIDUAL']:
+                        self.save_bank_details(bank_details_formset, organization)
+
+                    # Добавляем запись в историю
+                    organization.add_history_entry(
+                        request.user,
+                        'Создание контрагента'
+                    )
+
+                    messages.success(request, 'Контрагент успешно создан')
+                    return redirect(self.success_url)
+
+            except Exception as e:
+                messages.error(request, f'Ошибка при создании контрагента: {str(e)}')
+                return self.form_invalid(
+                    main_form, email_formset, bank_details_formset, org_type
+                )
+
+        return self.form_invalid(
+            main_form, email_formset, bank_details_formset, org_type
+        )
+
+    def save_emails(self, email_formset, organization):
+        """Сохранение email адресов"""
+        for i, form in enumerate(email_formset):
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                email = form.save(commit=False)
+                email.content_object = organization
+                # Первый email делаем основным
+                if i == 0:
+                    email.is_primary = True
+                email.save()
+
+    def save_bank_details(self, bank_details_formset, organization):
+        """Сохранение банковских реквизитов"""
+        for i, form in enumerate(bank_details_formset):
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                bank_detail = form.save(commit=False)
+                bank_detail.content_object = organization
+                # Первые реквизиты делаем основными
+                if i == 0:
+                    bank_detail.is_primary = True
+                bank_detail.save()
+
+
+class OrganizationUpdateView(UpdateView):
+    template_name = 'organization_edit.html'
+    success_url = reverse_lazy('organization_list')  # Замените на ваш URL
+
+    def get_object(self):
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(Organization, pk=pk)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        organization = self.get_object()
+
+        # Формы для email и банковских реквизитов
+        EmailFormSet = formset_factory(EmailForm, extra=1)
+        BankDetailsFormSet = formset_factory(BankDetailsForm, extra=1)
+
+        # Получаем существующие email и банковские реквизиты
+        existing_emails = organization.emails.all()
+        existing_bank_details = organization.bank_details.all() if hasattr(organization, 'bank_details') else []
+
+        context.update({
+            'org_type': organization.type,
+            'email_formset': EmailFormSet(
+                initial=[{'email': email.email, 'is_primary': email.is_primary} for email in existing_emails],
+                prefix='email'
+            ),
+            'bank_details_formset': BankDetailsFormSet(
+                initial=[{
+                    'bank_name': bank.bank_name,
+                    'account_number': bank.account_number,
+                    'bik': bank.bik,
+                    'correspondent_account': bank.correspondent_account,
+                    'is_primary': bank.is_primary
+                } for bank in existing_bank_details],
+                prefix='bank'
+            ) if organization.type in ['LEGAL', 'INDIVIDUAL'] else None,
+        })
+
+        return context
+
+    def get_form_class(self):
+        organization = self.get_object()
+        if organization.type == 'LEGAL':
+            return LegalEntityForm
+        elif organization.type == 'INDIVIDUAL':
+            return IndividualEntrepreneurForm
+        else:
+            return PhysicalPersonForm
 
     def form_valid(self, form):
-        # Проверяем ИНН на существование
-        inn = form.cleaned_data.get('inn')
-        org_type = form.cleaned_data.get('organization_type')
+        organization = self.get_object()
 
-        if inn and org_type in ['legal_entity', 'individual_entrepreneur']:
-            existing_org = Organization.objects.filter(inn=inn).first()
-            if existing_org:
-                # Сохраняем данные формы в сессии для повторного использования
-                self.request.session['organization_form_data'] = {
-                    'organization_type': org_type,
-                    'kind': form.cleaned_data.get('kind'),
-                    'name': form.cleaned_data.get('name'),
-                    'name_fl': form.cleaned_data.get('name_fl'),
-                    'legal_entity_id': form.cleaned_data.get('legal_entity').id if form.cleaned_data.get(
-                        'legal_entity') else None,
-                    'emails': form.cleaned_data.get('emails', ''),
-                    'bank_accounts': form.cleaned_data.get('bank_accounts', '[]'),
-                }
-                return redirect('organization_duplicate_handler', inn=inn)
+        try:
+            with transaction.atomic():
+                # Сохраняем основную форму
+                organization = form.save()
 
-        organization = form.save(commit=False)
-        organization.user = self.request.user
+                # Обновляем email и банковские реквизиты
+                self.update_emails(organization)
+                if organization.type in ['LEGAL', 'INDIVIDUAL']:
+                    self.update_bank_details(organization)
+
+                # Добавляем запись в историю
+                organization.add_history_entry(
+                    self.request.user,
+                    'Редактирование контрагента'
+                )
+
+                messages.success(self.request, 'Контрагент успешно обновлен')
+                return redirect(self.success_url)
+
+        except Exception as e:
+            messages.error(self.request, f'Ошибка при обновлении контрагента: {str(e)}')
+            return self.form_invalid(form)
+
+    def update_emails(self, organization):
+        """Обновление email адресов"""
+        EmailFormSet = formset_factory(EmailForm)
+        email_formset = EmailFormSet(self.request.POST, prefix='email')
+
+        if email_formset.is_valid():
+            # Удаляем старые email
+            organization.emails.all().delete()
+
+            # Сохраняем новые
+            for form in email_formset:
+                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                    email = form.save(commit=False)
+                    email.content_object = organization
+                    email.save()
+
+    def update_bank_details(self, organization):
+        """Обновление банковских реквизитов"""
+        BankDetailsFormSet = formset_factory(BankDetailsForm)
+        bank_details_formset = BankDetailsFormSet(self.request.POST, prefix='bank')
+
+        if bank_details_formset.is_valid():
+            # Удаляем старые реквизиты
+            organization.bank_details.all().delete()
+
+            # Сохраняем новые
+            for i, form in enumerate(bank_details_formset):
+                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                    bank_detail = form.save(commit=False)
+                    bank_detail.content_object = organization
+                    if i == 0:
+                        bank_detail.is_primary = True
+                    bank_detail.save()
+
+    def _get_organization(self, org_type, pk):
+        """Вспомогательный метод для получения организации по типу и ID"""
+        if org_type == 'legal':
+            return get_object_or_404(LegalEntity, pk=pk)
+        elif org_type == 'individual_entrepreneur':
+            return get_object_or_404(IndividualEntrepreneur, pk=pk)
+        elif org_type == 'person':
+            return get_object_or_404(PhysicalPerson, pk=pk)
+        return None
+
+
+class OrganizationListView(LoginRequiredMixin, View):
+    def get(self, request):
+        # Получаем все типы организаций для текущего пользователя
+        legal_entities = LegalEntity.objects.filter(user=request.user)
+        individual_entrepreneurs = IndividualEntrepreneur.objects.filter(user=request.user)
+        physical_persons = PhysicalPerson.objects.filter(user=request.user)
+
+        # Объединяем в один список для отображения
+        all_organizations = list(legal_entities) + list(individual_entrepreneurs) + list(physical_persons)
+        # Сортируем по дате создания (новые первыми)
+        all_organizations.sort(key=lambda x: x.created_at, reverse=True)
+
+        return render(request, 'organization_list.html', {
+            'organizations': all_organizations
+        })
+
+
+class TakeOverOrganizationView(LoginRequiredMixin, View):
+    def post(self, request):
+        org_type = request.POST.get('org_type')
+        organization_id = request.POST.get('organization_id')
+
+        organization = self._get_organization(org_type, organization_id)
+        if not organization:
+            return JsonResponse({'success': False, 'error': 'Organization not found'})
+
+        old_user = organization.user
+        organization.user = request.user
         organization.save()
 
-        # Сохраняем связанные данные
-        form.save_m2m()
-        return redirect('organization_list')
+        # Добавление записи в историю
+        organization.add_history_entry(
+            request.user,
+            "Смена менеджера",
+            old_value={'user': old_user.username},
+            new_value={'user': request.user.username}
+        )
 
-    def form_invalid(self, form):
-        return super().form_invalid(form)
+        return JsonResponse({'success': True})
+
+    def _get_organization(self, org_type, organization_id):
+        """Вспомогательный метод для получения организации по типу и ID"""
+        if org_type == 'legal':
+            return get_object_or_404(LegalEntity, pk=organization_id)
+        elif org_type == 'individual_entrepreneur':
+            return get_object_or_404(IndividualEntrepreneur, pk=organization_id)
+        elif org_type == 'person':
+            return get_object_or_404(PhysicalPerson, pk=organization_id)
+        return None
 
 
 @require_http_methods(["GET", "POST"])
-def organization_duplicate_handler(request, inn):
-    existing_org = get_object_or_404(Organization, inn=inn)
+def organization_duplicate_handler(request, org_type, identifier):
+    """Обработчик дубликатов организаций"""
+
+    # Получаем существующую организацию
+    if org_type in ['legal', 'individual_entrepreneur']:
+        existing_org = get_object_or_404(
+            LegalEntity if org_type == 'legal' else IndividualEntrepreneur,
+            inn=identifier
+        )
+    elif org_type == 'person':
+        existing_org = get_object_or_404(PhysicalPerson, phone=identifier)
+    else:
+        messages.error(request, 'Неверный тип организации')
+        return redirect('organization_create')
 
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -65,23 +332,55 @@ def organization_duplicate_handler(request, inn):
             # Забираем организацию
             old_user = existing_org.user
             existing_org.user = request.user
-            existing_org.add_history_record('user', str(old_user), str(request.user))
             existing_org.save()
+
+            existing_org.add_history_entry(
+                request.user,
+                "Смена менеджера при взятии организации",
+                old_value={'user': old_user.username},
+                new_value={'user': request.user.username}
+            )
+
             messages.success(request, f'Организация "{existing_org}" теперь прикреплена к вам')
 
         elif action == 'create_duplicate':
-            # Создаем дубликат с другим ИНН
+            # Создаем дубликат с другим идентификатором
             form_data = request.session.get('organization_form_data', {})
-            organization = Organization.objects.create(
-                organization_type=form_data.get('organization_type'),
-                user=request.user,
-                kind=form_data.get('kind'),
-                name=form_data.get('name'),
-                name_fl=form_data.get('name_fl'),
-                legal_entity_id=form_data.get('legal_entity_id'),
-                inn=f"{inn}_dup_{Organization.objects.count() + 1}"  # Уникальный ИНН для дубликата
+
+            if org_type == 'legal':
+                duplicate_inn = f"{identifier}_dup_{int(timezone.now().timestamp())}"
+                organization = LegalEntity.objects.create(
+                    legal_form=form_data.get('legal_form'),
+                    name=form_data.get('name'),
+                    inn=duplicate_inn,
+                    parent_company_id=form_data.get('parent_company'),
+                    user=request.user,
+                    # ... остальные поля
+                )
+            elif org_type == 'individual_entrepreneur':
+                duplicate_inn = f"{identifier}_dup_{int(timezone.now().timestamp())}"
+                organization = IndividualEntrepreneur.objects.create(
+                    full_name=form_data.get('full_name'),
+                    inn=duplicate_inn,
+                    parent_company_id=form_data.get('parent_company'),
+                    user=request.user,
+                    # ... остальные поля
+                )
+            elif org_type == 'person':
+                duplicate_phone = f"{identifier}_dup_{int(timezone.now().timestamp())}"
+                organization = PhysicalPerson.objects.create(
+                    full_name=form_data.get('full_name'),
+                    phone=duplicate_phone,
+                    user=request.user,
+                    # ... остальные поля
+                )
+
+            organization.add_history_entry(
+                request.user,
+                "Создана как дубликат существующей организации"
             )
-            messages.success(request, f'Создана новая организация с ИНН {organization.inn}')
+
+            messages.success(request, f'Создана новая организация')
 
         elif action == 'cancel':
             messages.info(request, 'Создание организации отменено')
@@ -92,98 +391,19 @@ def organization_duplicate_handler(request, inn):
 
         return redirect('organization_list')
 
-    return render(request, 'organization_duplicate_handler.html', {
+    return render(request, 'organizations/organization_duplicate_handler.html', {
         'existing_org': existing_org,
-        'inn': inn
+        'org_type': org_type,
+        'identifier': identifier
     })
 
-
-@require_http_methods(["GET"])
-def get_contract_template(request):
-    """API для получения подходящего шаблона договора"""
-    org_type = request.GET.get('organization_type')
-    legal_entity_id = request.GET.get('legal_entity')
-    kind = request.GET.get('kind')
-    footing = request.GET.get('ceo_footing')
-
-    templates = ContractTemplate.objects.all()
-
-    if org_type:
-        templates = templates.filter(contract_type=org_type)
-
-    if legal_entity_id:
-        templates = templates.filter(legal_entity_id=legal_entity_id)
-
-    if kind:
-        templates = templates.filter(organization_type=kind)
-
-    if footing:
-        templates = templates.filter(footing_type=footing)
-
-    # Ищем наиболее подходящий шаблон
-    template = templates.first()
-
-    if template:
-        return JsonResponse({
-            'template_id': template.id,
-            'template_name': template.name
-        })
-
-    return JsonResponse({'template_id': None, 'template_name': ''})
-
-
-class OrganizationUpdateView(UserAccessMixin, UpdateView):
-    model = Organization
-    form_class = OrganizationForm
-    template_name = 'organization_edit.html'
-    context_object_name = 'organization'
-
-    def get_success_url(self):
-        return reverse('organization_detail', kwargs={'pk': self.object.pk})
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def form_valid(self, form):
-        # Логируем изменения
-        old_instance = Organization.objects.get(pk=self.object.pk)
-        for field in form.changed_data:
-            if field not in ['emails', 'bank_accounts']:  # Исключаем скрытые поля
-                old_value = getattr(old_instance, field)
-                new_value = form.cleaned_data[field]
-                self.object.add_history_record(field, str(old_value), str(new_value))
-
-        return super().form_valid(form)
-
-
-class OrganizationListView(UserAccessMixin, ListView):
-    model = Organization
-    template_name = 'organization_list.html'
-    context_object_name = 'organizations'
-
-    def get_queryset(self):
-        return self.get_user_organizations()
-
-
-class OrganizationDetailView(UserAccessMixin, DetailView):
-    model = Organization
-    template_name = 'organization_detail.html'
-    context_object_name = 'organization'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['legal_entities'] = LegalEntity.objects.all()
-        return context
-
-def create_legal_entity(request):
+def create_internal_legal_entity(request):
     if request.method == 'POST':
-        form = LegalEntityForm(request.user, request.POST)
+        form = InternalLegalEntityForm(request.user, request.POST)
         if form.is_valid():
             form.save()
             return redirect('organization_list')
     else:
-        form = LegalEntityForm(request.user)
+        form = InternalLegalEntityForm(request.user)
 
     return render(request, 'legal_entity_form.html', {'form': form})

@@ -13,7 +13,7 @@ import logging
 import re
 from django.contrib import messages
 
-from ..models import Order, OrderItem, Organization, LegalEntity, GlassInfo, OrderChangeHistory
+from ..models import Order, OrderItem, Organization, InternalLegalEntity, GlassInfo, OrderChangeHistory
 from ..forms import OrderForm, OrderFileForm
 from .mixins import UserAccessMixin
 from .permissions import (  # Импорт из нового файла permissions.py
@@ -46,7 +46,7 @@ class OrderUploadView(UserAccessMixin, FormView):
         else:
             context['organizations'] = Organization.objects.filter(user=self.request.user)
 
-        context['legal_entities'] = LegalEntity.objects.all()
+        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
         context['user_role'] = user_role  # Передаем роль в шаблон
         return context
 

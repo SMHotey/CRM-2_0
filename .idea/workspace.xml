@@ -5,16 +5,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="логика формирования паспортов">
-      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0005_contracttemplate_contract_type_and_more.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/organization_duplicate_handler.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_Елего_-_472_на_запуск_B4JxqAG.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/calculation/migrations/0001_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/calculation/migrations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizaitons/organization_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizaitons/organization_type_select.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/views/managers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fix_migrations.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reset_database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/django_errors.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/api_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/api_views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_delete_nameplate.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0003_nameplate.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0005_contracttemplate_contract_type_and_more.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/urls_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views/certificates.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/certificates.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views/contracts.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/contracts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views/invoices.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/invoices.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/views/orders.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/orders.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views/organizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/organizations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,8 +51,8 @@
       <list>
         <option value="CSS File" />
         <option value="JavaScript File" />
-        <option value="Python Script" />
         <option value="HTML File" />
+        <option value="Python Script" />
       </list>
     </option>
   </component>
@@ -85,7 +107,9 @@
     &quot;Python.CRM 2_0.executor&quot;: &quot;Run&quot;,
     &quot;Python.crm.executor&quot;: &quot;Run&quot;,
     &quot;Python.fix_bom.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fix_migrations.executor&quot;: &quot;Run&quot;,
     &quot;Python.project_to_text.executor&quot;: &quot;Run&quot;,
+    &quot;Python.reset_database.executor&quot;: &quot;Run&quot;,
     &quot;Python.test.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -94,7 +118,7 @@
     &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/User01/CRM-2_0&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/User01/Desktop&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -172,6 +196,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="fix_migrations" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Journal_4_0" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fix_migrations.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="project_to_text" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Journal_4_0" />
       <option name="ENV_FILES" value="" />
@@ -187,6 +234,29 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/project_to_text.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="reset_database" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Journal_4_0" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/reset_database.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -248,11 +318,15 @@
       <item itemvalue="Django Server.Journal_4_0" />
       <item itemvalue="Python.CRM 2_0" />
       <item itemvalue="Python.crm" />
+      <item itemvalue="Python.fix_migrations" />
+      <item itemvalue="Python.reset_database" />
       <item itemvalue="Python.project_to_text" />
       <item itemvalue="Python.test" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.fix_migrations" />
+        <item itemvalue="Python.reset_database" />
         <item itemvalue="Python.project_to_text" />
         <item itemvalue="Python.test" />
       </list>
@@ -475,6 +549,13 @@
       <workItem from="1762930161829" duration="15827000" />
       <workItem from="1763015856716" duration="12297000" />
       <workItem from="1763036700209" duration="5682000" />
+      <workItem from="1763107910255" duration="11837000" />
+      <workItem from="1763381565709" duration="5919000" />
+      <workItem from="1763448554009" duration="11689000" />
+      <workItem from="1763534240988" duration="22689000" />
+      <workItem from="1763622213885" duration="9620000" />
+      <workItem from="1763706743771" duration="7900000" />
+      <workItem from="1763722143397" duration="8139000" />
     </task>
     <task id="LOCAL-00018" summary="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции">
       <option name="closed" value="true" />
@@ -915,9 +996,11 @@
     <option name="LAST_COMMIT_MESSAGE" value="логика формирования паспортов" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Journal_4_0$fix_migrations.coverage" NAME="fix_migrations Coverage Results" MODIFIED="1763627173224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$fix_bom.coverage" NAME="fix_bom Coverage Results" MODIFIED="1746434437970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$test.coverage" NAME="test Coverage Results" MODIFIED="1746433440343" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1763044343615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1763627446180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$reset_database.coverage" NAME="reset_database Coverage Results" MODIFIED="1763562940019" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1737014151421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
     <SUITE FILE_PATH="coverage/Journal_4_0$project_to_text.coverage" NAME="project_to_text Coverage Results" MODIFIED="1760700103058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745936517854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />

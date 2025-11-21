@@ -24,9 +24,9 @@ class OrganizationViewSet(viewsets.ModelViewSet):
         return Organization.objects.filter(user=self.request.user)
 
 
-class LegalEntityViewSet(viewsets.ModelViewSet):
-    queryset = LegalEntity.objects.all()
-    serializer_class = LegalEntitySerializer
+class InternalLegalEntityViewSet(viewsets.ModelViewSet):
+    queryset = InternalLegalEntity.objects.all()
+    serializer_class = InternalLegalEntitySerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'inn']
 

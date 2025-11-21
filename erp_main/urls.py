@@ -4,13 +4,16 @@ from .views import (
     custom_login, glass_info, update_glass_status,
     OrderUploadView, orders_list, order_detail, update_order_item_status,
     invoice_add, invoice_detail, invoices_list,
-    OrganizationCreateView, OrganizationUpdateView, OrganizationListView, OrganizationDetailView,
-    create_legal_entity, create_contract,
-    save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport
+
+    save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport, create_contract
 )
+from .views.organizations import OrganizationCreateView, OrganizationUpdateView, OrganizationListView, \
+    TakeOverOrganizationView, create_internal_legal_entity
 from .views import certificates
 from .views.orders import update_workshop
 from .views.base import index
+
+
 urlpatterns = [
     # Auth
     path('login/', custom_login, name='login'),
@@ -32,12 +35,14 @@ urlpatterns = [
     path('invoices/', invoices_list, name='invoices_list'),
 
     # Organizations
-    path('organizations/add/', OrganizationCreateView.as_view(), name='organization_add'),
-    path('organizations/<int:pk>/edit/', OrganizationUpdateView.as_view(), name='organization_edit'),
-    path('organizations/<int:pk>/', OrganizationDetailView.as_view(), name='organization_detail'),
     path('organizations/', OrganizationListView.as_view(), name='organization_list'),
-    path('legal_entity/create/', create_legal_entity, name='create_legal_entity'),
+    path('organizations/create/', OrganizationCreateView.as_view(), name='organization_add'),
+    path('organizations/<int:pk>/update/', OrganizationUpdateView.as_view(), name='organization_update'),
+    path('organizations/takeover/', TakeOverOrganizationView.as_view(), name='organization_takeover'),
+    # path('email/add/', EmailCreateView.as_view(), name='email_add'),
+    # path('bank-details/add/', BankDetailsCreateView.as_view(), name='bank_details_add'),
     path('organizations/<int:pk>/create_contract/', create_contract, name='create_contract'),
+    path('organizations/create_internal_legal_entity/',create_internal_legal_entity, name='create_internal_legal_entity'),
 
     # Glass
 
@@ -78,4 +83,5 @@ urlpatterns = [
 
     # Debug
     path('debug/users/', debug_users, name='debug_users'),
+
 ]

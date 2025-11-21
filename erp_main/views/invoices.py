@@ -1,6 +1,4 @@
-from functools import wraps
-
-from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -8,11 +6,9 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.urls import reverse
 from django.db import IntegrityError
-from django.views.decorators.http import require_POST
 
-from ..models import Invoice, Organization, LegalEntity
+from ..models import Invoice, Organization, InternalLegalEntity
 from ..forms import InvoiceForm
-from .mixins import UserAccessMixin
 from .permissions import get_user_role_from_request, can_add_invoice, ajax_permission_required
 
 
@@ -86,7 +82,7 @@ def invoice_detail(request, pk):
 @login_required
 def invoices_list(request):
     search_query = request.GET.get('search', '')
-    selected_legal_entity_id = request.GET.get('legal_entity', None)
+    selected_internal_legal_entity_id = request.GET.get('internal_legal_entity', None)
     sort_by = request.GET.get('sort', 'id')
     direction = request.GET.get('direction', 'desc')
     source = request.GET.get('source')
@@ -105,10 +101,10 @@ def invoices_list(request):
         )
 
     # Фильтрация по выбранному юридическому лицу
-    if selected_legal_entity_id:
+    if selected_internal_legal_entity_id:
         try:
-            selected_legal_entity_id = int(selected_legal_entity_id)
-            invoices = invoices.filter(legal_entity_id=selected_legal_entity_id)
+            selected_internal_legal_entity_id = int(selected_internal_legal_entity_id)
+            invoices = invoices.filter(internal_legal_entity_id=selected_internal_legal_entity_id)
         except ValueError:
             pass
 
@@ -128,11 +124,11 @@ def invoices_list(request):
     invoices_page = paginator.get_page(page_number)
 
     # Получение всех юридических лиц для отображения в выпадающем списке
-    legal_entities = LegalEntity.objects.all()
+    internal_legal_entities = InternalLegalEntity.objects.all()
 
     return render(request, 'invoices_list.html', {
         'invoices': invoices_page,
-        'legal_entities': legal_entities,
-        'selected_legal_entity_id': selected_legal_entity_id,
+        'internal_legal_entities': internal_legal_entities,
+        'selected_internal_legal_entity_id': selected_internal_legal_entity_id,
         'request': request,
     })

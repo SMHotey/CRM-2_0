@@ -4,7 +4,7 @@ from .api_views import *
 
 router = DefaultRouter()
 router.register(r'organizations', OrganizationViewSet)
-router.register(r'legal-entities', LegalEntityViewSet)
+router.register(r'legal-entities', InternalLegalEntityViewSet)
 router.register(r'invoices', InvoiceViewSet)
 router.register(r'orders', OrderViewSet)
 router.register(r'order-items', OrderItemViewSet)

@@ -14,9 +14,9 @@ from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import FormView, CreateView, ListView, DetailView, UpdateView
 
 from erp_main.views.permissions import get_user_role_from_request
-from .models import Order, OrderItem, Organization, Invoice, LegalEntity, GlassInfo, OrderChangeHistory, Contract, \
+from .models import Order, OrderItem, Organization, Invoice, InternalLegalEntity, GlassInfo, OrderChangeHistory, Contract, \
     Shipment
-from .forms import OrderForm, OrganizationForm, InvoiceForm,OrderFileForm, LegalEntityForm, \
+from .forms import OrderForm, OrganizationForm, InvoiceForm,OrderFileForm, InternalLegalEntityForm, \
     ShipmentForm
 import logging
 from docx import Document

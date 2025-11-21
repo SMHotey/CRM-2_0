@@ -1,12 +1,13 @@
 import json
 
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from ..models import Certificate, LegalEntity, Nameplate
+from ..models import Certificate, InternalLegalEntity, Nameplate
 from ..forms import CertificateForm
 
 
@@ -17,7 +18,7 @@ class CertificateListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = Certificate.objects.select_related('legal_entity').order_by('-id')
+        queryset = Certificate.objects.select_related('internal_legal_entity').order_by('-id')
 
         # Фильтрация по поисковому запросу
         search_query = self.request.GET.get('search')
@@ -26,20 +27,20 @@ class CertificateListView(LoginRequiredMixin, ListView):
                 Q(numbers__icontains=search_query) |
                 Q(p_kind__icontains=search_query) |
                 Q(p_type__icontains=search_query) |
-                Q(legal_entity__name__icontains=search_query)
+                Q(internal_legal_entity__name__icontains=search_query)
             )
 
         # Фильтрация по юридическому лицу
-        legal_entity_id = self.request.GET.get('legal_entity')
-        if legal_entity_id:
-            queryset = queryset.filter(legal_entity_id=legal_entity_id)
+        internal_legal_entity_id = self.request.GET.get('internal_legal_entity')
+        if internal_legal_entity_id:
+            queryset = queryset.filter(internal_legal_entity_id=internal_legal_entity_id)
 
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['legal_entities'] = LegalEntity.objects.all()
-        context['selected_legal_entity'] = self.request.GET.get('legal_entity')
+        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
+        context['selected_internal_legal_entity'] = self.request.GET.get('internal_legal_entity')
         context['search_query'] = self.request.GET.get('search', '')
         return context
 
@@ -58,7 +59,7 @@ class CertificateCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['legal_entities'] = LegalEntity.objects.all()
+        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
         return context
 
     def form_valid(self, form):
@@ -74,7 +75,7 @@ class CertificateUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['legal_entities'] = LegalEntity.objects.all()
+        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
         context['certificate'] = self.get_object()
         return context
 
@@ -93,14 +94,14 @@ def get_certificates(request):
     certificates = Certificate.objects.filter(
         p_kind=kind,
         p_type=type
-    ).select_related('legal_entity')
+    ).select_related('internal_legal_entity')
 
     certificates_data = []
     for cert in certificates:
         certificates_data.append({
             'id': cert.id,
             'numbers': cert.numbers,
-            'legal_entity_name': cert.legal_entity.name
+            'internal_legal_entity_name': cert.internal_legal_entity.name
         })
 
     return JsonResponse(certificates_data, safe=False)

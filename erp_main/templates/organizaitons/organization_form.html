@@ -1034,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const copyCheckbox = document.getElementById('copy-legal-address');
         const legalAddress = document.querySelector('textarea[name="legal_address"]');
         const postalAddress = document.querySelector('textarea[name="postal_address"]');
-
+        
         if (copyCheckbox.checked && legalAddress && postalAddress) {
             postalAddress.value = legalAddress.value;
         }
@@ -1045,18 +1045,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-
+            
             const submitBtn = form.querySelector('.btn-submit');
             const btnText = submitBtn.querySelector('.btn-text');
             const btnLoading = submitBtn.querySelector('.btn-loading');
-
+            
             // Показываем индикатор загрузки
             btnText.style.display = 'none';
             btnLoading.style.display = 'flex';
             submitBtn.disabled = true;
 
             const formData = new FormData(form);
-
+            
             fetch('', {
                 method: 'POST',
                 body: formData,
@@ -1099,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         document.body.appendChild(notification);
-
+        
         // Удаляем уведомление через 5 секунд
         setTimeout(() => {
             if (notification.parentNode) {
@@ -1110,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.takeOverOrganization = function() {
         const existingId = document.getElementById('duplicateModal').dataset.existingId;
-
+        
         fetch("{% url 'organizations:organization_takeover' %}", {
             method: 'POST',
             body: JSON.stringify({organization_id: existingId}),
@@ -1135,11 +1135,11 @@ document.addEventListener('DOMContentLoaded', function() {
         input.name = 'force_create';
         input.value = 'true';
         form.appendChild(input);
-
+        
         // Закрываем модальное окно
         const modal = bootstrap.Modal.getInstance(document.getElementById('duplicateModal'));
         modal.hide();
-
+        
         // Отправляем форму
         form.dispatchEvent(new Event('submit'));
     };
