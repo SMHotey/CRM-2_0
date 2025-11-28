@@ -23,7 +23,6 @@
             --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             --danger-gradient: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
             --sidebar-width: 280px;
-            --sidebar-collapsed: 80px;
             --sidebar-transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --header-height: 70px;
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -70,14 +69,15 @@
             z-index: 1000;
         }
 
-        .sidebar.collapsed {
-            width: var(--sidebar-collapsed);
+        .sidebar.hidden {
+            transform: translateX(-100%);
         }
 
         .sidebar-header {
             padding: 1.5rem 1rem;
             text-align: center;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .logo {
@@ -142,11 +142,6 @@
             height: 24px;
             margin-right: 0.75rem;
             transition: var(--transition-smooth);
-        }
-
-        .sidebar.collapsed .nav-text {
-            opacity: 0;
-            visibility: hidden;
         }
 
         .dropdown-menu {
@@ -228,8 +223,8 @@
             min-height: 100vh;
         }
 
-        .main-content.expanded {
-            margin-left: var(--sidebar-collapsed);
+        .main-content.full-width {
+            margin-left: 0;
         }
 
         /* Header */
@@ -276,6 +271,27 @@
             color: white;
             font-weight: 600;
             font-size: 0.875rem;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: #4a5568;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            transform: scale(1.1);
         }
 
         /* Stats Cards */
@@ -679,6 +695,9 @@
                 <a href="{% url 'index' %}" aria-label="Главная страница">
                     <img src="{% static 'erp_main/images/logo.png' %}" alt="Логотип завода" class="logo">
                 </a>
+                <button class="sidebar-toggle" id="sidebarToggle" title="Скрыть меню">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
             </div>
 
             <div class="sidebar-nav">
@@ -712,11 +731,6 @@
                             <li><a class="dropdown-item" href="{% url 'organization_list' %}">
                                 <i class="bi bi-building"></i> Все клиенты
                             </a></li>
-                            {% if user.is_superuser %}
-                            <li><a class="dropdown-item" href="{% url 'create_internal_legal_entity' %}">
-                                <i class="bi bi-building-add"></i> Новое ЮЛ
-                            </a></li>
-                            {% endif %}
                             <li><a class="dropdown-item" href="{% url 'organization_add' %}">
                                 <i class="bi bi-person-plus"></i> Добавить клиента
                             </a></li>
@@ -779,7 +793,12 @@
             <!-- Header -->
             <header class="main-header glass-effect">
                 <div class="header-content">
-                    <h1 class="page-title">ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ</h1>
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="sidebar-toggle" id="headerSidebarToggle" title="Показать меню">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <h1 class="page-title">ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ</h1>
+                    </div>
                     <div class="user-menu">
                         {% if user.is_authenticated %}
                         <div class="dropdown">
@@ -810,6 +829,21 @@
                     </div>
                 </div>
             </header>
+
+            <div class="container-fluid">
+                {% if messages %}
+                    <div class="row">
+                        <div class="col-12">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
 
             <!-- Stats Dashboard -->
             {% block stats_dashboard %}
@@ -913,15 +947,20 @@
                 this.sidebar = document.getElementById('sidebar');
                 this.mainContent = document.getElementById('mainContent');
                 this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                this.sidebarToggle = document.getElementById('sidebarToggle');
+                this.headerSidebarToggle = document.getElementById('headerSidebarToggle');
                 this.isMobile = window.innerWidth < 992;
+                this.isSidebarHidden = false;
 
                 this.init();
             }
 
             init() {
                 try {
+                    this.loadSidebarState();
                     this.setupEventListeners();
                     this.handleResize();
+                    this.updateSidebarState();
                 } catch (error) {
                     console.error('AppController initialization error:', error);
                 }
@@ -931,6 +970,15 @@
                 // Mobile menu toggle
                 if (this.mobileMenuBtn) {
                     this.mobileMenuBtn.addEventListener('click', () => this.toggleMobileMenu());
+                }
+
+                // Sidebar toggle buttons
+                if (this.sidebarToggle) {
+                    this.sidebarToggle.addEventListener('click', () => this.toggleSidebar());
+                }
+
+                if (this.headerSidebarToggle) {
+                    this.headerSidebarToggle.addEventListener('click', () => this.showSidebar());
                 }
 
                 // Window resize handler
@@ -960,6 +1008,56 @@
                 });
             }
 
+            toggleSidebar() {
+                this.isSidebarHidden = !this.isSidebarHidden;
+                this.saveSidebarState();
+                this.updateSidebarState();
+            }
+
+            showSidebar() {
+                if (this.isSidebarHidden) {
+                    this.isSidebarHidden = false;
+                    this.saveSidebarState();
+                    this.updateSidebarState();
+                }
+            }
+
+            updateSidebarState() {
+                if (this.isSidebarHidden) {
+                    this.sidebar.classList.add('hidden');
+                    this.mainContent.classList.add('full-width');
+                } else {
+                    this.sidebar.classList.remove('hidden');
+                    this.mainContent.classList.remove('full-width');
+                }
+
+                // Update toggle button icon and title
+                this.updateToggleButton();
+            }
+
+            updateToggleButton() {
+                if (this.sidebarToggle) {
+                    const icon = this.sidebarToggle.querySelector('i');
+                    if (this.isSidebarHidden) {
+                        icon.className = 'bi bi-chevron-right';
+                        this.sidebarToggle.title = 'Показать меню';
+                    } else {
+                        icon.className = 'bi bi-chevron-left';
+                        this.sidebarToggle.title = 'Скрыть меню';
+                    }
+                }
+
+                if (this.headerSidebarToggle) {
+                    if (this.isSidebarHidden) {
+                        this.headerSidebarToggle.style.display = 'flex';
+                        this.headerSidebarToggle.title = 'Показать меню';
+                    } else {
+                        this.headerSidebarToggle.style.display = 'flex';
+                        this.headerSidebarToggle.title = 'Скрыть меню';
+                    }
+                }
+            }
+
             toggleMobileMenu() {
                 this.sidebar.classList.toggle('mobile-open');
                 const icon = this.mobileMenuBtn.querySelector('i');
@@ -987,6 +1085,21 @@
                     this.mobileMenuBtn.style.display = 'none';
                 } else {
                     this.mobileMenuBtn.style.display = 'flex';
+                    // On mobile, always show sidebar when not hidden
+                    if (!this.isSidebarHidden) {
+                        this.sidebar.classList.remove('hidden');
+                    }
+                }
+            }
+
+            saveSidebarState() {
+                localStorage.setItem('isSidebarHidden', this.isSidebarHidden);
+            }
+
+            loadSidebarState() {
+                const savedState = localStorage.getItem('isSidebarHidden');
+                if (savedState !== null) {
+                    this.isSidebarHidden = JSON.parse(savedState);
                 }
             }
         }

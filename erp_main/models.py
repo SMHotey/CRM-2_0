@@ -1,10 +1,7 @@
 import ast
-import re
-
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import models
-from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.templatetags.static import static
@@ -88,17 +85,22 @@ class Documents(models.Model):
 
     # Generic Foreign Key
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(null=True, blank=True)  # Добавлено null=True, blank=True
     content_object = GenericForeignKey('content_type', 'object_id')
 
     def clean(self):
         """Проверяет, что тип документа доступен для связанной модели"""
         if self.content_object and self.document_type:
-            available_types = self.content_object.get_available_document_types()
-            if self.document_type not in available_types:
-                raise ValidationError(
-                    f"Тип документа '{self.document_type}' недоступен для этой модели"
-                )
+            # Проверяем, реализует ли модель метод get_available_document_types
+            if hasattr(self.content_object, 'get_available_document_types'):
+                available_types = self.content_object.get_available_document_types()
+                if self.document_type not in available_types:
+                    raise ValidationError(
+                        f"Тип документа '{self.document_type}' недоступен для этой модели"
+                    )
+            else:
+                # Если метод не реализован, разрешаем все типы документов
+                pass
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -112,62 +114,53 @@ class Documents(models.Model):
         verbose_name_plural = "Документы"
 
 
-class Email(models.Model):
-    """Email адреса для всех типов контрагентов"""
-    email = models.EmailField()
-    is_primary = models.BooleanField(default=False)
-
-    # Полиморфная связь
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['content_type', 'object_id']),
-        ]
-
-
-class BankDetails(models.Model):
-    """Банковские реквизиты для юрлиц и ИП"""
-    bank_name = models.CharField(max_length=255, verbose_name="Название банка")
-    account_number = models.CharField(max_length=20, verbose_name="Расчетный счет")
-    bik = models.CharField(max_length=9, verbose_name="БИК")
-    correspondent_account = models.CharField(max_length=20, verbose_name="Корреспондентский счет")
-    is_primary = models.BooleanField(default=False, verbose_name="Основной")
-
-    # Полиморфная связь
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-
-    class Meta:
-        indexes = [
-            models.Index(fields=['content_type', 'object_id']),
-        ]
-
-    verbose_name = "Банковские реквизиты"
-    verbose_name_plural = "Банковские реквизиты"
-
-
 class InternalLegalEntity(models.Model):
-    name = models.CharField(max_length=255)
-    inn = models.CharField(max_length=12, blank=True, null=True)
-    ogrn = models.CharField(max_length=15, blank=True, null=True)
-    kpp = models.CharField(max_length=9, blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, null=True)
-    ceo_title = models.CharField(max_length=100, blank=True, null=True)
-    ceo_name = models.CharField(max_length=255, blank=True, null=True)
+    TYPES = [
+        ('LEGAL', 'ООО'),
+        ('INDIVIDUAL', 'ИП'),
+        ('WITHOUT_INVOICE', 'Без выставления счета'),
+    ]
 
-    email = GenericRelation(Email, verbose_name="Email адреса")
-    documents = GenericRelation(Documents, verbose_name="Документы по юридическому лицу")
-    bank_details = GenericRelation(BankDetails, verbose_name="Банковские реквизиты")
+    CEO_TITLES = [
+        ('director', 'Директор'),
+        ('general_director', 'Генеральный директор'),
+    ]
+
+    type = models.CharField(max_length=20, choices=TYPES, verbose_name="Тип")
+    name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название")
+    inn = models.CharField(max_length=12, blank=True, null=True, verbose_name="ИНН")
+    ogrn = models.CharField(max_length=15, blank=True, null=True, verbose_name="ОГРН")
+    kpp = models.CharField(max_length=9, blank=True, null=True, verbose_name="КПП")
+    legal_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Юридический адрес")
+    postal_address = models.CharField(max_length=255, blank=True, null=True, verbose_name="Почтовый адрес")
+    ceo_title = models.CharField(
+        max_length=20,
+        choices=CEO_TITLES,
+        blank=True,
+        null=True,
+        verbose_name="Должность руководителя"
+    )
+    ceo_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="ФИО руководителя")
+    email = models.EmailField(blank=True, null=True, verbose_name="Электронная почта")
+    bank_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название банка")
+    account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Расчетный счет")
+    bik = models.CharField(max_length=9, blank=True, null=True, verbose_name="БИК")
+    correspondent_account = models.CharField(max_length=20, blank=True, null=True,
+                                             verbose_name="Корреспондентский счет")
+
+    documents = GenericRelation(Documents, verbose_name="Документы")
+
     def __str__(self):
-        return self.name
+        if self.name:
+            return self.name
+        elif self.ceo_name:
+            return f"{self.get_type_display()} {self.ceo_name}"
+        else:
+            return f"{self.get_type_display()} - {self.id if self.id else 'Новый'}"
 
     class Meta:
+        verbose_name = 'Внутреннее юридическое лицо'
         verbose_name_plural = 'Внутренние юридические лица'
-
 
 
 class Organization(models.Model):
@@ -194,10 +187,127 @@ class Organization(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
-    # Общие связи для всех контрагентов
-    emails = GenericRelation(Email, blank=True, null=True, verbose_name="Email адреса")
-    # Связь с документами
-    documents = GenericRelation(Documents,verbose_name="Документы по контрагенту")
+   # Связь с документами
+    documents = GenericRelation(Documents, verbose_name="Документы по контрагенту")
+
+    @property
+    def last_order(self):
+        return (
+            Order.objects.filter(invoice__organization=self.id)
+            .order_by('-created_at')
+            .first().created_at if Order.objects.filter(invoice__organization=self.id).exists() else None
+        )
+
+    @property
+    def bank_name(self):
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.bank_name
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.bank_name
+        return None
+    @property
+    def account_number(self):
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.account_number
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.account_number
+        return None
+
+    @property
+    def correspondent_account(self):
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.correspondent_account
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.correspondent_account
+        return None
+
+    def bik(self):
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.bik
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.bik
+        return None
+
+    @property
+    def display_name(self):
+        """Возвращает отображаемое имя в зависимости от типа"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.name
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.full_name
+        elif self.type == 'PERSON' and hasattr(self, 'physicalperson'):
+            return self.physicalperson.full_name
+        return f"Контрагент {self.id}"
+
+    @property
+    def legal_form(self):
+        """Возвращает ОГРН/ОГРНИП"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.legal_form_display
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return 'ИП'
+        return None
+
+    @property
+    def inn(self):
+        """Возвращает ИНН для юрлиц и ИП"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.inn
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.inn
+        return None
+
+    @property
+    def kpp(self):
+        """Возвращает КПП для юрлиц"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.kpp
+        return None
+
+    @property
+    def ogrn(self):
+        """Возвращает ОГРН/ОГРНИП"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.ogrn
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.ogrn
+        return None
+
+    @property
+    def email(self):
+        """Возвращает ОГРН/ОГРНИП"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.email
+        elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
+            return self.individualentrepreneur.email
+        elif self.type == 'PERSON' and hasattr(self, 'physicalperson'):
+            return self.physicalperson.email
+        return None
+
+    @property
+    def phone(self):
+        """Возвращает телефон для физлиц"""
+        if self.type == 'PERSON' and hasattr(self, 'physicalperson'):
+            return self.physicalperson.phone
+        return None
+
+    @property
+    def legal_form_display(self):
+        """Возвращает отображаемое название организационно-правовой формы"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.get_legal_form_display()
+        elif self.type == 'INDIVIDUAL':
+            return "Индивидуальный предприниматель"
+        elif self.type == 'PERSON':
+            return "Физическое лицо"
+        return ""
+
+    @property
+    def leader_name(self):
+        """Возвращает ФИО руководителя для юрлиц"""
+        if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
+            return self.legalentity.leader_name
+        return None
 
 
     class Meta:
@@ -210,6 +320,12 @@ class Organization(models.Model):
             raise ValidationError({
                 'internal_legal_entity': 'Для данного типа контрагента обязательно нужно выбрать внутреннее юридическое лицо'
             })
+
+    def get_available_document_types(self):
+        """Возвращает доступные типы документов для внутреннего юрлица"""
+        from django.contrib.contenttypes.models import ContentType
+        content_type = ContentType.objects.get_for_model(self)
+        return DocumentType.objects.filter(available_for_models=content_type)
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -228,7 +344,7 @@ class Organization(models.Model):
         self.save()
 
     def __str__(self):
-        return f"Контрагент {self.id} ({self.get_type_display()})"
+        return self.display_name
 
 
 class LegalEntity(Organization):
@@ -270,9 +386,12 @@ class LegalEntity(Organization):
         null=True,
         verbose_name="ФИО руководителя"
     )
+    email = models.EmailField(blank=True, null=True)
+    bank_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название банка")
+    account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Расчетный счет")
+    bik = models.CharField(max_length=9, blank=True, null=True, verbose_name="БИК")
+    correspondent_account = models.CharField(max_length=20, blank=True, null=True, verbose_name="Корреспондентский счет")
 
-    # Связь с банковскими реквизитами
-    bank_details = GenericRelation(BankDetails, verbose_name="Банковские реквизиты")
 
     def __str__(self):
         return f"{self.get_legal_form_display()} {self.name}"
@@ -313,11 +432,11 @@ class IndividualEntrepreneur(Organization):
         null=True,
         verbose_name="Юридический адрес"
     )
-
-    # Связь с банковскими реквизитами
-    bank_details = GenericRelation(BankDetails, verbose_name="Банковские реквизиты")
-    # Связь с документами
-    documents = GenericRelation(Documents,verbose_name="Документы по ИП")
+    email = models.EmailField(blank=True, null=True, )
+    bank_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название банка")
+    account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Расчетный счет")
+    bik = models.CharField(max_length=9, blank=True, null=True, verbose_name="БИК")
+    correspondent_account = models.CharField(max_length=20, blank=True, null=True, verbose_name="Корреспондентский счет")
 
     def __str__(self):
         return f"ИП {self.full_name}"
@@ -346,13 +465,14 @@ class PhysicalPerson(Organization):
     phone = models.CharField(max_length=20, unique=True, verbose_name="Номер телефона")
 
     # Дополнительные поля
+    email = models.EmailField(blank=True, null=True)
     passport_scan = models.FileField(
         upload_to='passport_scans/%Y/%m/%d/',
         blank=True,
         null=True,
         verbose_name="Скан паспорта"
     )
-    documents = GenericRelation(Documents, blank=True, null=True, verbose_name="Документы по ФЛ")
+
     def __str__(self):
         return self.full_name
 

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Обнаружен дубликат{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="main-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="bi bi-exclamation-circle"></i> Обнаружен дубликат
+            </h1>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="glass-effect rounded-3 p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-people display-1 text-warning"></i>
+                    </div>
+                    
+                    <h2 class="mb-3">Контрагент уже существует</h2>
+                    
+                    <div class="alert alert-warning mb-4">
+                        <p class="mb-0">
+                            Контрагент с такими реквизитами уже существует в системе.
+                        </p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body text-start">
+                            <h5 class="card-title">Существующий контрагент:</h5>
+                            <p class="mb-1"><strong>Тип:</strong> {{ existing_org.get_type_display }}</p>
+                            {% if existing_org.type == 'LEGAL' %}
+                                <p class="mb-1"><strong>Название:</strong> {{ existing_org.name }}</p>
+                                <p class="mb-1"><strong>ИНН:</strong> {{ existing_org.inn }}</p>
+                            {% elif existing_org.type == 'INDIVIDUAL' %}
+                                <p class="mb-1"><strong>ФИО:</strong> {{ existing_org.full_name }}</p>
+                                <p class="mb-1"><strong>ИНН:</strong> {{ existing_org.inn }}</p>
+                            {% else %}
+                                <p class="mb-1"><strong>ФИО:</strong> {{ existing_org.full_name }}</p>
+                                <p class="mb-1"><strong>Телефон:</strong> {{ existing_org.phone }}</p>
+                            {% endif %}
+                            <p class="mb-0"><strong>Менеджер:</strong> {{ existing_org.user.get_full_name|default:existing_org.user.username }}</p>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-block">
+                            <button type="submit" name="action" value="take_over" class="btn btn-primary me-md-2 mb-2">
+                                <i class="bi bi-person-check"></i> Взять на обслуживание
+                            </button>
+                            <button type="submit" name="action" value="create_duplicate" class="btn btn-outline-primary me-md-2 mb-2">
+                                <i class="bi bi-copy"></i> Создать дубликат
+                            </button>
+                            <button type="submit" name="action" value="cancel" class="btn btn-outline-secondary mb-2">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

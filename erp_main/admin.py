@@ -2,7 +2,9 @@ from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.utils.translation import gettext_lazy as _
-from erp_main.models import LegalEntity, IndividualEntrepreneur, PhysicalPerson, Email, BankDetails, InternalLegalEntity
+
+from erp_main.forms import InternalLegalEntityForm
+from erp_main.models import LegalEntity, IndividualEntrepreneur, PhysicalPerson, InternalLegalEntity
 
 
 class CustomGroupAdmin(GroupAdmin):
@@ -45,10 +47,67 @@ class CustomUserAdmin(UserAdmin):
         qs = super().get_queryset(request)
         return qs
 
+
 @admin.register(InternalLegalEntity)
 class InternalLegalEntityAdmin(admin.ModelAdmin):
-    list_display = ['name', 'inn', 'ogrn', 'kpp', 'address']
-    search_fields = ['name', 'inn', 'ogrn']
+    form = InternalLegalEntityForm
+    list_display = ['type', 'name', 'inn', 'ogrn', 'email']
+    search_fields = ['name', 'inn', 'ogrn', 'ceo_name']
+
+    def get_fieldsets(self, request, obj=None):
+        # Для типа WITHOUT_INVOICE показываем только тип
+        if obj and obj.type == 'WITHOUT_INVOICE':
+            return (
+                ('Основная информация', {
+                    'fields': ('type',)
+                }),
+            )
+
+        # Для INDIVIDUAL
+        elif obj and obj.type == 'INDIVIDUAL':
+            return (
+                ('Основная информация', {
+                    'fields': ('type', 'ceo_name', 'inn', 'ogrn', 'legal_address')
+                }),
+                ('Контактная информация', {
+                    'fields': ('email',)
+                }),
+                ('Банковские реквизиты', {
+                    'fields': ('bank_name', 'account_number', 'bik', 'correspondent_account')
+                }),
+            )
+
+        # Для LEGAL (и по умолчанию для новых объектов)
+        else:
+            return (
+                ('Основная информация', {
+                    'fields': ('type', 'name', 'inn', 'ogrn', 'kpp', 'legal_address')
+                }),
+                ('Контактная информация', {
+                    'fields': ('email', 'postal_address')
+                }),
+                ('Руководитель', {
+                    'fields': ('ceo_title', 'ceo_name')
+                }),
+                ('Банковские реквизиты', {
+                    'fields': ('bank_name', 'account_number', 'bik', 'correspondent_account')
+                }),
+            )
+
+    def save_model(self, request, obj, form, change):
+        """Кастомная логика сохранения модели"""
+        # Можно добавить дополнительную логику перед сохранением
+        if not change:  # Если это создание нового объекта
+            # Например, логирование кто создал
+            pass
+
+        # Автоматическое заполнение некоторых полей при необходимости
+        if obj.type == 'INDIVIDUAL' and not obj.name:
+            obj.name = f"ИП {obj.ceo_name}"
+
+        super().save_model(request, obj, form, change)
+    class Media:
+        js = ('admin/js/internal_legal_entity.js',)
 
 @admin.register(LegalEntity)
 class LegalEntityAdmin(admin.ModelAdmin):
@@ -69,20 +128,6 @@ class PhysicalPersonAdmin(admin.ModelAdmin):
     list_display = ['full_name', 'phone', 'user', 'created_at']
     search_fields = ['full_name', 'phone']
     readonly_fields = ['history']
-
-# Уберите регистрацию абстрактной модели Organization
-# admin.site.register(Organization)  # ЭТУ СТРОКУ НУЖНО УДАЛИТЬ ИЛИ ЗАКОММЕНТИРОВАТЬ
-
-# Зарегистрируйте остальные модели по необходимости
-@admin.register(Email)
-class EmailAdmin(admin.ModelAdmin):
-    list_display = ['email', 'is_primary', 'content_type', 'object_id']
-    list_filter = ['is_primary']
-
-@admin.register(BankDetails)
-class BankDetailsAdmin(admin.ModelAdmin):
-    list_display = ['bank_name', 'account_number', 'is_primary', 'content_type', 'object_id']
-    list_filter = ['is_primary']
 
 # Сначала отменяем стандартную регистрацию
 admin.site.unregister(Group)

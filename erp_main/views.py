@@ -16,8 +16,7 @@ from django.views.generic import FormView, CreateView, ListView, DetailView, Upd
 from erp_main.views.permissions import get_user_role_from_request
 from .models import Order, OrderItem, Organization, Invoice, InternalLegalEntity, GlassInfo, OrderChangeHistory, Contract, \
     Shipment
-from .forms import OrderForm, OrganizationForm, InvoiceForm,OrderFileForm, InternalLegalEntityForm, \
-    ShipmentForm
+from .forms import OrderForm, InvoiceForm, OrderFileForm, ShipmentForm, InternalLegalEntityForm
 import logging
 from docx import Document
 from datetime import datetime, timedelta, time
@@ -72,132 +71,132 @@ def custom_login(request):
     return redirect(reverse('index'))  # Используем reverse вместо строки
 
 
-# @login_required  # Декоратор для проверки аутентификации пользователя
-# def index(request):
-#     start_date = request.GET.get('startDate', f'{datetime.now().year}-01-01')
-#     end_date = request.GET.get('endDate', timezone.now().strftime('%Y-%m-%d'))
-#     invoice_status = request.GET.get('invoice_status', '')
-#     order_status = request.GET.get('order_status', '')
+@login_required  # Декоратор для проверки аутентификации пользователя
+def index(request):
+    start_date = request.GET.get('startDate', f'{datetime.now().year}-01-01')
+    end_date = request.GET.get('endDate', timezone.now().strftime('%Y-%m-%d'))
+    invoice_status = request.GET.get('invoice_status', '')
+    order_status = request.GET.get('order_status', '')
+
+    # Преобразуем строки в даты
+    start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
+
+    # Фильтруем организации по пользователю
+    user_orgs = Organization.objects.filter(user=request.user)
+
+    # Базовые запросы с фильтрацией по дате
+    invoice_query = Invoice.objects.filter(
+        organization__in=user_orgs,
+        date__range=[start_date_obj, end_date_obj]
+    )
+
+    order_query = Order.objects.filter(
+        invoice__organization__in=user_orgs,
+        created_at__range=[start_date_obj, end_date_obj]
+    )
+
+    # Применяем фильтры статусов
+    if invoice_status == 'paid':
+        invoice_query = invoice_query.filter(is_paid=True)
+    elif invoice_status == 'unpaid':
+        invoice_query = invoice_query.filter(is_paid=False)
+
+    if order_status:
+        # Для заказов фильтрация идет по статусам позиций
+        order_query = order_query.filter(
+            items__p_status=order_status
+        ).distinct()
+
+    # Получаем данные
+    user_invoices = invoice_query.order_by('-date')
+    user_orders = order_query.order_by('-created_at')
+    user_role = get_user_role_from_request(request)
+
+    # Подготовка контекста
+    context = {
+        'current_year': datetime.now().year,
+        'start_date': start_date,
+        'end_date': end_date,
+        'invoice_status': invoice_status,
+        'order_status': order_status,
+        'orgs_count': user_orgs.count(),
+        'orders_count': user_orders.count(),
+        'invoices_count': user_invoices.count(),
+        'total_invoices_amount': user_invoices.aggregate(total=Sum('amount'))['total'] or 0,
+        'invoices': user_invoices,
+        'orders': user_orders,
+        'organizations': user_orgs,
+        'user_role': user_role,
+    }
+
+    return render(request, 'index.html', context)
+
+
+# class OrganizationCreateView(LoginRequiredMixin, CreateView):
+#     model = Organization
+#     form_class = OrganizationForm
+#     template_name = 'organization_add.html'
 #
-#     # Преобразуем строки в даты
-#     start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
-#     end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() + timedelta(days=1)
+#     def form_valid(self, form):
+#         organization = form.save(commit=False)
+#         organization.user = self.request.user
+#         organization.save()
+#         return redirect('organization_list')
 #
-#     # Фильтруем организации по пользователю
-#     user_orgs = Organization.objects.filter(user=request.user)
 #
-#     # Базовые запросы с фильтрацией по дате
-#     invoice_query = Invoice.objects.filter(
-#         organization__in=user_orgs,
-#         date__range=[start_date_obj, end_date_obj]
-#     )
+# class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
+#     model = Organization
+#     form_class = OrganizationForm
+#     template_name = 'organization_edit.html'
+#     context_object_name = 'organization'
 #
-#     order_query = Order.objects.filter(
-#         invoice__organization__in=user_orgs,
-#         created_at__range=[start_date_obj, end_date_obj]
-#     )
+#     def get_success_url(self):
+#         return reverse('organization_detail', kwargs={'pk': self.object.pk})
 #
-#     # Применяем фильтры статусов
-#     if invoice_status == 'paid':
-#         invoice_query = invoice_query.filter(is_paid=True)
-#     elif invoice_status == 'unpaid':
-#         invoice_query = invoice_query.filter(is_paid=False)
+#     def form_valid(self, form):
+#         organization = form.save(commit=False)
+#         type_ = form.cleaned_data.get('type')
 #
-#     if order_status:
-#         # Для заказов фильтрация идет по статусам позиций
-#         order_query = order_query.filter(
-#             items__p_status=order_status
-#         ).distinct()
+#         if type_ == 'organization':
+#             organization.name_fl = None
+#             organization.phone_number = None
+#         elif type_ == 'individual':
+#             organization.name = None
+#             organization.inn = None
+#             organization.ogrn = None
+#             organization.kpp = None
+#             organization.r_s = None
+#             organization.bank = None
+#             organization.bik = None
+#             organization.k_s = None
+#             organization.ceo_title = None
 #
-#     # Получаем данные
-#     user_invoices = invoice_query.order_by('-date')
-#     user_orders = order_query.order_by('-created_at')
-#     user_role = get_user_role_from_request(request)
+#         organization.save()
+#         return super().form_valid(form)
 #
-#     # Подготовка контекста
-#     context = {
-#         'current_year': datetime.now().year,
-#         'start_date': start_date,
-#         'end_date': end_date,
-#         'invoice_status': invoice_status,
-#         'order_status': order_status,
-#         'orgs_count': user_orgs.count(),
-#         'orders_count': user_orders.count(),
-#         'invoices_count': user_invoices.count(),
-#         'total_invoices_amount': user_invoices.aggregate(total=Sum('amount'))['total'] or 0,
-#         'invoices': user_invoices,
-#         'orders': user_orders,
-#         'organizations': user_orgs,
-#         'user_role': user_role,
-#     }
 #
-#     return render(request, 'index.html', context)
-
-
-class OrganizationCreateView(LoginRequiredMixin, CreateView):
-    model = Organization
-    form_class = OrganizationForm
-    template_name = 'organization_add.html'
-
-    def form_valid(self, form):
-        organization = form.save(commit=False)
-        organization.user = self.request.user
-        organization.save()
-        return redirect('organization_list')
-
-
-class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
-    model = Organization
-    form_class = OrganizationForm
-    template_name = 'organization_edit.html'
-    context_object_name = 'organization'
-
-    def get_success_url(self):
-        return reverse('organization_detail', kwargs={'pk': self.object.pk})
-
-    def form_valid(self, form):
-        organization = form.save(commit=False)
-        type_ = form.cleaned_data.get('type')
-
-        if type_ == 'organization':
-            organization.name_fl = None
-            organization.phone_number = None
-        elif type_ == 'individual':
-            organization.name = None
-            organization.inn = None
-            organization.ogrn = None
-            organization.kpp = None
-            organization.r_s = None
-            organization.bank = None
-            organization.bik = None
-            organization.k_s = None
-            organization.ceo_title = None
-
-        organization.save()
-        return super().form_valid(form)
-
-
-class OrganizationListView(LoginRequiredMixin, ListView):
-    model = Organization
-    template_name = 'organization_list.html'
-    context_object_name = 'organizations'
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_superuser:
-            return Organization.objects.all()
-        return Organization.objects.filter(user=user)
-
-
-class OrganizationDetailView(LoginRequiredMixin, DetailView):
-    model = Organization
-    template_name = 'organization_detail.html'
-    context_object_name = 'organization'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['legal_entities'] = LegalEntity.objects.all()
-        return context
+# class OrganizationListView(LoginRequiredMixin, ListView):
+#     model = Organization
+#     template_name = 'organization_list.html'
+#     context_object_name = 'organizations'
+#
+#     def get_queryset(self):
+#         user = self.request.user
+#         if user.is_superuser:
+#             return Organization.objects.all()
+#         return Organization.objects.filter(user=user)
+#
+#
+# class OrganizationDetailView(LoginRequiredMixin, DetailView):
+#     model = Organization
+#     template_name = 'organization_detail.html'
+#     context_object_name = 'organization'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['legal_entities'] = LegalEntity.objects.all()
+#         return context
 
 
 class OrderUploadView(LoginRequiredMixin, FormView):
@@ -212,7 +211,7 @@ class OrderUploadView(LoginRequiredMixin, FormView):
         else:
             context['organizations'] = Organization.objects.filter(user=self.request.user)
 
-        context['legal_entities'] = LegalEntity.objects.all()
+        context['legal_entities'] = InternalLegalEntity.objects.all()
 
         return context
 
@@ -635,7 +634,7 @@ def invoices_list(request):
     invoices_page = paginator.get_page(page_number)
 
     # Получение всех юридических лиц для отображения в выпадающем списке
-    legal_entities = LegalEntity.objects.all()
+    legal_entities = InternalLegalEntity.objects.all()
 
     return render(request, 'invoices_list.html', {
         'invoices': invoices_page,
@@ -677,12 +676,12 @@ def update_order_item_status(request):
 
 def create_legal_entity(request):
     if request.method == 'POST':
-        form = LegalEntityForm(request.user, request.POST)
+        form = InternalLegalEntityForm(request.user, request.POST)
         if form.is_valid():
             form.save()  # Сохраните объект LegalEntity
             return redirect('organization_list')  # Перенаправление на страницу успеха
     else:
-        form = LegalEntityForm(request.user)
+        form = InternalLegalEntityForm(request.user)
 
     return render(request, 'legal_entity_form.html', {'form': form})
 
@@ -760,7 +759,7 @@ def create_contract(request, pk):
 
     if request.method == 'POST':
         legal_entity_id = request.POST.get('legal_entity')
-        legal_entity = get_object_or_404(LegalEntity, pk=legal_entity_id)
+        legal_entity = get_object_or_404(InternalLegalEntity, pk=legal_entity_id)
         organization = get_object_or_404(Organization, pk=pk)
         c_number = f'{day_of_month}/{month_num}/{str(datetime.now().year)[2::]}/36/{organization.inn[-4:]}'
 
@@ -838,13 +837,13 @@ def create_contract(request, pk):
         # URL к новому файлу
 
         new_contract_url = os.path.join(settings.MEDIA_URL, f'contracts/договор_{num}.docx')
-        legal_entities = LegalEntity.objects.all()
+        legal_entities = InternalLegalEntity.objects.all()
 
-        new_contract = Contract(number=num, organization=organization, legal_entity=legal_entity, days=timeframe,
+        new_contract = Contract(number=num, organization=organization, legal_entity=legal_entities, days=timeframe,
                                 file=new_file_path)
         new_contract.save()
 
-        return render(request, 'organization_detail.html', {
+        return render(request, 'organizations/organization_detail.html', {
             'organization': organization,
             'new_contract_url': new_contract_url,
             'legal_entities': legal_entities,

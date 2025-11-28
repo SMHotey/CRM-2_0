@@ -1,2 +1,30 @@
-.idea/workspace.xml
+# Django
+*.log
+*.sqlite3
+db.sqlite3
+/staticfiles/
+/media/
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+.venv/
+
+# Virtual Environment
+venv/
+env/
+ENV/
 .env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+
+# OS
+.DS_Store
+Thumbs.db

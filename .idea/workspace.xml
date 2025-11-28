@@ -4,39 +4,54 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="логика формирования паспортов">
-      <change afterPath="$PROJECT_DIR$/calculation/migrations/0001_initial.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/calculation/migrations/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizaitons/organization_form.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizaitons/organization_type_select.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/erp_main/views/managers.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fix_migrations.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reset_database.py" afterDir="false" />
+    <list default="true" id="b6d6fa4d-944b-4d04-9a59-3331dd54ceeb" name="Changes" comment="логика создания контрагентов">
+      <change afterPath="$PROJECT_DIR$/calculation/migrations/0002_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0003_internallegalentity_type_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0004_remove_internallegalentity_address_and_more.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/migrations/0005_alter_internallegalentity_ceo_title.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_confirm_delete.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_detail.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_duplicate_handler.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_form.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_list.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_type_select.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/media/uploads/заявка_-_КУБ_14-11-25.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/static/admin/js/internal_legal_entity.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Journal_4_0/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/Journal_4_0/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/calculation/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/calculation/migrations/0001_initial.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/calculation/templates/calculation_table.html" beforeDir="false" afterPath="$PROJECT_DIR$/calculation/templates/calculation_table.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/django_errors.log" beforeDir="false" afterPath="$PROJECT_DIR$/django_errors.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/api_views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/api_views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/filters.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/filters.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/migrations/0001_initial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0002_delete_nameplate.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0003_nameplate.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/migrations/0005_contracttemplate_contract_type_and_more.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_add.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_edit.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organization_edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/base-statistic.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/organizations/organization_edit.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/certificate_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/certificate_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/certificate_form.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/certificate_form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/certificate_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/certificate_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/chat/chat.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/example.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoice_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/invoices_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/invoices_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/order_upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/templates/order_upload.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organizaitons/organization_form.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organizaitons/organization_type_select.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_add.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_detail.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_duplicate_handler.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_edit.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/erp_main/templates/organization_list.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/urls_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/urls_api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views/certificates.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/certificates.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/views/contracts.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/contracts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/views/invoices.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/invoices.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/erp_main/views/orders.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/orders.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/erp_main/views/organizations.py" beforeDir="false" afterPath="$PROJECT_DIR$/erp_main/views/organizations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,9 +65,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="CSS File" />
-        <option value="JavaScript File" />
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -125,7 +140,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.sourceCode.Python&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
   &quot;keyToStringList&quot;: {
@@ -140,11 +155,11 @@
       <recent name="C:\Users\User01\PycharmProjects\Journal_4_0\erp_main\static\erp_main\images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\User01\CRM-2_0\erp_main\templates\organizations_old" />
       <recent name="C:\Users\User01\CRM-2_0\media\passports" />
       <recent name="C:\Users\User01\CRM-2_0\erp_main\views" />
       <recent name="C:\Users\User01\CRM-2_0\static\images" />
       <recent name="C:\Users\User01\CRM-2_0" />
-      <recent name="C:\Users\User01\CRM-2_0\erp_main\static\erp_main\images" />
     </key>
   </component>
   <component name="RunManager" selected="Python.CRM 2_0">
@@ -325,8 +340,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.fix_migrations" />
         <item itemvalue="Python.reset_database" />
+        <item itemvalue="Python.fix_migrations" />
         <item itemvalue="Python.project_to_text" />
         <item itemvalue="Python.test" />
       </list>
@@ -555,15 +570,13 @@
       <workItem from="1763534240988" duration="22689000" />
       <workItem from="1763622213885" duration="9620000" />
       <workItem from="1763706743771" duration="7900000" />
-      <workItem from="1763722143397" duration="8139000" />
-    </task>
-    <task id="LOCAL-00018" summary="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции">
-      <option name="closed" value="true" />
-      <created>1729694023070</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1729694023070</updated>
+      <workItem from="1763722143397" duration="8611000" />
+      <workItem from="1763973243693" duration="13264000" />
+      <workItem from="1764053124184" duration="17567000" />
+      <workItem from="1764146579803" duration="682000" />
+      <workItem from="1764153839821" duration="14351000" />
+      <workItem from="1764224154117" duration="20950000" />
+      <workItem from="1764310824652" duration="10441000" />
     </task>
     <task id="LOCAL-00019" summary="добавлена фильтрация по статусам; из queryset убраны отмененные и измененные позиции">
       <option name="closed" value="true" />
@@ -949,7 +962,15 @@
       <option name="project" value="LOCAL" />
       <updated>1762954997990</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="логика создания контрагентов">
+      <option name="closed" value="true" />
+      <created>1763732217108</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1763732217109</updated>
+    </task>
+    <option name="localTasksCounter" value="68" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -968,7 +989,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-    <MESSAGE value="правки по дизайну orders_list" />
     <MESSAGE value="правки по дизайну2 orders_list" />
     <MESSAGE value="правки по дизайну" />
     <MESSAGE value="работа с обновлением заявки" />
@@ -993,14 +1013,15 @@
     <MESSAGE value="дизайн_2" />
     <MESSAGE value="добавлены шильды и сертификаты" />
     <MESSAGE value="логика формирования паспортов" />
-    <option name="LAST_COMMIT_MESSAGE" value="логика формирования паспортов" />
+    <MESSAGE value="логика создания контрагентов" />
+    <option name="LAST_COMMIT_MESSAGE" value="логика создания контрагентов" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Journal_4_0$fix_migrations.coverage" NAME="fix_migrations Coverage Results" MODIFIED="1763627173224" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$fix_migrations.coverage" NAME="fix_migrations Coverage Results" MODIFIED="1763992629088" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$fix_bom.coverage" NAME="fix_bom Coverage Results" MODIFIED="1746434437970" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$test.coverage" NAME="test Coverage Results" MODIFIED="1746433440343" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1763627446180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
-    <SUITE FILE_PATH="coverage/Journal_4_0$reset_database.coverage" NAME="reset_database Coverage Results" MODIFIED="1763562940019" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1764317711964" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />
+    <SUITE FILE_PATH="coverage/Journal_4_0$reset_database.coverage" NAME="reset_database Coverage Results" MODIFIED="1763993057686" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Journal_4_0$crm.coverage" NAME="crm Coverage Results" MODIFIED="1737014151421" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\PycharmProjects\Journal_4_0" />
     <SUITE FILE_PATH="coverage/Journal_4_0$project_to_text.coverage" NAME="project_to_text Coverage Results" MODIFIED="1760700103058" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/CRM_2_0$CRM_2_0.coverage" NAME="CRM 2_0 Coverage Results" MODIFIED="1745936517854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\User01\CRM-2_0" />

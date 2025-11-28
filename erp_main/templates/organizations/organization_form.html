@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Редактирование {{ form.instance }}{% else %}Добавление контрагента{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="main-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="bi bi-{% if form.instance.pk %}pencil{% else %}plus-circle{% endif %}"></i>
+                {% if form.instance.pk %}Редактирование{% else %}Добавление{% endif %} контрагента
+            </h1>
+            <div class="user-menu">
+                <a href="{% url 'organization_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="glass-effect rounded-3 p-4">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <!-- Основная информация -->
+                <div class="form-section mb-4">
+                    <h4 class="mb-3 text-gradient">
+                        <i class="bi bi-info-circle"></i> Основная информация
+                    </h4>
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        {% for field in form %}
+                            {% if field.name != 'show_advanced' and field.name != 'email' and field.name != 'bank_name' and field.name != 'account_number' and field.name != 'bik' and field.name != 'correspondent_account' %}
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                        {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Email адрес -->
+                <div class="form-section mb-4">
+                    <h4 class="mb-3 text-gradient">
+                        <i class="bi bi-envelope"></i> Email адрес
+                    </h4>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    {{ form.email.label }}
+                                    {% if form.email.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.help_text %}
+                                    <div class="form-text">{{ form.email.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Банковские реквизиты (только для ЮЛ и ИП) -->
+                {% if form.type.value in 'LEGAL INDIVIDUAL' or not form.instance.pk %}
+                <div class="form-section mb-4">
+                    <h4 class="mb-3 text-gradient">
+                        <i class="bi bi-bank"></i> Банковские реквизиты
+                    </h4>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.bank_name.id_for_label }}" class="form-label">
+                                    {{ form.bank_name.label }}
+                                    {% if form.bank_name.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.bank_name }}
+                                {% if form.bank_name.help_text %}
+                                    <div class="form-text">{{ form.bank_name.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.bank_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.account_number.id_for_label }}" class="form-label">
+                                    {{ form.account_number.label }}
+                                    {% if form.account_number.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.account_number }}
+                                {% if form.account_number.help_text %}
+                                    <div class="form-text">{{ form.account_number.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.account_number.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.bik.id_for_label }}" class="form-label">
+                                    {{ form.bik.label }}
+                                    {% if form.bik.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.bik }}
+                                {% if form.bik.help_text %}
+                                    <div class="form-text">{{ form.bik.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.bik.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.correspondent_account.id_for_label }}" class="form-label">
+                                    {{ form.correspondent_account.label }}
+                                    {% if form.correspondent_account.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ form.correspondent_account }}
+                                {% if form.correspondent_account.help_text %}
+                                    <div class="form-text">{{ form.correspondent_account.help_text }}</div>
+                                {% endif %}
+                                {% for error in form.correspondent_account.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Кнопки действий -->
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="{% url 'organization_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        {% if form.instance.pk %}Сохранить изменения{% else %}Создать контрагента{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Динамическое скрытие/показ банковских реквизитов в зависимости от типа
+    const typeField = document.getElementById('id_type');
+    const bankSection = document.querySelector('.form-section:has(.bi-bank)');
+
+    function toggleBankSection() {
+        if (typeField) {
+            const selectedType = typeField.value;
+            if (bankSection) {
+                if (selectedType === 'LEGAL' || selectedType === 'INDIVIDUAL') {
+                    bankSection.style.display = 'block';
+                } else {
+                    bankSection.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    // Инициализация при загрузке
+    toggleBankSection();
+
+    // Обработчик изменения типа
+    if (typeField) {
+        typeField.addEventListener('change', toggleBankSection);
+    }
+});
+</script>
+
+<style>
+.form-section {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4F97C7;
+    box-shadow: 0 0 0 0.2rem rgba(79, 151, 199, 0.25);
+}
+</style>
+{% endblock %}

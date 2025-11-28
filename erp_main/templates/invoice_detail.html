@@ -6,7 +6,7 @@
     <h2 class="mb-4">Детальная информация по счету №{{ invoice.number }} от {{ invoice.date }}</h2>
 
     <div class="mb-4">
-        <b>Юридическое лицо:</b> <i>{{ invoice.legal_entity }}</i> <br>
+        <b>Юридическое лицо:</b> <i>{{ invoice.internal_legal_entity }}</i> <br>
         <b>Организация:</b> <i>{{ invoice.organization }}</i> <br>
         <b>Менеджер:</b> <i>{{ invoice.organization.user.first_name }} {{ invoice.organization.user.last_name }}</i> <br>
         <b>Сумма счета:</b> <i>{{ invoice.amount|intcomma }} р.</i> <br>
@@ -40,10 +40,10 @@
         {% csrf_token %}
 
         <div class="mb-3">
-            <label for="id_legal_entity" class="form-label">Юридическое лицо</label>
-            <select name="legal_entity" id="id_legal_entity" class="form-control" required>
-                {% for entity in form.legal_entity.field.queryset %}
-                    <option value="{{ entity.id }}" {% if entity.id == invoice.legal_entity.id %}selected{% endif %}>{{ entity }}</option>
+            <label for="id_internal_legal_entity" class="form-label">Юридическое лицо</label>
+            <select name="internal_legal_entity" id="id_internal_legal_entity" class="form-control" required>
+                {% for entity in form.internal_legal_entity.field.queryset %}
+                    <option value="{{ entity.id }}" {% if entity.id == invoice.internal_legal_entity.id %}selected{% endif %}>{{ entity }}</option>
                 {% endfor %}
             </select>
         </div>

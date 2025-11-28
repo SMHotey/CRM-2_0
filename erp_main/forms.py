@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Organization, Invoice, Order, InternalLegalEntity, OrderItem, Shipment, Certificate, BankDetails, \
-    Email, ContractTemplate, LegalEntity, IndividualEntrepreneur, PhysicalPerson
+from .models import (Organization, Invoice, Order, InternalLegalEntity, OrderItem, Shipment, Certificate,
+                     ContractTemplate, LegalEntity, IndividualEntrepreneur, PhysicalPerson)
 from django.core.exceptions import ValidationError
 
 
@@ -34,42 +34,60 @@ class OrderForm(forms.ModelForm):
 class InternalLegalEntityForm(forms.ModelForm):
     class Meta:
         model = InternalLegalEntity
-        fields = ['name', 'inn', 'ogrn', 'kpp', 'r_s', 'bank', 'bik', 'k_s', 'address', 'email', 'ceo_title', 'ceo_name']
-
-    def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['name'].label = 'Название'
-        self.fields['inn'].label = 'ИНН'
-        self.fields['ogrn'].label = 'ОГРН'
-        self.fields['kpp'].label = 'КПП'
-        self.fields['r_s'].label = 'р/с'
-        self.fields['bank'].label = 'Банк'
-        self.fields['bik'].label = 'БИК'
-        self.fields['k_s'].label = 'к/с'
-        self.fields['address'].label = 'юр.адрес'
-        self.fields['email'].label = 'email'
-        self.fields['ceo_title'].label = 'должность подписанта'
-        self.fields['ceo_name'].label = 'ФИО полностью'
-
-
-class EmailForm(forms.ModelForm):
-    class Meta:
-        model = Email
-        fields = ['email']
+        fields = '__all__'
         widgets = {
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'})
-        }
-
-
-class BankDetailsForm(forms.ModelForm):
-    class Meta:
-        model = BankDetails
-        fields = ['bank_name', 'account_number', 'bik', 'correspondent_account']
-        widgets = {
-            'bank_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название банка'}),
-            'account_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Расчетный счет'}),
-            'bik': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'БИК'}),
-            'correspondent_account': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Корреспондентский счет'}),
+            'type': forms.Select(attrs={'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 40%', 'placeholder': 'Название'}),
+            'inn': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 20%', 'placeholder': 'ИНН'}),
+            'ogrn': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 20%', 'placeholder': 'ОГРН'}),
+            'kpp': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 20%', 'placeholder': 'КПП'}),
+            'legal_address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'style': 'width: 40%; height: 60px;',
+                'placeholder': 'Юридический адрес',
+                'rows': 3
+            }),
+            'postal_address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'style': 'width: 40%; height: 60px;',
+                'placeholder': 'Почтовый адрес',
+                'rows': 3
+            }),
+            'ceo_title': forms.Select(attrs={
+                'class': 'form-control',
+                'style': 'width: 20%',
+                'placeholder': 'Должность руководителя'
+            }),
+            'ceo_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 40%',
+                'placeholder': 'ФИО руководителя'
+            }),
+            'bank_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 40%',
+                'placeholder': 'Название банка'
+            }),
+            'account_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 20%',
+                'placeholder': 'Расчетный счет'
+            }),
+            'bik': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 20%',
+                'placeholder': 'БИК'
+            }),
+            'correspondent_account': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 20%',
+                'placeholder': 'Корреспондентский счет'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 20%',
+                'placeholder': 'Введите email'
+            })
         }
 
 
@@ -85,7 +103,8 @@ class LegalEntityForm(forms.ModelForm):
         model = LegalEntity
         fields = [
             'legal_form', 'name', 'inn', 'internal_legal_entity', 'ogrn', 'kpp',
-            'legal_address', 'postal_address', 'leader_position', 'leader_name'
+            'legal_address', 'postal_address', 'leader_position', 'leader_name',
+            'bank_name', 'account_number', 'bik', 'correspondent_account', 'email'
         ]
         widgets = {
             'legal_form': forms.Select(attrs={'class': 'form-select'}),
@@ -100,6 +119,12 @@ class LegalEntityForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Почтовый адрес'}),
             'leader_position': forms.Select(attrs={'class': 'form-select'}),
             'leader_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО руководителя'}),
+            'bank_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название банка'}),
+            'account_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Расчетный счет'}),
+            'bik': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'БИК'}),
+            'correspondent_account': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Корреспондентский счет'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'})
         }
 
     def __init__(self, *args, **kwargs):
@@ -120,54 +145,60 @@ class IndividualEntrepreneurForm(forms.ModelForm):
 
     class Meta:
         model = IndividualEntrepreneur
-        fields = ['full_name', 'inn', 'internal_legal_entity', 'ogrnip', 'legal_address']
+        fields = [
+            'full_name', 'inn', 'internal_legal_entity', 'ogrn', 'legal_address',
+            'bank_name', 'account_number', 'bik', 'correspondent_account', 'email'
+        ]
         widgets = {
-            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО ИП'}),
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО индивидуального предпринимателя'}),
             'inn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ИНН'}),
             'internal_legal_entity': forms.Select(attrs={'class': 'form-select'}),
-            'ogrnip': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ОГРНИП'}),
+            'ogrn': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ОГРНИП'}),
             'legal_address': forms.Textarea(
-                attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Юридический адрес'}),
+                attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Юридический адрес / Почтовый адрес'}),
+            'bank_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Название банка'}),
+            'account_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Расчетный счет'}),
+            'bik': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'БИК'}),
+            'correspondent_account': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'Корреспондентский счет'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'})
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['internal_legal_entity'].queryset = InternalLegalEntity.objects.all()
         self.fields['internal_legal_entity'].label = "Юридическое лицо (наша компания)"
-        # Делаем поле обязательным для ИП
         self.fields['internal_legal_entity'].required = True
 
 
 class PhysicalPersonForm(forms.ModelForm):
-    # Добавляем скрытое поле internal_legal_entity для совместимости
-    internal_legal_entity = forms.ModelChoiceField(
-        queryset=InternalLegalEntity.objects.all(),
+    show_advanced = forms.BooleanField(
         required=False,
+        initial=False,
         widget=forms.HiddenInput(),
-        label=""
+        label="Показать расширенную информацию"
     )
 
     class Meta:
         model = PhysicalPerson
-        fields = ['full_name', 'phone', 'passport_scan', 'internal_legal_entity']
+        fields = ['full_name', 'phone', 'passport_scan', 'email']
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Номер телефона'}),
             'passport_scan': forms.FileInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'})
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Для физлица устанавливаем значение по умолчанию или оставляем пустым
-        if not self.instance.pk:
-            # Можно установить значение по умолчанию, если нужно
-            # self.fields['internal_legal_entity'].initial = InternalLegalEntity.objects.first()
-            pass
+        # Для физлица internal_legal_entity не требуется
+        pass
 
 class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
-        fields = ['number', 'date', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount', 'internal_legal_entity',
+        fields = ['number', 'date', 'amount', 'payed_amount', 'shipping_amount', 'montage_amount',
+                  'internal_legal_entity',
                   'organization', 'invoice_file']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),

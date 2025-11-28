@@ -15,7 +15,7 @@ from .invoices import invoice_add, invoice_detail, invoices_list
 # Organization views
 from .organizations import (
     OrganizationCreateView, OrganizationUpdateView,
-    OrganizationListView, create_internal_legal_entity
+    OrganizationListView
 )
 
 # Contract views
@@ -40,7 +40,6 @@ __all__ = [
     'OrganizationCreateView',
     'OrganizationUpdateView',
     'OrganizationListView',
-    'create_legal_entity',
     'create_contract',
     'save_shipment',
     'shipment_detail',

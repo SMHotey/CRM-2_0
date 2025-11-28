@@ -8,7 +8,7 @@ from .views import (
     save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport, create_contract
 )
 from .views.organizations import OrganizationCreateView, OrganizationUpdateView, OrganizationListView, \
-    TakeOverOrganizationView, create_internal_legal_entity
+    TakeOverOrganizationView, OrganizationTypeSelectView, OrganizationDetailView, OrganizationDeleteView
 from .views import certificates
 from .views.orders import update_workshop
 from .views.base import index
@@ -36,13 +36,15 @@ urlpatterns = [
 
     # Organizations
     path('organizations/', OrganizationListView.as_view(), name='organization_list'),
+    path('organizations/select-type/', OrganizationTypeSelectView.as_view(), name='organization_select_type'),
     path('organizations/create/', OrganizationCreateView.as_view(), name='organization_add'),
+    path('organizations/<int:pk>/', OrganizationDetailView.as_view(), name='organization_detail'),
     path('organizations/<int:pk>/update/', OrganizationUpdateView.as_view(), name='organization_update'),
-    path('organizations/takeover/', TakeOverOrganizationView.as_view(), name='organization_takeover'),
+    path('organizations/<int:pk>/delete/', OrganizationDeleteView.as_view(), name='organization_delete'),
+    path('organizations/<int:pk>/takeover/', TakeOverOrganizationView.as_view(), name='organization_takeover'),
     # path('email/add/', EmailCreateView.as_view(), name='email_add'),
     # path('bank-details/add/', BankDetailsCreateView.as_view(), name='bank_details_add'),
     path('organizations/<int:pk>/create_contract/', create_contract, name='create_contract'),
-    path('organizations/create_internal_legal_entity/',create_internal_legal_entity, name='create_internal_legal_entity'),
 
     # Glass
 

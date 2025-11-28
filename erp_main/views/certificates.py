@@ -31,7 +31,7 @@ class CertificateListView(LoginRequiredMixin, ListView):
             )
 
         # Фильтрация по юридическому лицу
-        internal_legal_entity_id = self.request.GET.get('internal_legal_entity')
+        internal_legal_entity_id = self.request.GET.get('internal_legal_entity')  # ИЗМЕНИЛ НАЗВАНИЕ
         if internal_legal_entity_id:
             queryset = queryset.filter(internal_legal_entity_id=internal_legal_entity_id)
 
@@ -39,8 +39,8 @@ class CertificateListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
-        context['selected_internal_legal_entity'] = self.request.GET.get('internal_legal_entity')
+        context['legal_entities'] = InternalLegalEntity.objects.all()  # УБРАЛ internal_ из ключа
+        context['selected_legal_entity'] = self.request.GET.get('internal_legal_entity')  # ИЗМЕНИЛ НАЗВАНИЕ
         context['search_query'] = self.request.GET.get('search', '')
         return context
 
@@ -57,15 +57,9 @@ class CertificateCreateView(LoginRequiredMixin, CreateView):
     template_name = 'certificate_form.html'
     success_url = reverse_lazy('certificate_list')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
-        return context
-
     def form_valid(self, form):
         # Можно добавить дополнительную логику при создании
         return super().form_valid(form)
-
 
 class CertificateUpdateView(LoginRequiredMixin, UpdateView):
     model = Certificate
@@ -73,11 +67,8 @@ class CertificateUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'certificate_form.html'
     success_url = reverse_lazy('certificate_list')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['internal_legal_entities'] = InternalLegalEntity.objects.all()
-        context['certificate'] = self.get_object()
-        return context
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 
 class CertificateDeleteView(LoginRequiredMixin, DeleteView):
@@ -87,6 +78,7 @@ class CertificateDeleteView(LoginRequiredMixin, DeleteView):
 
 
 @require_http_methods(["GET"])
+@require_http_methods(["GET"])
 def get_certificates(request):
     kind = request.GET.get('kind')
     type = request.GET.get('type')
@@ -94,14 +86,14 @@ def get_certificates(request):
     certificates = Certificate.objects.filter(
         p_kind=kind,
         p_type=type
-    ).select_related('internal_legal_entity')
+    ).select_related('internal_legal_entity')  # ИСПРАВИЛ НА internal_legal_entity
 
     certificates_data = []
     for cert in certificates:
         certificates_data.append({
             'id': cert.id,
             'numbers': cert.numbers,
-            'internal_legal_entity_name': cert.internal_legal_entity.name
+            'legal_entity_name': cert.internal_legal_entity.name  # ОСТАВИЛ КАК ЕСТЬ - правильно
         })
 
     return JsonResponse(certificates_data, safe=False)

@@ -168,11 +168,11 @@
                 <!-- Header -->
                 <div class="form-header">
                     <h1 class="page-title mb-2">
-                        {% if certificate %}Редактирование сертификата{% else %}Создание нового сертификата{% endif %}
+                        {% if form.instance.pk %}Редактирование сертификата{% else %}Создание нового сертификата{% endif %}
                     </h1>
                     <p class="text-muted mb-0">
-                        {% if certificate %}
-                            Изменение данных сертификата №{{ certificate.numbers }}
+                        {% if form.instance.pk %}
+                            Изменение данных сертификата №{{ form.instance.numbers|default:"..." }}
                         {% else %}
                             Заполните информацию о новом сертификате продукции
                         {% endif %}
@@ -192,15 +192,10 @@
                         <div class="row g-3">
                             <!-- Numbers Field -->
                             <div class="col-md-6">
-                                <label for="id_numbers" class="form-label">
+                                <label for="{{ form.numbers.id_for_label }}" class="form-label">
                                     Номер сертификата
                                 </label>
-                                <input type="text"
-                                       name="numbers"
-                                       id="id_numbers"
-                                       class="form-control"
-                                       value="{{ form.numbers.value|default:'' }}"
-                                       placeholder="Введите номер сертификата">
+                                {{ form.numbers }}
                                 {% if form.numbers.errors %}
                                 <div class="text-danger small mt-1">
                                     {{ form.numbers.errors }}
@@ -210,45 +205,23 @@
 
                             <!-- Legal Entity Field -->
                             <div class="col-md-6">
-                                <label for="id_legal_entity" class="form-label required-field">
+                                <label for="{{ form.internal_legal_entity.id_for_label }}" class="form-label required-field">
                                     Юридическое лицо
                                 </label>
-                                <select name="legal_entity"
-                                        id="id_legal_entity"
-                                        class="form-select"
-                                        required>
-                                    <option value="">Выберите юридическое лицо</option>
-                                    {% for entity in legal_entities %}
-                                    <option value="{{ entity.id }}"
-                                            {% if form.legal_entity.value == entity.id %}selected{% endif %}>
-                                        {{ entity.name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                                {% if form.legal_entity.errors %}
+                                {{ form.internal_legal_entity }}
+                                {% if form.internal_legal_entity.errors %}
                                 <div class="text-danger small mt-1">
-                                    {{ form.legal_entity.errors }}
+                                    {{ form.internal_legal_entity.errors }}
                                 </div>
                                 {% endif %}
                             </div>
 
                             <!-- Product Kind Field -->
                             <div class="col-md-6">
-                                <label for="id_p_kind" class="form-label required-field">
+                                <label for="{{ form.p_kind.id_for_label }}" class="form-label required-field">
                                     Вид изделия
                                 </label>
-                                <select name="p_kind"
-                                        id="id_p_kind"
-                                        class="form-select"
-                                        required>
-                                    <option value="">Выберите вид изделия</option>
-                                    {% for value, label in form.fields.p_kind.choices %}
-                                    <option value="{{ value }}"
-                                            {% if form.p_kind.value == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                {{ form.p_kind }}
                                 {% if form.p_kind.errors %}
                                 <div class="text-danger small mt-1">
                                     {{ form.p_kind.errors }}
@@ -258,21 +231,10 @@
 
                             <!-- Product Type Field -->
                             <div class="col-md-6">
-                                <label for="id_p_type" class="form-label required-field">
+                                <label for="{{ form.p_type.id_for_label }}" class="form-label required-field">
                                     Тип изделия
                                 </label>
-                                <select name="p_type"
-                                        id="id_p_type"
-                                        class="form-select"
-                                        required>
-                                    <option value="">Выберите тип изделия</option>
-                                    {% for value, label in form.fields.p_type.choices %}
-                                    <option value="{{ value }}"
-                                            {% if form.p_type.value == value %}selected{% endif %}>
-                                        {{ label }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
+                                {{ form.p_type }}
                                 {% if form.p_type.errors %}
                                 <div class="text-danger small mt-1">
                                     {{ form.p_type.errors }}
@@ -298,12 +260,8 @@
                                     Перетащите файл сюда или нажмите для выбора<br>
                                     Поддерживаемые форматы: PDF, JPG, PNG
                                 </p>
-                                <input type="file"
-                                       name="scan_copy"
-                                       id="id_scan_copy"
-                                       class="d-none"
-                                       accept=".pdf,.jpg,.jpeg,.png">
-                                <button type="button" class="btn btn-primary mt-2" onclick="document.getElementById('id_scan_copy').click()">
+                                {{ form.scan_copy }}
+                                <button type="button" class="btn btn-primary mt-2" onclick="document.getElementById('{{ form.scan_copy.id_for_label }}').click()">
                                     <i class="bi bi-folder2-open me-2"></i>Выбрать файл
                                 </button>
                             </div>
@@ -321,7 +279,7 @@
                                     </button>
                                 </div>
                             </div>
-                            {% if certificate.scan_copy %}
+                            {% if form.instance.scan_copy %}
                             <div class="file-preview mt-2">
                                 <div class="file-info">
                                     <div class="file-icon">
@@ -330,8 +288,8 @@
                                     <div class="flex-grow-1">
                                         <h6 class="mb-1">Текущий файл</h6>
                                         <small class="text-muted">
-                                            <a href="{{ certificate.scan_copy.url }}" target="_blank" class="text-decoration-none">
-                                                {{ certificate.scan_copy.name|slice:"-20:" }}
+                                            <a href="{{ form.instance.scan_copy.url }}" target="_blank" class="text-decoration-none">
+                                                {{ form.instance.scan_copy.name|slice:"-20:" }}
                                             </a>
                                         </small>
                                     </div>
@@ -355,12 +313,8 @@
                                     Перетащите файл сюда или нажмите для выбора<br>
                                     Поддерживаемые форматы: PDF, DOC, DOCX
                                 </p>
-                                <input type="file"
-                                       name="passport_templates"
-                                       id="id_passport_templates"
-                                       class="d-none"
-                                       accept=".pdf,.doc,.docx">
-                                <button type="button" class="btn btn-primary mt-2" onclick="document.getElementById('id_passport_templates').click()">
+                                {{ form.passport_templates }}
+                                <button type="button" class="btn btn-primary mt-2" onclick="document.getElementById('{{ form.passport_templates.id_for_label }}').click()">
                                     <i class="bi bi-folder2-open me-2"></i>Выбрать файл
                                 </button>
                             </div>
@@ -378,7 +332,7 @@
                                     </button>
                                 </div>
                             </div>
-                            {% if certificate.passport_templates %}
+                            {% if form.instance.passport_templates %}
                             <div class="file-preview mt-2">
                                 <div class="file-info">
                                     <div class="file-icon">
@@ -387,8 +341,8 @@
                                     <div class="flex-grow-1">
                                         <h6 class="mb-1">Текущий файл</h6>
                                         <small class="text-muted">
-                                            <a href="{{ certificate.passport_templates.url }}" target="_blank" class="text-decoration-none">
-                                                {{ certificate.passport_templates.name|slice:"-20:" }}
+                                            <a href="{{ form.instance.passport_templates.url }}" target="_blank" class="text-decoration-none">
+                                                {{ form.instance.passport_templates.name|slice:"-20:" }}
                                             </a>
                                         </small>
                                     </div>
@@ -418,7 +372,7 @@
                                 </a>
                                 <button type="submit" class="btn btn-submit">
                                     <i class="bi bi-check-lg me-2"></i>
-                                    {% if certificate %}Сохранить изменения{% else %}Создать сертификат{% endif %}
+                                    {% if form.instance.pk %}Сохранить изменения{% else %}Создать сертификат{% endif %}
                                 </button>
                             </div>
                         </div>
@@ -438,6 +392,15 @@ class CertificateFormManager {
     init() {
         this.setupFileUploads();
         this.setupFormValidation();
+        this.hideFileInputs();
+    }
+
+    hideFileInputs() {
+        // Скрываем стандартные file inputs, так как у нас кастомный интерфейс
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        fileInputs.forEach(input => {
+            input.style.display = 'none';
+        });
     }
 
     setupFileUploads() {
@@ -450,7 +413,7 @@ class CertificateFormManager {
 
     setupFileUpload(type, allowedExtensions) {
         const uploadArea = document.getElementById(`${type}UploadArea`);
-        const fileInput = document.getElementById(`id_${type}_${type === 'scan' ? 'copy' : 'templates'}`);
+        const fileInput = document.getElementById(`id_${type === 'scan' ? 'scan_copy' : 'passport_templates'}`);
         const preview = document.getElementById(`${type}Preview`);
         const fileName = document.getElementById(`${type}FileName`);
         const fileSize = document.getElementById(`${type}FileSize`);
@@ -566,7 +529,8 @@ class CertificateFormManager {
 
 // Global functions for HTML onclick handlers
 function clearFile(type) {
-    const fileInput = document.getElementById(`id_${type}_${type === 'scan' ? 'copy' : 'templates'}`);
+    const fileInputId = type === 'scan' ? 'id_scan_copy' : 'id_passport_templates';
+    const fileInput = document.getElementById(fileInputId);
     const preview = document.getElementById(`${type}Preview`);
 
     if (fileInput) fileInput.value = '';

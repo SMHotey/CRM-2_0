@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+<style>
+    .organization-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+}
+
+    .organization-link:hover {
+    color: #764ba2;
+}
+
+</style>
+
+{% block title %}Контрагенты - Управление контрагентами{% endblock %}
+
+{% block content %}
+<div class="main-content ps-0 ms-0">
+    <div class="main-header ps-0 ms-0">
+        <div class="header-content ps-1">
+            <h1 class="page-title">
+                <i class="bi bi-building"></i> Управление контрагентами
+            </h1>
+            <div class="user-menu">
+                <a href="{% url 'organization_select_type' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Добавить контрагента
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <!-- Фильтры и поиск -->
+        <div class="glass-effect rounded-3 p-4 mb-4">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <form method="get" class="d-flex gap-2">
+                        <input type="text" name="search" class="form-control" placeholder="Поиск по названию или ФИО..."
+                               value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="?type=LEGAL" class="btn {% if request.GET.type == 'LEGAL' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            Юр. лица
+                        </a>
+                        <a href="?type=INDIVIDUAL" class="btn {% if request.GET.type == 'INDIVIDUAL' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            ИП
+                        </a>
+                        <a href="?type=PERSON" class="btn {% if request.GET.type == 'PERSON' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            Физ. лица
+                        </a>
+                        <a href="?" class="btn btn-outline-secondary">Все</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Список организаций -->
+        <div class="glass-effect rounded-3">
+            {% if organizations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Название/ФИО</th>
+                            <th scope="col">ИНН/Телефон</th>
+                            <th scope="col">Менеджер</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Дата создания</th>
+                            <th scope="col" class="text-end">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for organization in organizations %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge
+                                        {% if organization.type == 'LEGAL' %}bg-primary
+                                        {% elif organization.type == 'INDIVIDUAL' %}bg-success
+                                        {% else %}bg-secondary{% endif %}" style="font-size: 0.7rem;">
+                                        {% if organization.type == 'LEGAL' %}ЮЛ
+                                        {% elif organization.type == 'INDIVIDUAL' %}ИП
+                                        {% else %}ФЛ{% endif %}
+                                    </span>
+                                    <a href="{% url 'organization_detail' organization.pk %}" class="organization-link">
+                                        {{ organization.display_name }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                {% if organization.type == 'LEGAL' %}
+                                    <div>ИНН: {{ organization.inn|default:"-" }}</div>
+                                {% elif organization.type == 'INDIVIDUAL' %}
+                                    <div>ИНН: {{ organization.inn|default:"-" }}</div>
+                                {% else %}
+                                    <div>Телефон: {{ organization.phone|default:"-" }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ organization.user.get_full_name|default:organization.user.username }}
+                            </td>
+                            <td>
+                                {{ organization.email|default:"не указан" }}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ organization.created_at|date:"d.m.Y H:i" }}
+                                </small>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'organization_update' organization.pk %}" class="btn btn-sm btn-outline-secondary" title="Редактировать">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'organization_delete' organization.pk %}" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center p-5">
+                <i class="bi bi-building display-1 text-muted mb-3"></i>
+                <h3 class="text-muted">Контрагенты не найдены</h3>
+                <p class="text-muted mb-4">Создайте первого контрагента или измените параметры поиска</p>
+                <a href="{% url 'organization_select_type' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> Добавить контрагента
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if is_paginated %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

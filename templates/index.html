@@ -303,16 +303,20 @@
                         <tr class="table-row">
                             <td>
                                 <a href="{% url 'organization_detail' org.id %}" class="table-link org-name">
-                                    {{ org.name|default:org.name_fl }}
+                                    {% if org.type != 'PERSON'%}
+                                        {{ org.legal_form }} {{ org.display_name }}
+                                    {% else %}
+                                        {{ org.display_name }}
+                                    {% endif %}
                                 </a>
                             </td>
                             <td class="inn-cell">{{ org.inn }}</td>
                             <td>
                                 <div class="contact-info">
-                                    {% if org.phone_number %}
+                                    {% if org.phone %}
                                     <div class="contact-item">
                                         <i class="bi bi-telephone"></i>
-                                        {{ org.phone_number }}
+                                        {{ org.phone }}
                                     </div>
                                     {% endif %}
                                     {% if org.email %}

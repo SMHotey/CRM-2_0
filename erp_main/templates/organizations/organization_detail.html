@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ organization }}{% endblock %}
+
+{% block content %}
+<div class="main-content ps-0 ms-0">
+    <div class="main-header ps-0 ms-0">
+        <div class="header-content ps-1">
+            <h1 class="page-title">
+                <i class="bi bi-building"></i> {{ organization }}
+            </h1>
+            <div class="user-menu">
+                <a href="{% url 'organization_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад
+                </a>
+                <a href="{% url 'organization_update' organization.pk %}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                {% if organization.user != request.user %}
+                    <form method="post" action="{% url 'organization_takeover' organization.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-warning" 
+                                onclick="return confirm('Взять организацию на обслуживание?')">
+                            <i class="bi bi-person-check"></i> Взять на обслуживание
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="row">
+            <!-- Основная информация -->
+            <div class="col-lg-8">
+                <div class="glass-effect rounded-3 p-4 mb-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-info-circle"></i> Основная информация
+                    </h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Тип:</th>
+                                    <td>
+                                        <span class="badge 
+                                            {% if organization.type == 'LEGAL' %}bg-primary
+                                            {% elif organization.type == 'INDIVIDUAL' %}bg-success
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ organization.get_type_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% if organization.type == 'LEGAL' %}
+                                    <tr>
+                                        <th>Орг. форма:</th>
+                                        <td>{{ organization.legal_form_display }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Название:</th>
+                                        <td>{{ organization.name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ИНН:</th>
+                                        <td>{{ organization.inn }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>КПП:</th>
+                                        <td>{{ organization.kpp|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ОГРН:</th>
+                                        <td>{{ organization.ogrn|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Юр. адрес:</th>
+                                        <td>{{ organization.legal_address|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Почтовый адрес:</th>
+                                        <td>{{ organization.postal_address|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Руководитель:</th>
+                                        <td>
+                                            {{ organization.leader_name|default:"-" }}
+                                            {% if organization.leader_position %}
+                                                ({{ organization.get_leader_position_display }})
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% elif organization.type == 'INDIVIDUAL' %}
+                                    <tr>
+                                        <th>ФИО:</th>
+                                        <td>{{ organization.full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ИНН:</th>
+                                        <td>{{ organization.inn }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>ОГРНИП:</th>
+                                        <td>{{ organization.ogrn|default:"-" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Юр. адрес:</th>
+                                        <td>{{ organization.legal_address|default:"-" }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <th>ФИО:</th>
+                                        <td>{{ organization.full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Телефон:</th>
+                                        <td>{{ organization.phone }}</td>
+                                    </tr>
+                                {% endif %}
+                                <tr>
+                                    <th>Менеджер:</th>
+                                    <td>{{ organization.user.get_full_name|default:organization.user.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Дата создания:</th>
+                                    <td>{{ organization.created_at|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Последнее обновление:</th>
+                                    <td>{{ organization.updated_at|date:"d.m.Y H:i" }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Контактная информация -->
+                <div class="glass-effect rounded-3 p-4 mb-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-telephone"></i> Контактная информация
+                    </h4>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Email:</th>
+                                    <td>
+                                        {% if organization.email %}
+                                            <a href="mailto:{{ organization.email }}">{{ organization.email }}</a>
+                                        {% else %}
+                                            <span class="text-muted">Не указан</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if organization.type == 'PERSON' and organization.phone %}
+                                <tr>
+                                    <th>Телефон:</th>
+                                    <td>
+                                        <a href="tel:{{ organization.phone }}">{{ organization.phone }}</a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Банковские реквизиты (для ЮЛ и ИП) -->
+                {% if organization.type in 'LEGAL INDIVIDUAL' and organization.bank_name %}
+                <div class="glass-effect rounded-3 p-4 mb-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-bank"></i> Банковские реквизиты
+                    </h4>
+
+                    <div class="bank-detail-card border-primary p-3 rounded-3"
+                         style="background: rgba(255,255,255,0.5); border: 1px solid #dee2e6;">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <th width="30%">Банк:</th>
+                                <td>{{ organization.bank_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Расчетный счет:</th>
+                                <td>{{ organization.account_number }}</td>
+                            </tr>
+                            <tr>
+                                <th>БИК:</th>
+                                <td>{{ organization.bik }}</td>
+                            </tr>
+                            <tr>
+                                <th>Корр. счет:</th>
+                                <td>{{ organization.correspondent_account|default:"-" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Скан паспорта для физлиц -->
+                {% if organization.type == 'PERSON' and organization.passport_scan %}
+                <div class="glass-effect rounded-3 p-4 mb-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-file-earmark-text"></i> Документы
+                    </h4>
+
+                    <div class="document-card p-3 rounded-3"
+                         style="background: rgba(255,255,255,0.5); border: 1px solid #dee2e6;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Скан паспорта</strong>
+                                <br>
+                                <small class="text-muted">Загружен: {{ organization.passport_scan.uploaded_at|date:"d.m.Y H:i"|default:"" }}</small>
+                            </div>
+                            <a href="{{ organization.passport_scan.url }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="bi bi-download"></i> Скачать
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Боковая панель -->
+            <div class="col-lg-4">
+                <!-- Внутреннее юридическое лицо -->
+                {% if organization.internal_legal_entity %}
+                <div class="glass-effect rounded-3 p-4 mb-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-building-gear"></i> Внутреннее юр. лицо
+                    </h4>
+
+                    <div class="internal-legal-entity-card p-3 rounded-3"
+                         style="background: rgba(255,255,255,0.5); border: 1px solid #dee2e6;">
+                        <h6 class="mb-2">{{ organization.internal_legal_entity.name }}</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            {% if organization.internal_legal_entity.inn %}
+                            <tr>
+                                <th width="40%">ИНН:</th>
+                                <td>{{ organization.internal_legal_entity.inn }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if organization.internal_legal_entity.ogrn %}
+                            <tr>
+                                <th>ОГРН:</th>
+                                <td>{{ organization.internal_legal_entity.ogrn }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if organization.internal_legal_entity.kpp %}
+                            <tr>
+                                <th>КПП:</th>
+                                <td>{{ organization.internal_legal_entity.kpp }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if organization.internal_legal_entity.ceo_name %}
+                            <tr>
+                                <th>Руководитель:</th>
+                                <td>
+                                    {{ organization.internal_legal_entity.ceo_name }}
+                                    {% if organization.internal_legal_entity.ceo_title %}
+                                        ({{ organization.internal_legal_entity.ceo_title }})
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Документы -->
+                <div class="glass-effect rounded-3 p-4 mb-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-files"></i> Документы
+                    </h4>
+
+                    {% for document in documents %}
+                    <div class="document-card mb-2 p-2 rounded-2"
+                         style="background: rgba(255,255,255,0.5); border: 1px solid #dee2e6;">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ document.name }}</strong>
+                                {% if document.document_type %}
+                                    <br><small class="text-muted">{{ document.document_type }}</small>
+                                {% endif %}
+                            </div>
+                            <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Документы не загружены</p>
+                    {% endfor %}
+
+                    {% if organization.type == 'PERSON' and not organization.passport_scan and documents.empty %}
+                    <p class="text-muted">Документы не загружены</p>
+                    {% endif %}
+                </div>
+
+                <!-- История -->
+                <div class="glass-effect rounded-3 p-4">
+                    <h4 class="text-gradient mb-4">
+                        <i class="bi bi-clock-history"></i> История изменений
+                    </h4>
+
+                    <div class="history-timeline">
+                        {% for entry in history_entries %}
+                        <div class="history-item mb-3 ps-3 border-start border-primary">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ entry.action }}</strong>
+                                <small class="text-muted">{{ entry.timestamp|date:"d.m.Y H:i" }}</small>
+                            </div>
+                            <small class="text-muted">Пользователь: {{ entry.user }}</small>
+                            {% if entry.old_value or entry.new_value %}
+                            <div class="mt-1">
+                                {% if entry.old_value %}
+                                    <small class="text-danger">Было: {{ entry.old_value }}</small><br>
+                                {% endif %}
+                                {% if entry.new_value %}
+                                    <small class="text-success">Стало: {{ entry.new_value }}</small>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">История изменений отсутствует</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-effect {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.text-gradient {
+    background: linear-gradient(45deg, #4F97C7, #6C63FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bank-detail-card, .document-card, .internal-legal-entity-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bank-detail-card:hover, .document-card:hover, .internal-legal-entity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.history-item {
+    position: relative;
+}
+
+.history-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    background: #4F97C7;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+.table td {
+    color: #6c757d;
+}
+</style>
+{% endblock %}

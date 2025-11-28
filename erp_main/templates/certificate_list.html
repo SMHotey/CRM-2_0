@@ -168,7 +168,7 @@
 
                 <div class="col-md-5">
                     <label class="form-label fw-semibold">Юридическое лицо</label>
-                    <select name="legal_entity" class="form-select">
+                    <select name="internal_legal_entity" class="form-select">
                         <option value="">Все юридические лица</option>
                         {% for entity in legal_entities %}
                             <option value="{{ entity.id }}"
@@ -224,7 +224,7 @@
                         </td>
                         <td>
                             <span class="badge bg-light text-dark">
-                                {{ certificate.legal_entity.name }}
+                                {{ certificate.internal_legal_entity.name }}
                             </span>
                         </td>
                         <td class="text-center">
@@ -300,11 +300,11 @@
     <div class="pagination-container mt-4">
         <div class="d-flex justify-content-center align-items-center flex-wrap">
             {% if certificates.has_previous %}
-                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&internal_legal_entity={{ selected_legal_entity }}{% endif %}"
                    class="page-btn">
                     <i class="bi bi-chevron-double-left"></i> Первая
                 </a>
-                <a href="?page={{ certificates.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                <a href="?page={{ certificates.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&internal_legal_entity={{ selected_legal_entity }}{% endif %}"
                    class="page-btn">
                     <i class="bi bi-chevron-left"></i> Предыдущая
                 </a>
@@ -314,17 +314,17 @@
                 {% if certificates.number == i %}
                     <span class="page-btn active">{{ i }}</span>
                 {% elif i > certificates.number|add:'-3' and i < certificates.number|add:'3' %}
-                    <a href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                    <a href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&internal_legal_entity={{ selected_legal_entity }}{% endif %}"
                        class="page-btn">{{ i }}</a>
                 {% endif %}
             {% endfor %}
 
             {% if certificates.has_next %}
-                <a href="?page={{ certificates.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                <a href="?page={{ certificates.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&internal_legal_entity={{ selected_legal_entity }}{% endif %}"
                    class="page-btn">
                     Следующая <i class="bi bi-chevron-right"></i>
                 </a>
-                <a href="?page={{ certificates.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&legal_entity={{ selected_legal_entity }}{% endif %}"
+                <a href="?page={{ certificates.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_legal_entity %}&internal_legal_entity={{ selected_legal_entity }}{% endif %}"
                    class="page-btn">
                     Последняя <i class="bi bi-chevron-double-right"></i>
                 </a>
@@ -350,7 +350,7 @@ class CertificateListManager {
 
     setupFilters() {
         const form = document.getElementById('searchForm');
-        const legalEntitySelect = form.querySelector('select[name="legal_entity"]');
+        const legalEntitySelect = form.querySelector('select[name="internal_legal_entity"]');
 
         if (legalEntitySelect) {
             legalEntitySelect.addEventListener('change', () => {

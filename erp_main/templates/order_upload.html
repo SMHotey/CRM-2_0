@@ -232,7 +232,7 @@
                                 <select class="form-input" id="id_legal_entity" name="legal_entity" required>
                                     <option value="" disabled selected>Выберите юридическое лицо</option>
                                     {% for entity in legal_entities %}
-                                        <option value="{{ entity.id }}">{{ entity.name }}</option>
+                                        <option value="{{ entity.id }}">{{ entity.display_name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -244,7 +244,7 @@
                                 <select class="form-input" id="id_organization" name="organization" required>
                                     <option value="" disabled selected>Выберите организацию</option>
                                     {% for organization in organizations %}
-                                        <option value="{{ organization.id }}">{{ organization.name }}</option>
+                                        <option value="{{ organization.id }}">{{ organization.display_name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

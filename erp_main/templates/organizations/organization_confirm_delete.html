@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удаление контрагента{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="main-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="bi bi-exclamation-triangle"></i> Удаление контрагента
+            </h1>
+            <div class="user-menu">
+                <a href="{% url 'organization_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Назад
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="glass-effect rounded-3 p-5 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+                    </div>
+                    
+                    <h2 class="mb-3">Подтверждение удаления</h2>
+                    
+                    <p class="lead mb-4">
+                        Вы уверены, что хотите удалить контрагента 
+                        <strong>
+                            {% if organization.type == 'LEGAL' %}
+                                {{ organization.name }}
+                            {% elif organization.type == 'INDIVIDUAL' %}
+                                {{ organization.full_name }}
+                            {% else %}
+                                {{ organization.full_name }}
+                            {% endif %}
+                        </strong>?
+                    </p>
+
+                    <p class="text-muted mb-4">
+                        Это действие нельзя будет отменить. Все связанные данные (email адреса, банковские реквизиты, документы) также будут удалены.
+                    </p>
+
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{% url 'organization_list' %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-circle"></i> Отмена
+                        </a>
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash"></i> Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

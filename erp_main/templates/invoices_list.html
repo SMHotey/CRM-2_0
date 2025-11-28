@@ -270,7 +270,7 @@
                     <label class="form-label fw-semibold">Юридическое лицо</label>
                     <select name="legal_entity" class="form-select">
                         <option value="">Все юридические лица</option>
-                        {% for l_e in legal_entities %}
+                        {% for l_e in internal_legal_entity %}
                             <option value="{{ l_e.id }}"
                                     {% if l_e.id == selected_legal_entity_id %}selected{% endif %}>
                                 {{ l_e.name }}
