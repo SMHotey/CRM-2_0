@@ -708,7 +708,8 @@ class OrderItem(models.Model):
         ('hatch', 'Люк'),
         ('transom', 'Фрамуга'),
         ('dobor', 'Добор'),
-        ('others', 'Прочее')
+        ('others', 'Прочее'),
+        ('small_gate', 'Калитка')
     )
     TYPE_CHOICE = (
         ('tech', 'тех.'),
@@ -717,7 +718,8 @@ class OrderItem(models.Model):
         ('eiws-60', 'EIWS-60'),
         ('flat', 'квартир.'),
         ('one_layer', 'однолист.'),
-        ('revision', 'ревиз.')
+        ('revision', 'ревиз.'),
+        ('None', '')
     )
     CONSTRUCTION_CHOICE = (
         ('SK', 'старый конструктив'),
@@ -736,21 +738,32 @@ class OrderItem(models.Model):
     p_kind = models.CharField(max_length=15, null=True, choices=KIND_CHOICE, verbose_name='вид изделия')
     p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
     p_construction = models.CharField(max_length=10, choices=CONSTRUCTION_CHOICE, blank=True, null=True, verbose_name='конструктив изделия')
+    p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE, verbose_name='статус')
+
     p_width = models.IntegerField(default=0, verbose_name='ширина изделия')
     p_height = models.IntegerField(default=0, verbose_name='высота изделия')
+
     p_open = models.CharField(max_length=2, blank=True, null=True, verbose_name='открывание')
     p_active_trim = models.CharField(max_length=5, blank=True, null=True, verbose_name='ширина активной створки')
+
     p_furniture = models.CharField(max_length=100, blank=True, null=True, verbose_name='фурнитура')
+
     p_ral = models.CharField(max_length=50, blank=True, null=True, verbose_name='RAL')
+
     p_platband = models.CharField(max_length=50, blank=True, null=True, verbose_name='наличник')
     p_door_closer = models.CharField(max_length=50, blank=True, null=True, verbose_name='доводчик')
+
     p_step = models.CharField(max_length=20, blank=True, null=True, verbose_name='порог')
+
     p_metal = models.CharField(max_length=50, blank=True, null=True, verbose_name='толщина металла')
+
     p_vent_grate = models.CharField(max_length=50, blank=True, null=True, verbose_name='вент.решетка')
+
     p_plate = models.CharField(max_length=100, blank=True, null=True, verbose_name='отбойная пластина')
+
     p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
+
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
-    p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE, verbose_name='статус')
     position_num = models.CharField(max_length=5, verbose_name='номер позиции')
     nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
@@ -875,3 +888,83 @@ class Shipment(models.Model):
 
     def can_edit(self, user):
         return user.is_superuser or self.user == user
+
+
+class StockOperation(models.Model):
+    """Операция со складом (приход/резерв/списание)"""
+    OPERATION_TYPES = [
+        ('receipt', 'Приход'),
+        ('reservation', 'Резервирование'),
+        ('consumption', 'Списание'),
+        ('cancel_reservation', 'Отмена резерва'),
+    ]
+
+    operation_type = models.CharField(
+        max_length=20,
+        choices=OPERATION_TYPES,
+        verbose_name='Тип операции'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        verbose_name='Создал'
+    )
+    comment = models.TextField(blank=True, null=True, verbose_name='Комментарий')
+
+    # Для приходов
+    invoice_number = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='Номер накладной'
+    )
+    supplier = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name='Поставщик'
+    )
+
+    class Meta:
+        verbose_name = 'Операция со складом'
+        verbose_name_plural = 'Операции со складом'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_operation_type_display()} от {self.created_at.date()}"
+
+
+class StockOperationItem(models.Model):
+    """Позиция в операции со складом"""
+    operation = models.ForeignKey(
+        StockOperation,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name='Операция'
+    )
+
+    # Универсальная связь с любой моделью фурнитуры
+    content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    item = models.GenericForeignKey('content_type', 'object_id')
+
+    quantity = models.PositiveIntegerField(
+        verbose_name='Количество'
+    )
+
+    # Для приходов - цена закупки
+    purchase_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name='Цена закупки'
+    )
+
+    class Meta:
+        verbose_name = 'Позиция операции'
+        verbose_name_plural = 'Позиции операций'
+
+    def __str__(self):
+        return f"{self.item}: {self.quantity} шт."

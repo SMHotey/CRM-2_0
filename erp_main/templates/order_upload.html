@@ -231,8 +231,8 @@
                             <div class="input-wrapper">
                                 <select class="form-input" id="id_legal_entity" name="legal_entity" required>
                                     <option value="" disabled selected>Выберите юридическое лицо</option>
-                                    {% for entity in legal_entities %}
-                                        <option value="{{ entity.id }}">{{ entity.display_name }}</option>
+                                    {% for entity in internal_legal_entities %}
+                                        <option value="{{ entity.id }}">{{ entity.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
