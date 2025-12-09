@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.fields.related import ManyToManyField
 
 
 class BaseFurnitureItem(models.Model):
@@ -7,10 +6,27 @@ class BaseFurnitureItem(models.Model):
     name = models.CharField(max_length=50, verbose_name='Наименование')
     code = models.CharField(max_length=30, unique=True, blank=True, null=True, verbose_name='Код для счета и заявки')
     description = models.TextField(blank=True, null=True, verbose_name='Описание')
-    retail_price = models.IntegerField(blank=True, null=True, verbose_name='Розничная цена')
-    base_order_price = models.IntegerField(blank=True, null=True, verbose_name='Цена в заказе')
-    image = models.ImageField(verbose_name='изображение')
-    fireproof = models.BooleanField(default=None)  # Противопожарность элемента фурнитуры
+    retail_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name='Розничная цена'
+    )
+    base_order_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name='Цена в заказе'
+    )
+    image = models.ImageField(
+        upload_to='furniture/%Y/%m/%d/',  # Организация по папкам
+        blank=True,  # Сделать необязательным?
+        null=True,
+        verbose_name='изображение'
+    )
+    fireproof = models.BooleanField(default=False, blank=True, null=True)  # Противопожарность элемента фурнитуры
 
     # Для отдела закупки
     vendor_number = models.CharField(max_length=20, blank=True, null=True, verbose_name='Артикул')
@@ -58,6 +74,11 @@ class BaseFurnitureItem(models.Model):
         """Можно ли списать указанное количество?"""
         return self.available_quantity >= quantity
 
+    def get_code(self):
+        if self.code:
+            return self.code
+        return self.name
+
     def _get_base_str(self):
         """Базовое строковое представление"""
         if self.code:
@@ -92,6 +113,12 @@ class DoorHandle(BaseFurnitureItem):
         verbose_name_plural = 'Дверные ручки'
 
 
+class LockCylinder(BaseFurnitureItem):
+    class Meta:
+        verbose_name = 'Цилиндровый механизм'
+        verbose_name_plural = 'Цилиндровые механизмы'
+
+
 class FurnitureKit(models.Model):
     """Комплект фурнитуры - связан с OrderItem через OneToOne"""
     name = models.CharField(max_length=100, verbose_name='Наименование комплекта', blank=True)
@@ -110,6 +137,13 @@ class FurnitureKit(models.Model):
         through='FurnitureKitHandle',
         related_name='furniture_kits',
         verbose_name='Ручки',
+        blank=True
+    )
+    cylinders = models.ManyToManyField(
+        LockCylinder,
+        through='FurnitureKitCylinder',
+        related_name='furniture_kits',
+        verbose_name='ц/м',
         blank=True
     )
 
@@ -165,3 +199,18 @@ class FurnitureKitHandle(models.Model):
 
     def __str__(self):
         return f"{self.door_handle.name} × {self.quantity}"
+
+
+class FurnitureKitCylinder(models.Model):
+    """Связь комплекта фурнитуры с ц/м"""
+    furniture_kit = models.ForeignKey(FurnitureKit, on_delete=models.CASCADE)
+    lock_cylinder = models.ForeignKey(LockCylinder, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1, verbose_name='Количество')
+
+    class Meta:
+        unique_together = ('furniture_kit', 'lock_cylinder')
+        verbose_name = 'Ц/м в комплекте'
+        verbose_name_plural = 'Ц/м в комплекте'
+
+    def __str__(self):
+        return f"{self.lock_cylinder.name} × {self.quantity}"

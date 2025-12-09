@@ -8,6 +8,8 @@ from django.templatetags.static import static
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
+from erp_main.furniture import FurnitureKit, FurnitureKitLock, FurnitureKitHandle, FurnitureKitCylinder
+
 
 # def validate_numeric_only(value):
 #     if not re.match(r'^\d{6,}$', value) and value is not None:
@@ -701,6 +703,7 @@ class Certificate(models.Model):
     scan_copy = models.FileField(upload_to='uploads/certificates/', blank=True, null=True)
     passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/',verbose_name='Шаблон паспорта', blank=True, null=True)
 
+
 class OrderItem(models.Model):
     KIND_CHOICE = (
         ('door', 'Дверь'),
@@ -709,7 +712,7 @@ class OrderItem(models.Model):
         ('transom', 'Фрамуга'),
         ('dobor', 'Добор'),
         ('others', 'Прочее'),
-        ('small_gate', 'Калитка')
+        ('wickit', 'Калитка')
     )
     TYPE_CHOICE = (
         ('tech', 'тех.'),
@@ -737,15 +740,19 @@ class OrderItem(models.Model):
 
     p_kind = models.CharField(max_length=15, null=True, choices=KIND_CHOICE, verbose_name='вид изделия')
     p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
-    p_construction = models.CharField(max_length=10, choices=CONSTRUCTION_CHOICE, blank=True, null=True, verbose_name='конструктив изделия')
+    p_construction = models.CharField(max_length=10, choices=CONSTRUCTION_CHOICE, blank=True, null=True,
+                                      verbose_name='конструктив изделия')
     p_status = models.CharField(max_length=15, default='in_query', choices=STATUS_CHOICE, verbose_name='статус')
 
     p_width = models.IntegerField(default=0, verbose_name='ширина изделия')
     p_height = models.IntegerField(default=0, verbose_name='высота изделия')
 
-    p_open = models.CharField(max_length=2, blank=True, null=True, verbose_name='открывание')
-    p_active_trim = models.CharField(max_length=5, blank=True, null=True, verbose_name='ширина активной створки')
+    p_open = models.CharField(max_length=100, blank=True, null=True,
+                              choices=(('right', 'R'), ('left', 'L')),
+                              verbose_name='открывание')
+    p_active_trim = models.IntegerField(default=0, blank=True, null=True, verbose_name='ширина активной створки')
 
+    # Поле для хранения кодовой строки фурнитуры
     p_furniture = models.CharField(max_length=100, blank=True, null=True, verbose_name='фурнитура')
 
     p_ral = models.CharField(max_length=50, blank=True, null=True, verbose_name='RAL')
@@ -769,8 +776,205 @@ class OrderItem(models.Model):
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
     p_comment = models.TextField(max_length=255, blank=True, null=True, default='', verbose_name='комментарий')
     firm_plate = models.BooleanField(default=True, verbose_name='фирменный шильд')
-    mounting_plates = models.CharField(max_length=50, default=False, blank=True, null=True, verbose_name='монтажные уши')
+    mounting_plates = models.CharField(max_length=50, default=False, blank=True, null=True,
+                                       verbose_name='монтажные уши')
     workshop = models.IntegerField(default=0, verbose_name='цех')
+
+    def __str__(self):
+        return f"{self.order.id} - {self.position_num} - {self.get_p_kind_display()} {self.p_width}x{self.p_height}"
+
+    def generate_furniture_codes_string(self):
+        def format_furniture_items(items, item_attr_name):
+            """Форматирует элементы фурнитуры одного типа"""
+            if not items.exists():
+                return "00"
+
+            codes = []
+            for item in items.order_by('id'):
+                # Получаем объект фурнитуры через указанный атрибут
+                furniture_item = getattr(item, item_attr_name, None)
+                if not furniture_item:
+                    codes.append("00")
+                    continue
+
+                # Пытаемся получить код через метод get_code() если он есть
+                if hasattr(furniture_item, 'get_code'):
+                    code = furniture_item.get_code()
+                # Иначе берем поле code или name
+                elif hasattr(furniture_item, 'code') and furniture_item.code:
+                    code = furniture_item.code
+                elif hasattr(furniture_item, 'name') and furniture_item.name:
+                    code = furniture_item.name
+                else:
+                    code = "00"
+
+                codes.append(str(code))
+
+            return ".".join(codes)
+
+        try:
+            # Получаем связанный комплект фурнитуры
+            furniture_kit = self.furniture_kit
+
+            # Форматируем каждый тип фурнитуры
+            lock_str = format_furniture_items(
+                furniture_kit.furniturekitlock_set.all(),
+                'door_lock'
+            )
+            handle_str = format_furniture_items(
+                furniture_kit.furniturekithandle_set.all(),
+                'door_handle'
+            )
+            # Исправляем имя атрибута для цилиндров (согласно исправленной модели)
+            cylinder_str = format_furniture_items(
+                furniture_kit.furniturekitcylinder_set.all(),
+                'lock_cylinder'
+            )
+
+            result = f"{lock_str}-{handle_str}-{cylinder_str}"
+
+            # Сохраняем сгенерированную строку в поле p_furniture
+            self.p_furniture = result
+            # Сохраняем только поле p_furniture, чтобы не трогать другие поля
+            self.save(update_fields=['p_furniture'])
+
+            return result
+
+        except (FurnitureKit.DoesNotExist, AttributeError):
+            # Если комплекта нет, возвращаем текущее значение из p_furniture или дефолтную строку
+            if self.p_furniture:
+                return self.p_furniture
+            return "00-00-00"
+
+    def update_furniture_codes(self):
+        """Обновляет поле p_furniture на основе данных из комплекта фурнитуры"""
+        return self.generate_furniture_codes_string()
+
+    @property
+    def furniture_codes(self):
+        """Свойство для удобного доступа к кодам фурнитуры"""
+        # Если есть данные в p_furniture, возвращаем их
+        if self.p_furniture:
+            return self.p_furniture
+
+        # Иначе пытаемся сгенерировать и сохранить
+        try:
+            return self.generate_furniture_codes_string()
+        except:
+            return "00-00-00"
+
+    def get_furniture_items(self):
+        """
+        Возвращает все элементы фурнитуры для этой позиции в структурированном виде
+        """
+        try:
+            furniture_kit = self.furniture_kit
+            return {
+                'locks': [item.door_lock for item in furniture_kit.furniturekitlock_set.all()],
+                'handles': [item.door_handle for item in furniture_kit.furniturekithandle_set.all()],
+                'cylinders': [item.lock_cylinder for item in furniture_kit.furniturekitcylinder_set.all()],
+            }
+        except (FurnitureKit.DoesNotExist, AttributeError):
+            return {'locks': [], 'handles': [], 'cylinders': []}
+
+    def has_furniture_kit(self):
+        """Проверяет, есть ли у позиции комплект фурнитуры"""
+        return hasattr(self, 'furniture_kit') and self.furniture_kit is not None
+
+    def create_furniture_kit_if_needed(self):
+        """Создает пустой комплект фурнитуры, если его нет"""
+        if not self.has_furniture_kit():
+            kit = FurnitureKit.objects.create(order_item=self)
+            return kit
+        return self.furniture_kit
+
+    def add_furniture_item(self, item_type, item_object, quantity=1):
+        """
+        Добавляет элемент фурнитуры в комплект и обновляет p_furniture
+
+        Args:
+            item_type: 'lock', 'handle' или 'cylinder'
+            item_object: объект DoorLock, DoorHandle или LockCylinder
+            quantity: количество
+        """
+        # Создаем комплект, если его нет
+        self.create_furniture_kit_if_needed()
+
+        furniture_kit = self.furniture_kit
+
+        if item_type == 'lock':
+            FurnitureKitLock.objects.get_or_create(
+                furniture_kit=furniture_kit,
+                door_lock=item_object,
+                defaults={'quantity': quantity}
+            )
+        elif item_type == 'handle':
+            FurnitureKitHandle.objects.get_or_create(
+                furniture_kit=furniture_kit,
+                door_handle=item_object,
+                defaults={'quantity': quantity}
+            )
+        elif item_type == 'cylinder':
+            FurnitureKitCylinder.objects.get_or_create(
+                furniture_kit=furniture_kit,
+                lock_cylinder=item_object,
+                defaults={'quantity': quantity}
+            )
+
+        # Автоматически обновляем поле p_furniture после добавления
+        self.update_furniture_codes()
+
+    def remove_furniture_item(self, item_type, item_object):
+        """
+        Удаляет элемент фурнитуры из комплекта и обновляет p_furniture
+        """
+        if not self.has_furniture_kit():
+            return
+
+        furniture_kit = self.furniture_kit
+
+        if item_type == 'lock':
+            FurnitureKitLock.objects.filter(
+                furniture_kit=furniture_kit,
+                door_lock=item_object
+            ).delete()
+        elif item_type == 'handle':
+            FurnitureKitHandle.objects.filter(
+                furniture_kit=furniture_kit,
+                door_handle=item_object
+            ).delete()
+        elif item_type == 'cylinder':
+            FurnitureKitCylinder.objects.filter(
+                furniture_kit=furniture_kit,
+                lock_cylinder=item_object
+            ).delete()
+
+        # Автоматически обновляем поле p_furniture после удаления
+        self.update_furniture_codes()
+
+    def clear_furniture_kit(self):
+        """Очищает весь комплект фурнитуры"""
+        if self.has_furniture_kit():
+            self.furniture_kit.furniturekitlock_set.all().delete()
+            self.furniture_kit.furniturekithandle_set.all().delete()
+            self.furniture_kit.furniturekitcylinder_set.all().delete()
+            self.update_furniture_codes()
+
+    def save(self, *args, **kwargs):
+        """Переопределяем save для автоматического обновления p_furniture при изменении комплекта"""
+        # Сначала сохраняем объект
+        super().save(*args, **kwargs)
+
+        # Если есть комплект фурнитуры, обновляем p_furniture
+        if self.has_furniture_kit():
+            # Обновляем только если еще не обновляли в этом же save
+            if 'update_fields' not in kwargs or 'p_furniture' not in kwargs.get('update_fields', []):
+                self.update_furniture_codes()
+
+    class Meta:
+        verbose_name = 'Позиция заказа'
+        verbose_name_plural = 'Позиции заказа'
+        ordering = ['order', 'position_num']
 
     @property
     def d_glass(self):
@@ -867,6 +1071,7 @@ class Contract(models.Model):
     file = models.FileField(upload_to='contracts/')
     days = models.IntegerField(blank=True, null=True)
 
+
 class Shipment(models.Model):
     SHIPMENT_TYPES = [
         ('pickup', 'самовывоз'),
@@ -890,81 +1095,81 @@ class Shipment(models.Model):
         return user.is_superuser or self.user == user
 
 
-class StockOperation(models.Model):
-    """Операция со складом (приход/резерв/списание)"""
-    OPERATION_TYPES = [
-        ('receipt', 'Приход'),
-        ('reservation', 'Резервирование'),
-        ('consumption', 'Списание'),
-        ('cancel_reservation', 'Отмена резерва'),
-    ]
+# class StockOperation(models.Model):
+#     """Операция со складом (приход/резерв/списание)"""
+#     OPERATION_TYPES = [
+#         ('receipt', 'Приход'),
+#         ('reservation', 'Резервирование'),
+#         ('consumption', 'Списание'),
+#         ('cancel_reservation', 'Отмена резерва'),
+#     ]
+#
+#     operation_type = models.CharField(
+#         max_length=20,
+#         choices=OPERATION_TYPES,
+#         verbose_name='Тип операции'
+#     )
+#     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
+#     created_by = models.ForeignKey(
+#         User,
+#         on_delete=models.PROTECT,
+#         verbose_name='Создал'
+#     )
+#     comment = models.TextField(blank=True, null=True, verbose_name='Комментарий')
+#
+#     # Для приходов
+#     invoice_number = models.CharField(
+#         max_length=50,
+#         blank=True,
+#         null=True,
+#         verbose_name='Номер накладной'
+#     )
+#     supplier = models.CharField(
+#         max_length=100,
+#         blank=True,
+#         null=True,
+#         verbose_name='Поставщик'
+#     )
+#
+#     class Meta:
+#         verbose_name = 'Операция со складом'
+#         verbose_name_plural = 'Операции со складом'
+#         ordering = ['-created_at']
+#
+#     def __str__(self):
+#         return f"{self.get_operation_type_display()} от {self.created_at.date()}"
 
-    operation_type = models.CharField(
-        max_length=20,
-        choices=OPERATION_TYPES,
-        verbose_name='Тип операции'
-    )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата операции')
-    created_by = models.ForeignKey(
-        User,
-        on_delete=models.PROTECT,
-        verbose_name='Создал'
-    )
-    comment = models.TextField(blank=True, null=True, verbose_name='Комментарий')
 
-    # Для приходов
-    invoice_number = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        verbose_name='Номер накладной'
-    )
-    supplier = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-        verbose_name='Поставщик'
-    )
-
-    class Meta:
-        verbose_name = 'Операция со складом'
-        verbose_name_plural = 'Операции со складом'
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.get_operation_type_display()} от {self.created_at.date()}"
-
-
-class StockOperationItem(models.Model):
-    """Позиция в операции со складом"""
-    operation = models.ForeignKey(
-        StockOperation,
-        on_delete=models.CASCADE,
-        related_name='items',
-        verbose_name='Операция'
-    )
-
-    # Универсальная связь с любой моделью фурнитуры
-    content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    item = models.GenericForeignKey('content_type', 'object_id')
-
-    quantity = models.PositiveIntegerField(
-        verbose_name='Количество'
-    )
-
-    # Для приходов - цена закупки
-    purchase_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        blank=True,
-        null=True,
-        verbose_name='Цена закупки'
-    )
-
-    class Meta:
-        verbose_name = 'Позиция операции'
-        verbose_name_plural = 'Позиции операций'
-
-    def __str__(self):
-        return f"{self.item}: {self.quantity} шт."
+# class StockOperationItem(models.Model):
+#     """Позиция в операции со складом"""
+#     operation = models.ForeignKey(
+#         StockOperation,
+#         on_delete=models.CASCADE,
+#         related_name='items',
+#         verbose_name='Операция'
+#     )
+#
+#     # Универсальная связь с любой моделью фурнитуры
+#     content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
+#     object_id = models.PositiveIntegerField()
+#     item = models.GenericForeignKey('content_type', 'object_id')
+#
+#     quantity = models.PositiveIntegerField(
+#         verbose_name='Количество'
+#     )
+    #
+    # # Для приходов - цена закупки
+    # purchase_price = models.DecimalField(
+    #     max_digits=10,
+    #     decimal_places=2,
+    #     blank=True,
+    #     null=True,
+    #     verbose_name='Цена закупки'
+    # )
+    #
+    # class Meta:
+    #     verbose_name = 'Позиция операции'
+    #     verbose_name_plural = 'Позиции операций'
+    #
+    # def __str__(self):
+    #     return f"{self.item}: {self.quantity} шт."
