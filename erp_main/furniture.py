@@ -101,13 +101,16 @@ class BaseFurnitureItem(models.Model):
 
 
 class DoorLock(BaseFurnitureItem):
+    security_class = models.CharField( max_length=50, default='None', blank=True, null=True)
+
     class Meta:
         verbose_name = 'Дверной замок'
         verbose_name_plural = 'Дверные замки'
 
 
 class DoorHandle(BaseFurnitureItem):
-    color = models.CharField(max_length=30, blank=True, null=True, verbose_name='Цвет')
+    color = models.CharField(max_length=30, default='стандарт', blank=True, null=True, verbose_name='Цвет')
+    anti_fire = models.BooleanField(default='False')
     class Meta:
         verbose_name = 'Дверная ручка'
         verbose_name_plural = 'Дверные ручки'

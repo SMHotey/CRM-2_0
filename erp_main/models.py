@@ -1010,7 +1010,7 @@ class GlassInfo(models.Model):
 
     kind = models.CharField(max_length=20, blank=True, null=True,choices=KIND_CHOICE)
     option = models.CharField(max_length=20, blank=True, null=True, choices=OPTIONS_CHOICE)
-    order_items = models.ForeignKey(OrderItem, related_name='glasses', on_delete=models.CASCADE)
+    order_items = models.ForeignKey(OrderItem, related_name='glasses',blank=True, null=True, on_delete=models.SET_NULL)
     height = models.IntegerField(blank=True, null=True)
     width = models.IntegerField(blank=True, null=True)
     depth = models.IntegerField(blank=True, null=True)

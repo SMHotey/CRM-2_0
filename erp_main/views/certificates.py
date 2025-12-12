@@ -86,14 +86,14 @@ def get_certificates(request):
     certificates = Certificate.objects.filter(
         p_kind=kind,
         p_type=type
-    ).select_related('internal_legal_entity')  # ИСПРАВИЛ НА internal_legal_entity
+    ).select_related('internal_legal_entity')
 
     certificates_data = []
     for cert in certificates:
         certificates_data.append({
             'id': cert.id,
             'numbers': cert.numbers,
-            'legal_entity_name': cert.internal_legal_entity.name  # ОСТАВИЛ КАК ЕСТЬ - правильно
+            'legal_entity_name': cert.internal_legal_entity.name
         })
 
     return JsonResponse(certificates_data, safe=False)

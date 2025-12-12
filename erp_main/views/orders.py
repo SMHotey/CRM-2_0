@@ -40,7 +40,6 @@ class OrderUploadView(UserAccessMixin, FormView):
         context = super().get_context_data(**kwargs)
         user_role = self.get_user_role()
 
-        # Сохраняем предыдущую логику доступа к организациям
         if self.request.user.is_superuser or user_role in ['admin', 'director']:
             context['organizations'] = Organization.objects.all()
         else:

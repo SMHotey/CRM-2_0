@@ -279,28 +279,28 @@ class OrderUploadView(LoginRequiredMixin, FormView):
     def _check_header(self, sheet):
         return sheet.cell(row=1, column=3).value == "Бланк №"
 
-    def _process_file(self, sheet):
-        cur_row, cur_column = 9, 15
-        while sheet.cell(row=cur_row, column=cur_column).value != 'шт.':
-            cur_row += 1
-        max_row = cur_row
-
-        seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
-        positions = []
-        line = []
-
-        for row in range(8, max_row):
-            if sheet.cell(row=row, column=2).value:
-                if line:
-                    positions.append(line)
-                line = [sheet.cell(row=row, column=column).value for column in seq]
-            else:
-                line.extend([sheet.cell(row=row, column=7).value, sheet.cell(row=row, column=8).value])
-
-        if line:
-            positions.append(line)
-
-        return positions
+    # def _process_file(self, sheet):
+    #     cur_row, cur_column = 9, 15
+    #     while sheet.cell(row=cur_row, column=cur_column).value != 'шт.':
+    #         cur_row += 1
+    #     max_row = cur_row
+    #
+    #     seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
+    #     positions = []
+    #     line = []
+    #
+    #     for row in range(8, max_row):
+    #         if sheet.cell(row=row, column=2).value:
+    #             if line:
+    #                 positions.append(line)
+    #             line = [sheet.cell(row=row, column=column).value for column in seq]
+    #         else:
+    #             line.extend([sheet.cell(row=row, column=7).value, sheet.cell(row=row, column=8).value])
+    #
+    #     if line:
+    #         positions.append(line)
+    #
+    #     return positions
 
     def _update_order_items(self, order, new_positions, old_file):
         current_items = {item.position_num: item for item in

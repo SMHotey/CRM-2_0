@@ -18,16 +18,16 @@ class OrderProcessor:
         cur_row, cur_column = 9, 15
         while sheet.cell(row=cur_row, column=cur_column).value != 'шт.':
             cur_row += 1
-        max_row = cur_row
+        max_row = cur_row  # кол-во строк(позиций) в заказе
 
-        seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]
-        positions = []
-        line = []
+        seq = [1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 7, 8]  # Последовательность чтения столбцов из бланка
+        positions = []  # Все позиции из заказа
+        line = []  # Текущая обрабатываемая позиция
 
-        for row in range(8, max_row):
-            if sheet.cell(row=row, column=2).value:
-                if line:
-                    positions.append(line)
+        for row in range(8, max_row):  # Цикл по строкам заказа
+            if sheet.cell(row=row, column=2).value:  # Если ячейка в столбце "Наименование" текущей строки не пустая
+                if line:  # Если список line не пустой
+                    positions.append(line)  # Добавляем список line в список positions
                 line = [sheet.cell(row=row, column=column).value for column in seq]
             else:
                 line.extend([sheet.cell(row=row, column=7).value, sheet.cell(row=row, column=8).value])
