@@ -13,7 +13,7 @@ class OrderProcessor:
         return sheet.cell(row=1, column=3).value == "Бланк №"
 
     @staticmethod
-    def process_file_data(sheet):
+    def process_file_data(sheet):  # Парсинг бланка заявки
         """Обработка данных из файла Excel"""
         cur_row, cur_column = 9, 15
         while sheet.cell(row=cur_row, column=cur_column).value != 'шт.':

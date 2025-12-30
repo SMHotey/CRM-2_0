@@ -275,7 +275,8 @@ class OrderUploadView(UserAccessMixin, FormView):
                 'p_comment': data[12],
                 'p_glass': self.processor.count_glass_data(data[13:]),
             }
-
+# Здесь должна быть новая логика формирования order_item >>>>>>>>>>
+            
             new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
             new_item.p_status = 'in_query'
             new_item.save()

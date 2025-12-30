@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 from erp_main.furniture import FurnitureKit, FurnitureKitLock, FurnitureKitHandle, FurnitureKitCylinder
+from erp_main.views.product_options import ItemInfo
 
 
 # def validate_numeric_only(value):
@@ -771,11 +772,12 @@ class OrderItem(models.Model):
     p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
 
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
+    item_info = models.OneToOneField(ItemInfo, related_name='order_item', on_delete=models.PROTECT, null=True)
     position_num = models.CharField(max_length=5, verbose_name='номер позиции')
     nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
     p_comment = models.TextField(max_length=255, blank=True, null=True, default='', verbose_name='комментарий')
-    firm_plate = models.BooleanField(default=True, verbose_name='фирменный шильд')
+    firm_plate = models.BooleanField(default=False, verbose_name='фирменный шильд')
     mounting_plates = models.CharField(max_length=50, default=False, blank=True, null=True,
                                        verbose_name='монтажные уши')
     workshop = models.IntegerField(default=0, verbose_name='цех')

@@ -106,6 +106,7 @@ class InternalLegalEntityAdmin(admin.ModelAdmin):
             obj.name = f"ИП {obj.ceo_name}"
 
         super().save_model(request, obj, form, change)
+
     class Media:
         js = ('admin/js/internal_legal_entity.js',)
 
