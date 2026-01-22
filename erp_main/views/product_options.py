@@ -1,6 +1,6 @@
 from django.db import models
 
-from erp_main.models import OrderItem
+# from erp_main.models import OrderItem
 
 
 class ItemInfo(models.Model):

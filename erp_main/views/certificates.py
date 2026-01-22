@@ -31,7 +31,7 @@ class CertificateListView(LoginRequiredMixin, ListView):
             )
 
         # Фильтрация по юридическому лицу
-        internal_legal_entity_id = self.request.GET.get('internal_legal_entity')  # ИЗМЕНИЛ НАЗВАНИЕ
+        internal_legal_entity_id = self.request.GET.get('internal_legal_entity')
         if internal_legal_entity_id:
             queryset = queryset.filter(internal_legal_entity_id=internal_legal_entity_id)
 
@@ -39,8 +39,8 @@ class CertificateListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['legal_entities'] = InternalLegalEntity.objects.all()  # УБРАЛ internal_ из ключа
-        context['selected_legal_entity'] = self.request.GET.get('internal_legal_entity')  # ИЗМЕНИЛ НАЗВАНИЕ
+        context['legal_entities'] = InternalLegalEntity.objects.all()
+        context['selected_legal_entity'] = self.request.GET.get('internal_legal_entity')
         context['search_query'] = self.request.GET.get('search', '')
         return context
 
@@ -61,6 +61,7 @@ class CertificateCreateView(LoginRequiredMixin, CreateView):
         # Можно добавить дополнительную логику при создании
         return super().form_valid(form)
 
+
 class CertificateUpdateView(LoginRequiredMixin, UpdateView):
     model = Certificate
     form_class = CertificateForm
@@ -77,7 +78,6 @@ class CertificateDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('certificate_list')
 
 
-@require_http_methods(["GET"])
 @require_http_methods(["GET"])
 def get_certificates(request):
     kind = request.GET.get('kind')

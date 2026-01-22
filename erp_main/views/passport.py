@@ -110,7 +110,6 @@ def generate_passports(request):
                             'product_kind': item.get_p_kind_display(),
                             'quantity': item.p_quantity,
                         }
-
                         doc.render(context)
 
                         # Сохраняем документ в буфер

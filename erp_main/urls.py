@@ -79,11 +79,8 @@ urlpatterns = [
 #Passport
     path('check-nameplates/', passport.check_nameplates, name='check_nameplates'),
     path('generate-passports/', passport.generate_passports, name='generate_passports'),
-    # Chat
-    # path('chat/', chat_view, name='chat'),
-    # path('chat/users/', get_available_users, name='get_available_users'),
 
-    # Debug
+# Debug
     path('debug/users/', debug_users, name='debug_users'),
 
 ]

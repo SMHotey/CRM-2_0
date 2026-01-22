@@ -227,9 +227,9 @@
                         </div>
 
                         <div class="form-field-group full-width">
-                            <label for="id_legal_entity" class="form-label">Юридическое лицо</label>
+                            <label for="id_internal_legal_entity" class="form-label">Юридическое лицо</label>
                             <div class="input-wrapper">
-                                <select class="form-input" id="id_legal_entity" name="legal_entity" required>
+                                <select class="form-input" id="id_internal_legal_entity" name="internal_legal_entity" required>
                                     <option value="" disabled selected>Выберите юридическое лицо</option>
                                     {% for entity in internal_legal_entities %}
                                         <option value="{{ entity.id }}">{{ entity.name }}</option>
@@ -239,7 +239,7 @@
                         </div>
 
                         <div class="form-field-group full-width">
-                            <label for="id_organization" class="form-label">Орангизация</label>
+                            <label for="id_organization" class="form-label">Организация</label>
                             <div class="input-wrapper">
                                 <select class="form-input" id="id_organization" name="organization" required>
                                     <option value="" disabled selected>Выберите организацию</option>
@@ -599,15 +599,6 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"]::-webkit-outer-spin-button:hover,
 input[type="number"]::-webkit-inner-spin-button:hover {
     opacity: 1;
-}
-
-/* Для Firefox */
-input[type="number"] {
-    -moz-appearance: textfield;
-}
-
-input[type="number"]:hover {
-    -moz-appearance: number-input;
 }
 
 /* Due Date Display */

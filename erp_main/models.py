@@ -8,8 +8,7 @@ from django.templatetags.static import static
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
-from erp_main.furniture import FurnitureKit, FurnitureKitLock, FurnitureKitHandle, FurnitureKitCylinder
-from erp_main.views.product_options import ItemInfo
+#from erp_main.views.product_options import ItemInfo
 
 
 # def validate_numeric_only(value):
@@ -541,10 +540,10 @@ class Invoice(models.Model):
     def __str__(self):
         return f'Счет № {self.number}'
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['number', 'internal_legal_entity', 'year'], name='unique_field_combination')
-        ]
+    # class Meta:
+    #     constraints = [
+    #         models.UniqueConstraint(fields=['number', 'internal_legal_entity', 'year'], name='unique_field_combination')
+    #     ]
 
     @property
     def percent(self):
@@ -772,7 +771,7 @@ class OrderItem(models.Model):
     p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
 
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
-    item_info = models.OneToOneField(ItemInfo, related_name='order_item', on_delete=models.PROTECT, null=True)
+#    item_info = models.OneToOneField(ItemInfo, related_name='order_item', on_delete=models.PROTECT, null=True)
     position_num = models.CharField(max_length=5, verbose_name='номер позиции')
     nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
@@ -784,194 +783,6 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.order.id} - {self.position_num} - {self.get_p_kind_display()} {self.p_width}x{self.p_height}"
-
-    def generate_furniture_codes_string(self):
-        def format_furniture_items(items, item_attr_name):
-            """Форматирует элементы фурнитуры одного типа"""
-            if not items.exists():
-                return "00"
-
-            codes = []
-            for item in items.order_by('id'):
-                # Получаем объект фурнитуры через указанный атрибут
-                furniture_item = getattr(item, item_attr_name, None)
-                if not furniture_item:
-                    codes.append("00")
-                    continue
-
-                # Пытаемся получить код через метод get_code() если он есть
-                if hasattr(furniture_item, 'get_code'):
-                    code = furniture_item.get_code()
-                # Иначе берем поле code или name
-                elif hasattr(furniture_item, 'code') and furniture_item.code:
-                    code = furniture_item.code
-                elif hasattr(furniture_item, 'name') and furniture_item.name:
-                    code = furniture_item.name
-                else:
-                    code = "00"
-
-                codes.append(str(code))
-
-            return ".".join(codes)
-
-        try:
-            # Получаем связанный комплект фурнитуры
-            furniture_kit = self.furniture_kit
-
-            # Форматируем каждый тип фурнитуры
-            lock_str = format_furniture_items(
-                furniture_kit.furniturekitlock_set.all(),
-                'door_lock'
-            )
-            handle_str = format_furniture_items(
-                furniture_kit.furniturekithandle_set.all(),
-                'door_handle'
-            )
-            # Исправляем имя атрибута для цилиндров (согласно исправленной модели)
-            cylinder_str = format_furniture_items(
-                furniture_kit.furniturekitcylinder_set.all(),
-                'lock_cylinder'
-            )
-
-            result = f"{lock_str}-{handle_str}-{cylinder_str}"
-
-            # Сохраняем сгенерированную строку в поле p_furniture
-            self.p_furniture = result
-            # Сохраняем только поле p_furniture, чтобы не трогать другие поля
-            self.save(update_fields=['p_furniture'])
-
-            return result
-
-        except (FurnitureKit.DoesNotExist, AttributeError):
-            # Если комплекта нет, возвращаем текущее значение из p_furniture или дефолтную строку
-            if self.p_furniture:
-                return self.p_furniture
-            return "00-00-00"
-
-    def update_furniture_codes(self):
-        """Обновляет поле p_furniture на основе данных из комплекта фурнитуры"""
-        return self.generate_furniture_codes_string()
-
-    @property
-    def furniture_codes(self):
-        """Свойство для удобного доступа к кодам фурнитуры"""
-        # Если есть данные в p_furniture, возвращаем их
-        if self.p_furniture:
-            return self.p_furniture
-
-        # Иначе пытаемся сгенерировать и сохранить
-        try:
-            return self.generate_furniture_codes_string()
-        except:
-            return "00-00-00"
-
-    def get_furniture_items(self):
-        """
-        Возвращает все элементы фурнитуры для этой позиции в структурированном виде
-        """
-        try:
-            furniture_kit = self.furniture_kit
-            return {
-                'locks': [item.door_lock for item in furniture_kit.furniturekitlock_set.all()],
-                'handles': [item.door_handle for item in furniture_kit.furniturekithandle_set.all()],
-                'cylinders': [item.lock_cylinder for item in furniture_kit.furniturekitcylinder_set.all()],
-            }
-        except (FurnitureKit.DoesNotExist, AttributeError):
-            return {'locks': [], 'handles': [], 'cylinders': []}
-
-    def has_furniture_kit(self):
-        """Проверяет, есть ли у позиции комплект фурнитуры"""
-        return hasattr(self, 'furniture_kit') and self.furniture_kit is not None
-
-    def create_furniture_kit_if_needed(self):
-        """Создает пустой комплект фурнитуры, если его нет"""
-        if not self.has_furniture_kit():
-            kit = FurnitureKit.objects.create(order_item=self)
-            return kit
-        return self.furniture_kit
-
-    def add_furniture_item(self, item_type, item_object, quantity=1):
-        """
-        Добавляет элемент фурнитуры в комплект и обновляет p_furniture
-
-        Args:
-            item_type: 'lock', 'handle' или 'cylinder'
-            item_object: объект DoorLock, DoorHandle или LockCylinder
-            quantity: количество
-        """
-        # Создаем комплект, если его нет
-        self.create_furniture_kit_if_needed()
-
-        furniture_kit = self.furniture_kit
-
-        if item_type == 'lock':
-            FurnitureKitLock.objects.get_or_create(
-                furniture_kit=furniture_kit,
-                door_lock=item_object,
-                defaults={'quantity': quantity}
-            )
-        elif item_type == 'handle':
-            FurnitureKitHandle.objects.get_or_create(
-                furniture_kit=furniture_kit,
-                door_handle=item_object,
-                defaults={'quantity': quantity}
-            )
-        elif item_type == 'cylinder':
-            FurnitureKitCylinder.objects.get_or_create(
-                furniture_kit=furniture_kit,
-                lock_cylinder=item_object,
-                defaults={'quantity': quantity}
-            )
-
-        # Автоматически обновляем поле p_furniture после добавления
-        self.update_furniture_codes()
-
-    def remove_furniture_item(self, item_type, item_object):
-        """
-        Удаляет элемент фурнитуры из комплекта и обновляет p_furniture
-        """
-        if not self.has_furniture_kit():
-            return
-
-        furniture_kit = self.furniture_kit
-
-        if item_type == 'lock':
-            FurnitureKitLock.objects.filter(
-                furniture_kit=furniture_kit,
-                door_lock=item_object
-            ).delete()
-        elif item_type == 'handle':
-            FurnitureKitHandle.objects.filter(
-                furniture_kit=furniture_kit,
-                door_handle=item_object
-            ).delete()
-        elif item_type == 'cylinder':
-            FurnitureKitCylinder.objects.filter(
-                furniture_kit=furniture_kit,
-                lock_cylinder=item_object
-            ).delete()
-
-        # Автоматически обновляем поле p_furniture после удаления
-        self.update_furniture_codes()
-
-    def clear_furniture_kit(self):
-        """Очищает весь комплект фурнитуры"""
-        if self.has_furniture_kit():
-            self.furniture_kit.furniturekitlock_set.all().delete()
-            self.furniture_kit.furniturekithandle_set.all().delete()
-            self.furniture_kit.furniturekitcylinder_set.all().delete()
-            self.update_furniture_codes()
-
-    def save(self, *args, **kwargs):
-        """Переопределяем save для автоматического обновления p_furniture при изменении комплекта"""
-        # Сначала сохраняем объект
-        super().save(*args, **kwargs)
-
-        # Если есть комплект фурнитуры, обновляем p_furniture
-        if self.has_furniture_kit():
-            # Обновляем только если еще не обновляли в этом же save
-            if 'update_fields' not in kwargs or 'p_furniture' not in kwargs.get('update_fields', []):
-                self.update_furniture_codes()
 
     class Meta:
         verbose_name = 'Позиция заказа'

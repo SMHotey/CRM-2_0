@@ -16,7 +16,7 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        fields = ['order_file', 'invoice', 'due_date', 'comment']  # Убедитесь, что у вас в полях есть 'due_date'
+        fields = ['order_file', 'invoice', 'due_date', 'comment']
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -16,7 +16,7 @@ from django.contrib import messages
 from ..models import Order, OrderItem, Organization, InternalLegalEntity, GlassInfo, OrderChangeHistory
 from ..forms import OrderForm, OrderFileForm
 from .mixins import UserAccessMixin
-from .permissions import (  # Импорт из нового файла permissions.py
+from .permissions import (
     get_user_role_from_request,
     has_permission_for_action,
     can_view_order,
@@ -24,6 +24,7 @@ from .permissions import (  # Импорт из нового файла permissi
     can_modify_order_item, ajax_permission_required
 )
 from ..services.order_processor import OrderProcessor
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class OrderUploadView(UserAccessMixin, FormView):
             context['organizations'] = Organization.objects.filter(user=self.request.user)
 
         context['internal_legal_entities'] = InternalLegalEntity.objects.all()
-        context['user_role'] = user_role  # Передаем роль в шаблон
+        context['user_role'] = user_role
         return context
 
     def get_form_kwargs(self):
@@ -143,6 +144,9 @@ class OrderUploadView(UserAccessMixin, FormView):
             n_type = self.processor.get_product_type(name)
             n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
+            if data[4] == 'равн':
+                data[4] = -1
+
             new_item_data = {
                 'p_kind': n_kind,
                 'p_type': n_type,
@@ -186,7 +190,10 @@ class OrderUploadView(UserAccessMixin, FormView):
                             new_glass_str = ", ".join(
                                 [f"{h}x{w} ({q} шт.)" for (h, w), q in new_glass.items()]) if new_glass else "нет"
 
-                            changes_made.append(f"с \"{old_glass_str}\" на \"{new_glass_str}\";")
+                            if old_glass_str != "нет":
+                                changes_made.append(f"с \"{old_glass_str}\" на \"{new_glass_str}\";")
+                            else:
+                                changes_made.append(f"с \"{old_glass_str}\" на \"{new_glass_str}\";")
 
                             # Update p_glass field
                             setattr(current_item, 'p_glass', str(new_glass))
@@ -258,6 +265,9 @@ class OrderUploadView(UserAccessMixin, FormView):
             n_type = self.processor.get_product_type(name)
             n_construction = 'NK' if re.search('-м', name.lower()) else 'SK'
 
+            if data[4] == 'равн':
+                data[4] = -1
+
             new_item_data = {
                 'p_kind': n_kind,
                 'p_type': n_type,
@@ -276,7 +286,7 @@ class OrderUploadView(UserAccessMixin, FormView):
                 'p_glass': self.processor.count_glass_data(data[13:]),
             }
 # Здесь должна быть новая логика формирования order_item >>>>>>>>>>
-            
+
             new_item = OrderItem(order=order, position_num=n_num, **new_item_data)
             new_item.p_status = 'in_query'
             new_item.save()
@@ -489,7 +499,7 @@ def update_workshop(request, order_id):
 
 
 def process_order_action(order_items, action, user):
-    """Обрабатываем действие над заказом (сохраняем предыдущую логику)"""
+    """Обрабатываем действие над заказом"""
 
     status_mapping = {
         'start_1': 'product',
