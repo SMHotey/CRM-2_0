@@ -107,7 +107,7 @@ def shipment_detail(request, workshop, date):
 
 
 @csrf_exempt
-@require_http_methods(["POST"])
+@require_POST
 def delete_shipment(request, shipment_id):
     try:
         if not request.user.is_authenticated:

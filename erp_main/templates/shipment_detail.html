@@ -384,7 +384,33 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Shipment manager loaded');
+
+    // Отладка всех кнопок
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    console.log(`Found ${deleteButtons.length} delete buttons`);
+    deleteButtons.forEach((btn, index) => {
+        const id = btn.getAttribute('data-shipment-id');
+        console.log(`Delete button ${index + 1}: ID = ${id}`);
+    });
+
     const shipmentTypes = ['самовывоз', 'наша', 'ТК'];
+
+    // Функция для получения CSRF токена из cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 
     // Функция для получения данных заказов
     function getOrdersData() {
@@ -592,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Ошибка:', error);
+            console.error('Ошибка сохранения:', error);
             button.disabled = false;
             button.classList.remove('loading');
             exitEditMode(row, button, isNew);
@@ -600,67 +626,102 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Функция удаления отгрузки
+    // Функция удаления отгрузки (ИСПРАВЛЕННАЯ ВЕРСИЯ)
     function deleteShipment(button) {
-        if (!confirm('Вы уверены, что хотите удалить эту отгрузку?')) {
-            return;
-        }
+    const shipmentId = button.getAttribute('data-shipment-id');
+    const row = button.closest('tr');
+    const actionsCell = row.querySelector('.actions-cell');
 
-        const shipmentId = button.getAttribute('data-shipment-id');
-        const row = button.closest('tr');
-        const actionsCell = row.querySelector('.actions-cell');
+    // Отладочная информация
+    console.log('=== DELETE SHIPMENT DEBUG ===');
+    console.log('Shipment ID:', shipmentId);
 
-        // Показываем индикатор загрузки
-        button.disabled = true;
-        button.classList.add('loading');
-        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Удаление...';
+    // ПРАВИЛЬНО формируем URL
+    const url = `/erp_main/shipments/delete/${shipmentId}/`;
+    console.log('Final URL:', url);
+    console.log('==============================');
 
-        fetch(`{% url 'delete_shipment' 0 %}`.replace('0', shipmentId), {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === 'success') {
-                // Очищаем строку
-                row.classList.add('empty-row');
-                row.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(cell => {
-                    cell.textContent = '';
-                });
-
-                // Меняем кнопки на "Создать"
-                actionsCell.innerHTML = `
-                    <button class="btn btn-create create-btn"
-                            data-time="${row.getAttribute('data-time')}">
-                        <i class="bi bi-plus-circle"></i>
-                        Создать
-                    </button>
-                `;
-
-                // Назначаем обработчик для новой кнопки
-                actionsCell.querySelector('.create-btn').addEventListener('click', createHandler);
-
-                showNotification('Отгрузка успешно удалена', 'success');
-            } else {
-                throw new Error(data.message || 'Неизвестная ошибка сервера');
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            button.disabled = false;
-            button.classList.remove('loading');
-            button.innerHTML = '<i class="bi bi-trash"></i>';
-            showNotification(`Ошибка удаления: ${error.message}`, 'error');
-        });
+    if (!confirm('Вы уверены, что хотите удалить эту отгрузку?')) {
+        return;
     }
+
+    // Показываем индикатор загрузки
+    button.disabled = true;
+    button.classList.add('loading');
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Удаление...';
+
+    // Получаем CSRF токен
+    const csrftoken = '{{ csrf_token }}' || getCookie('csrftoken');
+    console.log('CSRF Token to use:', csrftoken ? 'Present' : 'Missing');
+
+    // Используем FormData для передачи CSRF токена
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrftoken);
+
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: csrftoken ? {
+            'X-CSRFToken': csrftoken,
+            'X-Requested-With': 'XMLHttpRequest'  // Добавляем этот заголовок
+        } : {}
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
+        if (!response.ok) {
+            // Получаем больше информации об ошибке
+            return response.text().then(text => {
+                console.error('Response text:', text);
+                console.error('Response headers:', Object.fromEntries(response.headers.entries()));
+                throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Delete response data:', data);
+
+        if (data.status === 'success') {
+            // Очищаем строку
+            row.classList.add('empty-row');
+            row.querySelectorAll('td:not(:first-child):not(:last-child)').forEach(cell => {
+                cell.textContent = '';
+            });
+
+            // Меняем кнопки на "Создать"
+            actionsCell.innerHTML = `
+                <button class="btn btn-create create-btn"
+                        data-time="${row.getAttribute('data-time')}">
+                    <i class="bi bi-plus-circle"></i>
+                    Создать
+                </button>
+            `;
+
+            // Назначаем обработчик для новой кнопки
+            actionsCell.querySelector('.create-btn').addEventListener('click', createHandler);
+
+            showNotification('Отгрузка успешно удалена', 'success');
+        } else {
+            throw new Error(data.message || 'Неизвестная ошибка сервера');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при удалении:', error);
+        console.error('Error details:', {
+            shipmentId: shipmentId,
+            url: url,
+            errorMessage: error.message,
+            errorStack: error.stack
+        });
+
+        button.disabled = false;
+        button.classList.remove('loading');
+        button.innerHTML = '<i class="bi bi-trash"></i>';
+        showNotification(`Ошибка удаления: ${error.message}`, 'error');
+    });
+}
 
     // Функция показа уведомлений
     function showNotification(message, type) {
@@ -736,6 +797,57 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', deleteHandler);
     });
+
+    // Добавляем стили для анимаций уведомлений
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .loading {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .loading:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 

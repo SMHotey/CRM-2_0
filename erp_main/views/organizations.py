@@ -69,7 +69,7 @@ class OrganizationCreateView(LoginRequiredMixin, CreateView):
 
 
 class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
-    template_name = 'organizations/organization_edit.html'  # Изменено на единый шаблон
+    template_name = 'organizations/organization_edit.html'
     success_url = reverse_lazy('organization_list')
 
     def get_queryset(self):
@@ -178,6 +178,7 @@ class OrganizationListView(LoginRequiredMixin, ListView):
             individual_entrepreneur_ids = IndividualEntrepreneur.objects.filter(
                 Q(full_name__icontains=search_query) |
                 Q(inn__icontains=search_query) |
+                Q(phone__icontains=search_query) |
                 Q(email__icontains=search_query)
             ).values_list('organization_ptr_id', flat=True)
 
@@ -287,47 +288,3 @@ class OrganizationTypeSelectView(LoginRequiredMixin, View):
         })
 
 
-# def create_internal_legal_entity(request):
-#     if request.method == 'POST':
-#         form = InternalLegalEntityForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('organization_list')
-#     else:
-#         form = InternalLegalEntityForm()
-#
-#     return render(request, 'legal_entity_form.html', {'form': form})
-#
-#
-# # AJAX представления для работы с внутренними юрлицами
-# class GetInternalLegalEntitiesView(LoginRequiredMixin, View):
-#     """Возвращает JSON список внутренних юрлиц для AJAX-запросов"""
-#
-#     def get(self, request):
-#         legal_entities = InternalLegalEntity.objects.all().values('id', 'name', 'inn')
-#         return JsonResponse(list(legal_entities), safe=False)
-#
-#
-# class GetInternalLegalEntityDetailsView(LoginRequiredMixin, View):
-#     """Возвращает детали внутреннего юрлица по ID"""
-#
-#     def get(self, request, pk):
-#         try:
-#             legal_entity = InternalLegalEntity.objects.get(pk=pk)
-#             data = {
-#                 'id': legal_entity.id,
-#                 'name': legal_entity.name,
-#                 'inn': legal_entity.inn,
-#                 'ogrn': legal_entity.ogrn,
-#                 'kpp': legal_entity.kpp,
-#                 'address': legal_entity.address,
-#                 'ceo_title': legal_entity.ceo_title,
-#                 'ceo_name': legal_entity.ceo_name,
-#                 'bank_name': legal_entity.bank_name,
-#                 'account_number': legal_entity.account_number,
-#                 'bik': legal_entity.bik,
-#                 'correspondent_account': legal_entity.correspondent_account,
-#             }
-#             return JsonResponse(data)
-#         except InternalLegalEntity.DoesNotExist:
-#             return JsonResponse({'error': 'Юридическое лицо не найдено'}, status=404)

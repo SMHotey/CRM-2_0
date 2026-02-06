@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выход из системы - ЗАВОД МЕТАЛЛИЧЕСКИХ ДВЕРЕЙ</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --logout-bg: linear-gradient(-45deg, #2c3e50, #34495e, #3498db, #2980b9);
+            --login-bg: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--logout-bg);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.9); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(1.1); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes morphToLogin {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+                border-radius: 20px;
+                max-width: 500px;
+            }
+            50% {
+                transform: translateY(-20px) scale(0.95);
+                opacity: 0.7;
+                border-radius: 15px;
+                max-width: 450px;
+            }
+            100% {
+                transform: translateY(-100vh) scale(0.1);
+                opacity: 0;
+                border-radius: 50%;
+                max-width: 100px;
+            }
+        }
+
+        @keyframes checkmarkMorph {
+            0% {
+                transform: scale(1) rotate(0deg);
+                background: linear-gradient(135deg, #27ae60, #2ecc71);
+            }
+            50% {
+                transform: scale(0.5) rotate(180deg);
+                background: linear-gradient(135deg, #3498db, #2980b9);
+                border-radius: 10px;
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                border-radius: 0;
+            }
+        }
+
+        .logout-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logout-container.morphing {
+            animation: morphToLogin 1.5s ease-in-out forwards;
+            pointer-events: none;
+        }
+
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            border-radius: 50%;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: checkmark 0.5s ease-out 0.3s both;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes checkmark {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .checkmark.morphing {
+            animation: checkmarkMorph 1s ease-in-out forwards;
+        }
+
+        .checkmark::after {
+            content: '✓';
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .logout-message {
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logout-message h1 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            transition: all 0.5s ease;
+        }
+
+        .logout-message.morphing h1 {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+
+        .logout-message p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            transition: all 0.5s ease;
+        }
+
+        .logout-message.morphing p {
+            transform: scale(0.8);
+            opacity: 0.3;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #ecf0f1;
+            color: var(--primary-color);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn.morphing {
+            transform: scale(0);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .security-message {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dfe6e9;
+            color: #95a5a6;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 2;
+            transition: all 0.5s ease;
+        }
+
+        .security-message.morphing {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        /* Перекрытие фона */
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--login-bg);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .background-overlay.visible {
+            opacity: 1;
+        }
+
+        /* Анимированные частицы */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logout-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .logout-message h1 {
+                font-size: 2rem;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Перекрытие фона для плавного перехода -->
+    <div class="background-overlay" id="backgroundOverlay"></div>
+
+    <!-- Анимированные частицы -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Основной контейнер выхода -->
+    <div class="logout-container" id="logoutContainer">
+        <div class="checkmark" id="checkmark">
+            ✓
+        </div>
+
+        <div class="logout-message" id="logoutMessage">
+            <h1>Выход выполнен</h1>
+            <p>Вы успешно вышли из системы ЗМДД.</p>
+            <p>Все сессии были завершены.</p>
+        </div>
+
+        <div class="btn-container">
+            <a href="{% url 'login' %}" class="btn btn-primary" id="loginBtn">
+                Войти снова
+            </a>
+            <a href="{% url 'index' %}" class="btn btn-secondary" id="homeBtn">
+                На главную
+            </a>
+        </div>
+
+        <div class="security-message" id="securityMessage">
+            🔒 Сессия завершена | Данные защищены
+        </div>
+    </div>
+
+    <script>
+        // Создание частиц
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                const size = Math.random() * 8 + 4;
+                const posX = Math.random() * 100;
+                const duration = Math.random() * 15 + 10;
+                const delay = Math.random() * 15;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Плавный переход к форме логина
+        function startMorphAnimation() {
+            const elements = [
+                document.getElementById('logoutContainer'),
+                document.getElementById('checkmark'),
+                document.getElementById('logoutMessage'),
+                document.getElementById('securityMessage'),
+                document.getElementById('loginBtn'),
+                document.getElementById('homeBtn')
+            ];
+
+            // Добавляем классы для анимации
+            elements.forEach(el => {
+                if (el) el.classList.add('morphing');
+            });
+
+            // Показываем новый фон
+            const overlay = document.getElementById('backgroundOverlay');
+            if (overlay) overlay.classList.add('visible');
+
+            // Просто редиректим после анимации без предзагрузки формы
+            setTimeout(() => {
+                window.location.href = "{% url 'login' %}";
+            }, 1500);
+        }
+
+        // Обработчики кнопок
+        document.getElementById('loginBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            startMorphAnimation();
+            return false;
+        });
+
+        // Автоматический переход через 7 секунд
+        let autoRedirectTimeout = setTimeout(() => {
+            startMorphAnimation();
+        }, 7000);
+
+        // Отмена авторедиректа при взаимодействии
+        document.addEventListener('click', function() {
+            clearTimeout(autoRedirectTimeout);
+        });
+
+        document.addEventListener('keypress', function() {
+            clearTimeout(autoRedirectTimeout);
+        });
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+
+            // Проверяем, есть ли параметр для анимированного перехода
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('animated') === 'true') {
+                startMorphAnimation();
+            }
+        });
+    </script>
+</body>
+</html>

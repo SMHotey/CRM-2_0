@@ -1,12 +1,12 @@
-from django.contrib.auth.views import LogoutView
 from django.urls import path
 from .views import (
-    custom_login, glass_info, update_glass_status,
+    custom_login, custom_logout, glass_info, update_glass_status,
     OrderUploadView, orders_list, order_detail, update_order_item_status,
     invoice_add, invoice_detail, invoices_list,
 
     save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport, create_contract
 )
+from .views.auth import get_csrf_token_view, refresh_csrf
 from .views.organizations import OrganizationCreateView, OrganizationUpdateView, OrganizationListView, \
     TakeOverOrganizationView, OrganizationTypeSelectView, OrganizationDetailView, OrganizationDeleteView
 from .views import certificates
@@ -17,7 +17,9 @@ from .views.base import index
 urlpatterns = [
     # Auth
     path('login/', custom_login, name='login'),
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', custom_logout, name='logout'),
+    path('get-csrf-token/', get_csrf_token_view, name='get_csrf_token'),
+    path('refresh-csrf/', refresh_csrf, name='refresh_csrf'),
 
     # Main
     path('', index, name='index'),
@@ -57,8 +59,8 @@ urlpatterns = [
 
     # Shipments
     path('shipments/save/', save_shipment, name='save_shipment'),
-    path('shipments/<str:workshop>/<str:date>/', shipment_detail, name='shipment_detail'),
     path('shipments/delete/<int:shipment_id>/', delete_shipment, name='delete_shipment'),
+    path('shipments/<str:workshop>/<str:date>/', shipment_detail, name='shipment_detail'),
     path('calendar/', calendar_view, name='calendar'),
 
 # Certificate URLs

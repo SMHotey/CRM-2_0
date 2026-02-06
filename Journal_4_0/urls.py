@@ -5,8 +5,6 @@ from django.conf import settings
 from django.urls import path, include
 from erp_main.views import custom_login, index
 
-
-
 urlpatterns = [
     path('', index, name='index'),
     path('admin/', admin.site.urls),

@@ -42,20 +42,31 @@
     }
 
     .table {
-        margin-bottom: 0;
+    margin-bottom: 0;
     }
 
-    .table td {
-        vertical-align: middle;     /* Центруем по вертикали */
-        text-align: center;         /* Центруем по горизонтали */
+    .table thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
+
     .table th {
-        background: rgba(55, 177, 222, 0.15);
+        background: rgba(255, 255, 255, 0.95) !important; /* Важно: непрозрачный фон */
         border-bottom: 2px solid rgba(55, 177, 222, 0.3);
         font-weight: 600;
         color: #2d3748;
-        vertical-align: middle;     /* Центруем по вертикали */
-        text-align: center;         /* Центруем по горизонтали */
+        vertical-align: middle;
+        text-align: center;
+
+        /* Sticky свойства */
+        position: sticky;
+        top: 0;
+        z-index: 10;
+
+        /* Опционально: эффект стекла */
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 
     .btn {
@@ -129,7 +140,11 @@
     .collapse-section {
         transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
-        max-height: 0px;
+    }
+
+    /* Специальный класс для изначально раскрытых секций */
+    .collapse-section.expanded {
+        max-height: none;
     }
 
     .file-upload-area {
@@ -536,14 +551,14 @@
             <strong>Содержимое заказа</strong>
             <div>
                 <button id="toggleButton" class="btn btn-primary btn-sm me-2">
-                    <i class="bi bi-chevron-down me-1"></i>Развернуть
+                    <i class="bi bi-chevron-up me-1"></i>Скрыть
                 </button>
                 <button type="button" class="btn btn-primary btn-sm" id="editButton">
                     <i class="bi bi-pencil me-1"></i>Редактировать
                 </button>
             </div>
         </div>
-        <div id="orderItems" class="collapse-section">
+        <div id="orderItems" class="collapse-section expanded">
             <div class="card-body">
                 <div class="table-responsive" style="max-height: 600px;">
                     <table class="table table-hover table-striped">
@@ -565,18 +580,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in filtered_items %}
+                            {% for item in filtered_items|dictsort:"id" %}
                             <tr>
                                 <td class="text-center fw-bold">{{ item.position_num }}</td>
-                                <td>{{ item.get_p_kind_display }}</td>
-                                <td class="text-nowrap">{{ item.get_p_type_display }}</td>
+                                <td class="text-center">{{ item.get_p_kind_display }}</td>
+                                <td class="text-nowrap center">{{ item.get_p_type_display }}</td>
                                 <td class="text-center">{{ item.p_height }}</td>
                                 <td class="text-center">{{ item.p_width }}</td>
                                 <td class="text-center">{{ item.p_open }}</td>
-                                <td>{{ item.d_glass|safe }}</td>
-                                <td>{{ item.p_furniture }}</td>
+                                <td class="text-center">{{ item.d_glass|safe }}</td>
+                                <td class="text-center">{{ item.p_furniture }}</td>
                                 <td class="text-center fw-bold">{{ item.p_quantity }}</td>
-                                <td>
+                                <td class="text-center">
                                     <span class="text-break">{{ item.p_comment|default_if_none:'' }}</span>
                                 </td>
                                 <td class="text-center">
@@ -695,7 +710,7 @@ class OrderDetailManager {
         this.isEditing = false;
         this.currentItem = null;
         this.currentNameplate = null;
-        this.formMode = 'create'; // 'create' или 'edit'
+        this.formMode = 'create';
         this.init();
     }
 
@@ -703,7 +718,7 @@ class OrderDetailManager {
         this.setupEventListeners();
         this.setupFileUpload();
         this.setupNameplateModal();
-        this.collapseAllSections();
+        this.setupInitialSectionStates();
         this.setupPassportGeneration();
     }
 
@@ -725,6 +740,32 @@ class OrderDetailManager {
             this.toggleEditMode());
     }
 
+    setupInitialSectionStates() {
+    // Сворачиваем все секции, кроме orderItems
+    const sections = ['invoiceItems', 'changeItems', 'orderOptions'];
+    sections.forEach(sectionId => {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            section.style.maxHeight = '0px';
+            section.classList.add('collapsed');
+        }
+    });
+
+    // Блок orderItems оставляем раскрытым
+    const orderItemsSection = document.getElementById('orderItems');
+    if (orderItemsSection) {
+        orderItemsSection.style.maxHeight = orderItemsSection.scrollHeight + 'px';
+        orderItemsSection.classList.remove('collapsed'); // Убираем класс collapsed
+    }
+
+    // Обновляем кнопки для свернутых секций
+    document.querySelectorAll('#toggleInvoices, #toggleChanges, #toggleOptions').forEach(button => {
+        if (button) {
+            button.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Развернуть';
+        }
+    });
+}
+
     collapseAllSections() {
         const sections = ['invoiceItems', 'orderItems', 'changeItems'];
         sections.forEach(sectionId => {
@@ -734,61 +775,63 @@ class OrderDetailManager {
             }
         });
     }
+
     setupPassportGeneration() {
-    document.getElementById('toggleOptions').addEventListener('click', () =>
-        this.toggleSection('toggleOptions', 'orderOptions'));
+        document.getElementById('toggleOptions').addEventListener('click', () =>
+            this.toggleSection('toggleOptions', 'orderOptions'));
 
-    document.getElementById('generatePassportsBtn').addEventListener('click', () =>
-        this.generatePassports());
-}
-
-async generatePassports() {
-    this.showLoading(true);
-
-    try {
-        // Проверяем наличие шильдов
-        const response = await fetch(`/erp_main/check-nameplates/?order_id={{ order.id }}`);
-        const result = await response.json();
-
-        if (!result.has_all_nameplates) {
-            // Показываем ошибку с перечнем позиций
-            let errorMessage = 'Укажите номера шильдов для позиций: ';
-            errorMessage += result.missing_items.map(item =>
-                `№${item.position_num} (${item.p_kind} - ${item.p_type})`
-            ).join(', ');
-
-            this.showToast('error', 'Ошибка', errorMessage);
-            return;
-        }
-
-        // Если все шильды есть, формируем паспорта
-        const downloadResponse = await fetch(`/erp_main/generate-passports/?order_id={{ order.id }}`);
-
-        if (downloadResponse.ok) {
-            // Создаем blob и скачиваем файл
-            const blob = await downloadResponse.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `passports_order_{{ order.id }}.docx`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-
-            this.showToast('success', 'Успех', 'Паспорта успешно сформированы и скачаны');
-        } else {
-            throw new Error('Ошибка при формировании паспортов');
-        }
-
-    } catch (error) {
-        console.error('Error generating passports:', error);
-        this.showToast('error', 'Ошибка', error.message || 'Не удалось сформировать паспорта');
-    } finally {
-        this.showLoading(false);
+        document.getElementById('generatePassportsBtn').addEventListener('click', () =>
+            this.generatePassports());
     }
-}
+
+    async generatePassports() {
+        this.showLoading(true);
+
+        try {
+            // Проверяем наличие шильдов
+            const response = await fetch(`/erp_main/check-nameplates/?order_id={{ order.id }}`);
+            const result = await response.json();
+
+            if (!result.has_all_nameplates) {
+                // Показываем ошибку с перечнем позиций
+                let errorMessage = 'Укажите номера шильдов для позиций: ';
+                errorMessage += result.missing_items.map(item =>
+                    `№${item.position_num} (${item.p_kind} - ${item.p_type})`
+                ).join(', ');
+
+                this.showToast('error', 'Ошибка', errorMessage);
+                return;
+            }
+
+            // Если все шильды есть, формируем паспорта
+            const downloadResponse = await fetch(`/erp_main/generate-passports/?order_id={{ order.id }}`);
+
+            if (downloadResponse.ok) {
+                // Создаем blob и скачиваем файл
+                const blob = await downloadResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `passports_order_{{ order.id }}.docx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                this.showToast('success', 'Успех', 'Паспорта успешно сформированы и скачаны');
+            } else {
+                throw new Error('Ошибка при формировании паспортов');
+            }
+
+        } catch (error) {
+            console.error('Error generating passports:', error);
+            this.showToast('error', 'Ошибка', error.message || 'Не удалось сформировать паспорта');
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
     setupNameplateModal() {
         // Add nameplate buttons
         document.querySelectorAll('.add-nameplate-btn').forEach(btn => {
@@ -1339,48 +1382,51 @@ async generatePassports() {
     }
 
     toggleSection(buttonId, sectionId) {
-        const button = document.getElementById(buttonId);
-        const section = document.getElementById(sectionId);
-        const icon = button.querySelector('i');
-        const isExpanded = section.style.maxHeight && section.style.maxHeight !== '0px';
+    const button = document.getElementById(buttonId);
+    const section = document.getElementById(sectionId);
 
-        if (isExpanded) {
-            section.style.maxHeight = '0px';
-            button.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Развернуть';
-        } else {
-            section.style.maxHeight = section.scrollHeight + 'px';
-            button.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Скрыть';
-        }
+    // Используем класс для отслеживания состояния
+    if (section.classList.contains('collapsed')) {
+        // Развернуть секцию
+        section.style.maxHeight = section.scrollHeight + 'px';
+        section.classList.remove('collapsed');
+        button.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Скрыть';
+    } else {
+        // Свернуть секцию
+        section.style.maxHeight = '0px';
+        section.classList.add('collapsed');
+        button.innerHTML = '<i class="bi bi-chevron-down me-1"></i>Развернуть';
     }
+}
 
-    showLoading(show) {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.style.display = show ? 'flex' : 'none';
-        }
+showLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = show ? 'flex' : 'none';
     }
+}
 
-    showToast(type, title, message) {
-        const toast = document.getElementById('toast');
-        const toastTitle = document.getElementById('toastTitle');
-        const toastMessage = document.getElementById('toastMessage');
+showToast(type, title, message) {
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
 
-        toast.className = `toast ${type}`;
-        toastTitle.textContent = title;
-        toastMessage.textContent = message;
-        toast.classList.remove('hidden');
-        toast.classList.add('show');
+    toast.className = `toast ${type}`;
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('show');
 
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.classList.add('hidden'), 400);
-        }, 3000);
-    }
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.classList.add('hidden'), 400);
+    }, 3000);
+}
 
-    preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
 }
 
 // Initialize when DOM is loaded

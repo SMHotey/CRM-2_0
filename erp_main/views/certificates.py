@@ -145,7 +145,7 @@ def create_nameplate(request):
         }, status=400)
 
 
-# erp_main/views.py
+# erp_main/views_old.py
 @require_http_methods(["GET"])
 def get_nameplate_data(request):
     nameplate_id = request.GET.get('nameplate_id')

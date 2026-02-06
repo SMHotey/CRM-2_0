@@ -43,26 +43,38 @@
 
             <!-- Выбор счета -->
             <div class="form-field-group invoice-select-group {% if form.invoice.errors %}form-field-error{% endif %}">
-                <label for="{{ form.invoice.id_for_label }}" class="form-label">
-                    {{ form.invoice.label }}
-                    <span class="required-asterisk">*</span>
-                </label>
-                <div class="invoice-select-wrapper">
-                    <div class="select-wrapper">
-                        {{ form.invoice }}
-                    </div>
-                    <button type="button" class="btn btn-outline btn-new-invoice" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
+    <label for="{{ form.invoice.id_for_label }}" class="form-label">
+        {{ form.invoice.label }}
+        <span class="required-asterisk">*</span>
+    </label>
+
+    <div class="invoice-select-wrapper">
+        <div class="d-flex gap-3 align-items-start">
+            <select id="{{ form.invoice.id_for_label }}"
+                    name="{{ form.invoice.html_name }}"
+                    class="form-select rounded-pill border-2 py-3 px-4 shadow-sm {% if form.invoice.errors %}is-invalid border-danger{% endif %}"
+                    {% if form.invoice.field.required %}required{% endif %}>
+                {% for value, text in form.invoice.field.choices %}
+                    <option value="{{ value }}"
+                            {% if form.invoice.value == value %}selected{% endif %}>
+                        {{ text }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="button" class="btn btn-outline btn-new-invoice" data-bs-toggle="modal" data-bs-target="#newInvoiceModal">
                         <span class="btn-icon">➕</span>
                         Новый счет
                     </button>
-                </div>
-                {% if form.invoice.errors %}
-                    <div class="field-error-message">
-                        <span class="error-icon">❌</span>
-                        {{ form.invoice.errors }}
-                    </div>
-                {% endif %}
-            </div>
+        </div>
+    </div>
+
+    {% if form.invoice.errors %}
+        <div class="invalid-feedback d-block mt-2">
+            {{ form.invoice.errors }}
+        </div>
+    {% endif %}
+</div>
         </div>
 
         <!-- Срок изготовления -->

@@ -94,7 +94,7 @@ def can_view_order(user, user_role, order):
 
 def can_edit_order_detail(user, user_role, order):
     """Проверяет, может ли пользователь редактировать заказ"""
-    # Только админы, директоры и менеджеры могут редактировать
+    # Только админы, директор и менеджеры могут редактировать
     if user_role in ['admin', 'director', 'manager']:
         return True
     return False

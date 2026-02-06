@@ -50,9 +50,26 @@ INSTALLED_APPS = [
     'channels',
 ]
 
-LOGIN_URL = '/login/'  # URL после успешного входа
-#LOGIN_REDIRECT_URL = '/index/'
-LOGOUT_URL = '/login/'  # URL после выхода
+# CSRF настройки
+CSRF_COOKIE_SECURE = False  # True в продакшене
+CSRF_COOKIE_HTTPONLY = False  # False для разработки, чтобы JS мог читать
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_USE_SESSIONS = False  # Хранить в куках, а не в сессии
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
+
+# Настройки сессии
+SESSION_COOKIE_AGE = 1209600  # 2 недели
+SESSION_COOKIE_SECURE = False  # True в продакшене
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
+
+# CORS для AJAX запросов
+CORS_ALLOW_CREDENTIALS = True
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
 LOGGING = {
     'version': 1,
@@ -94,6 +111,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'erp_main.middleware.ForceCSRFRefreshMiddleware',
 ]
 
 REST_FRAMEWORK = {

@@ -45,7 +45,7 @@ class CP(OrderItem):
 
 class Calculation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    project = models.ForeignKey(
+    project_id = models.ForeignKey(
         Organization,
         on_delete=models.SET_NULL,
         null=True,

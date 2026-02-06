@@ -147,7 +147,7 @@ class IndividualEntrepreneurForm(forms.ModelForm):
         model = IndividualEntrepreneur
         fields = [
             'full_name', 'inn', 'internal_legal_entity', 'ogrn', 'legal_address',
-            'bank_name', 'account_number', 'bik', 'correspondent_account', 'email'
+            'bank_name', 'account_number', 'bik', 'correspondent_account', 'email', 'phone'
         ]
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ФИО индивидуального предпринимателя'}),
@@ -161,9 +161,13 @@ class IndividualEntrepreneurForm(forms.ModelForm):
             'bik': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'БИК'}),
             'correspondent_account': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Корреспондентский счет'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'})
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'}),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '+7 (XXX) XXX-XX-XX',
+                'type': 'tel',
+                'pattern': '^\+7\s?[\(]?\d{3}[\)]?\s?\d{3}[\-]?\d{2}[\-]?\d{2}$'}),
         }
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['internal_legal_entity'].queryset = InternalLegalEntity.objects.all()

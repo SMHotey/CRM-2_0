@@ -1,5 +1,5 @@
 # Auth views
-from .auth import custom_login
+from .auth import custom_login, custom_logout
 
 # Base views
 from .base import index, glass_info, update_glass_status, debug_users
@@ -23,6 +23,7 @@ from .contracts import create_contract
 
 # Shipment views
 from .shipments import save_shipment, shipment_detail, delete_shipment, calendar_view
+
 
 __all__ = [
     'custom_login',

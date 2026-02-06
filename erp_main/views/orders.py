@@ -358,6 +358,7 @@ def order_detail(request, order_id):
 
     # Отфильтрованные OrderItem, где статус не равен 'changed'
     filtered_items = order.items.exclude(p_status__in=['changed'])
+    filtered_items.order_by('-id')
 
     if request.method == 'POST':
         # Проверяем права на редактирование заказа

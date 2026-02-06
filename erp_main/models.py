@@ -8,6 +8,7 @@ from django.templatetags.static import static
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
+
 #from erp_main.views.product_options import ItemInfo
 
 
@@ -189,7 +190,7 @@ class Organization(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
-   # Связь с документами
+    # Связь с документами
     documents = GenericRelation(Documents, verbose_name="Документы по контрагенту")
 
     @property
@@ -207,6 +208,7 @@ class Organization(models.Model):
         elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
             return self.individualentrepreneur.bank_name
         return None
+
     @property
     def account_number(self):
         if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
@@ -311,7 +313,6 @@ class Organization(models.Model):
             return self.legalentity.leader_name
         return None
 
-
     class Meta:
         verbose_name = "Контрагент"
         verbose_name_plural = "Контрагенты"
@@ -392,8 +393,8 @@ class LegalEntity(Organization):
     bank_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название банка")
     account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Расчетный счет")
     bik = models.CharField(max_length=9, blank=True, null=True, verbose_name="БИК")
-    correspondent_account = models.CharField(max_length=20, blank=True, null=True, verbose_name="Корреспондентский счет")
-
+    correspondent_account = models.CharField(max_length=20, blank=True, null=True,
+                                             verbose_name="Корреспондентский счет")
 
     def __str__(self):
         return f"{self.get_legal_form_display()} {self.name}"
@@ -435,10 +436,12 @@ class IndividualEntrepreneur(Organization):
         verbose_name="Юридический адрес"
     )
     email = models.EmailField(blank=True, null=True, )
+    phone = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Номер телефона")
     bank_name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Название банка")
     account_number = models.CharField(max_length=20, blank=True, null=True, verbose_name="Расчетный счет")
     bik = models.CharField(max_length=9, blank=True, null=True, verbose_name="БИК")
-    correspondent_account = models.CharField(max_length=20, blank=True, null=True, verbose_name="Корреспондентский счет")
+    correspondent_account = models.CharField(max_length=20, blank=True, null=True,
+                                             verbose_name="Корреспондентский счет")
 
     def __str__(self):
         return f"ИП {self.full_name}"
@@ -487,6 +490,7 @@ class PhysicalPerson(Organization):
         verbose_name = "Физическое лицо"
         verbose_name_plural = "Физические лица"
 
+
 class ContractTemplate(models.Model):
     CONTRACT_TYPE_CHOICES = (
         ('legal_entity', 'Юридическое лицо'),
@@ -495,7 +499,8 @@ class ContractTemplate(models.Model):
     )
 
     name = models.CharField(max_length=100)
-    contract_type = models.CharField(max_length=30, choices=CONTRACT_TYPE_CHOICES,default='legal_entity', null=True, blank=True)
+    contract_type = models.CharField(max_length=30, choices=CONTRACT_TYPE_CHOICES, default='legal_entity', null=True,
+                                     blank=True)
     internal_legal_entity = models.ForeignKey(InternalLegalEntity, on_delete=models.CASCADE, null=True, blank=True)
     organization_type = models.CharField(max_length=100, choices=(
         ('ooo', 'ООО'),
@@ -514,6 +519,7 @@ class ContractTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Invoice(models.Model):
     number = models.CharField(max_length=5, blank=True, null=True)
@@ -549,6 +555,7 @@ class Invoice(models.Model):
     def percent(self):
         return int(self.payed_amount * 100 / self.amount)
 
+
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
@@ -557,7 +564,7 @@ class Order(models.Model):
     comment = models.TextField(blank=True, null=True)
 
     def get_items_filtered(self):
-        return self.items.exclude(p_status__in=['changed',])
+        return self.items.exclude(p_status__in=['changed', ])
 
     @property
     def doors_1_nk(self):
@@ -636,12 +643,14 @@ class Order(models.Model):
 
     @property
     def status(self):
-        in_query = self.get_items_filtered().filter(p_status='in_query').aggregate(total=Sum('p_quantity'))['total'] or 0
+        in_query = self.get_items_filtered().filter(p_status='in_query').aggregate(total=Sum('p_quantity'))[
+                       'total'] or 0
         product = self.get_items_filtered().filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
         ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
         shipped = self.get_items_filtered().filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0
         stopped = self.get_items_filtered().filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0
-        canceled = self.get_items_filtered().filter(p_status='canceled').aggregate(total=Sum('p_quantity'))['total'] or 0
+        canceled = self.get_items_filtered().filter(p_status='canceled').aggregate(total=Sum('p_quantity'))[
+                       'total'] or 0
 
         if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
             return f'в очереди'
@@ -683,6 +692,7 @@ class OrderChangeHistory(models.Model):
     changed_by = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField(blank=True, null=True)
 
+
 class Certificate(models.Model):
     KIND_CHOICE = (
         ('door', 'Дверь'),
@@ -699,9 +709,11 @@ class Certificate(models.Model):
     numbers = models.CharField(max_length=20, blank=True, null=True)
     p_kind = models.CharField(max_length=15, choices=KIND_CHOICE, verbose_name='вид изделия')
     p_type = models.CharField(max_length=10, choices=TYPE_CHOICE, verbose_name='тип изделия')
-    internal_legal_entity = models.ForeignKey(InternalLegalEntity, related_name='certificates', on_delete=models.CASCADE)
+    internal_legal_entity = models.ForeignKey(InternalLegalEntity, related_name='certificates',
+                                              on_delete=models.CASCADE)
     scan_copy = models.FileField(upload_to='uploads/certificates/', blank=True, null=True)
-    passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/',verbose_name='Шаблон паспорта', blank=True, null=True)
+    passport_templates = models.FileField(upload_to='uploads/certificates/passport_templates/',
+                                          verbose_name='Шаблон паспорта', blank=True, null=True)
 
 
 class OrderItem(models.Model):
@@ -771,7 +783,7 @@ class OrderItem(models.Model):
     p_glass = models.CharField(max_length=100, blank=True, null=True, verbose_name='остекление')
 
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE, verbose_name='заказ')
-#    item_info = models.OneToOneField(ItemInfo, related_name='order_item', on_delete=models.PROTECT, null=True)
+    #    item_info = models.OneToOneField(ItemInfo, related_name='order_item', on_delete=models.PROTECT, null=True)
     position_num = models.CharField(max_length=5, verbose_name='номер позиции')
     nameplate_range = models.CharField(max_length=20, blank=True, null=True, verbose_name='номера шильдов')
     p_quantity = models.IntegerField(default=1, verbose_name='количество изделий')
@@ -798,6 +810,7 @@ class OrderItem(models.Model):
         else:
             return 'нет'
 
+
 class GlassInfo(models.Model):
     KIND_CHOICE = (
         ('pp', 'п/п'),
@@ -821,9 +834,9 @@ class GlassInfo(models.Model):
         ('received', 'получено'),
     )
 
-    kind = models.CharField(max_length=20, blank=True, null=True,choices=KIND_CHOICE)
+    kind = models.CharField(max_length=20, blank=True, null=True, choices=KIND_CHOICE)
     option = models.CharField(max_length=20, blank=True, null=True, choices=OPTIONS_CHOICE)
-    order_items = models.ForeignKey(OrderItem, related_name='glasses',blank=True, null=True, on_delete=models.SET_NULL)
+    order_items = models.ForeignKey(OrderItem, related_name='glasses', blank=True, null=True, on_delete=models.SET_NULL)
     height = models.IntegerField(blank=True, null=True)
     width = models.IntegerField(blank=True, null=True)
     depth = models.IntegerField(blank=True, null=True)
@@ -848,6 +861,7 @@ class GlassInfo(models.Model):
                 self.quantity == other.quantity and
                 self.comment == other.comment
         )
+
 
 class Nameplate(models.Model):
     order_item = models.ForeignKey(
@@ -876,6 +890,7 @@ class Nameplate(models.Model):
             return f"Шильды {self.first_value}-{self.end_value}"
         else:
             return f"Шильд {self.first_value}"
+
 
 class Contract(models.Model):
     number = models.CharField(unique=True, max_length=100, blank=True, null=True)
@@ -906,7 +921,6 @@ class Shipment(models.Model):
 
     def can_edit(self, user):
         return user.is_superuser or self.user == user
-
 
 # class StockOperation(models.Model):
 #     """Операция со складом (приход/резерв/списание)"""
@@ -970,19 +984,19 @@ class Shipment(models.Model):
 #     quantity = models.PositiveIntegerField(
 #         verbose_name='Количество'
 #     )
-    #
-    # # Для приходов - цена закупки
-    # purchase_price = models.DecimalField(
-    #     max_digits=10,
-    #     decimal_places=2,
-    #     blank=True,
-    #     null=True,
-    #     verbose_name='Цена закупки'
-    # )
-    #
-    # class Meta:
-    #     verbose_name = 'Позиция операции'
-    #     verbose_name_plural = 'Позиции операций'
-    #
-    # def __str__(self):
-    #     return f"{self.item}: {self.quantity} шт."
+#
+# # Для приходов - цена закупки
+# purchase_price = models.DecimalField(
+#     max_digits=10,
+#     decimal_places=2,
+#     blank=True,
+#     null=True,
+#     verbose_name='Цена закупки'
+# )
+#
+# class Meta:
+#     verbose_name = 'Позиция операции'
+#     verbose_name_plural = 'Позиции операций'
+#
+# def __str__(self):
+#     return f"{self.item}: {self.quantity} шт."
