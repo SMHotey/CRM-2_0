@@ -1,20 +1,22 @@
 import ast
+from datetime import datetime
+
 from django.utils import timezone
-from django.core.exceptions import ValidationError
-from django.db import models
+from django.core.exceptions import ValidationError, FieldError
+from django.db import models, transaction
+from django.db.models import Max
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.templatetags.static import static
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.utils.functional import cached_property
+
+import threading
 
 
-#from erp_main.views.product_options import ItemInfo
+DEFAULT_NUMBER=100
 
-
-# def validate_numeric_only(value):
-#     if not re.match(r'^\d{6,}$', value) and value is not None:
-#         raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
 
 
 class DocumentType(models.Model):
@@ -556,135 +558,681 @@ class Invoice(models.Model):
         return int(self.payed_amount * 100 / self.amount)
 
 
+_order_lock = threading.Lock()
+
+
 class Order(models.Model):
+
+    number = models.IntegerField(default=DEFAULT_NUMBER, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    order_file = models.FileField(upload_to='uploads/')
-    invoice = models.ForeignKey(Invoice, related_name='invoice', blank=True, null=True, on_delete=models.CASCADE)
+    order_file = models.FileField(upload_to='uploads/orders/%Y/%m/%d/')
+    invoice = models.ForeignKey('Invoice', related_name='orders', blank=True, null=True, on_delete=models.CASCADE)
     due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
 
-    def get_items_filtered(self):
-        return self.items.exclude(p_status__in=['changed', ])
+    class Meta:
+        indexes = [
+            # Составной индекс для самого частого запроса (поиск по номеру в году)
+            models.Index(
+                fields=['created_at', 'number'],
+                name='idx_order_year_number_compound'
+            ),
+            # Индекс для фильтрации по дате создания
+            models.Index(fields=['created_at'], name='idx_order_created_at'),
+            # Индекс для поиска по номеру
+            models.Index(fields=['number'], name='idx_order_number'),
+            # Индекс для поиска по дате планируемой готовности
+            models.Index(fields=['due_date'], name='idx_order_due_date'),
+        ]
+        # Ограничение уникальности номера в пределах года
+        constraints = [
+            models.UniqueConstraint(
+                fields=['created_at__year', 'number'],
+                name='unique_order_number_per_year',
+                violation_error_message="Заказ с таким номером уже существует в этом году"
+            ),
+        ]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Заказ №{self.number or 'N/A'}/{self.created_at.year}"
+
+    @property
+    def year(self):
+        return self.created_at.year
+
+    def clean(self):
+        """Валидация перед сохранением"""
+        super().clean()
+
+        pass
+
+    def save(self, *args, **kwargs):
+        """
+        Автоматическая генерация номера при создании.
+        Номер увеличивается на 1 от предыдущего в текущем году.
+        Если это первый заказ в году - используется DEFAULT_NUMBER.
+        """
+        # Определяем, нужно ли генерировать номер
+        is_new = self.pk is None
+        needs_number_generation = is_new and self.number is None
+
+        if needs_number_generation:
+            # Используем блокировку для предотвращения гонок
+            with _order_lock:
+                with transaction.atomic():
+                    # Определяем текущий год
+                    current_year = datetime.now().year
+
+                    # Получаем максимальный номер за текущий год с блокировкой
+                    max_number = Order.objects.select_for_update().filter(
+                        created_at__year=current_year
+                    ).aggregate(Max('number'))['number__max']
+
+                    # Определяем следующий номер
+                    if max_number is not None:
+                        self.number = max_number + 1
+                    else:
+                        self.number = DEFAULT_NUMBER
+
+        elif is_new and self.number:
+            # Проверяем уникальность явно заданного номера
+            exists = Order.objects.filter(
+                created_at__year=self.year,
+                number=self.number
+            ).exists()
+
+            if exists:
+                raise ValidationError(
+                    f'Заказ с номером {self.number} уже существует в {self.year} году'
+                )
+
+        # Выполняем валидацию
+        self.full_clean()
+
+        # Сохраняем объект
+        super().save(*args, **kwargs)
+
+    @property
+    def full_number(self):
+        """Полный номер в формате ГГГГ/НОМЕР"""
+        if self.number:
+            return f"{self.year}/{self.number:04d}"
+        return "N/A"
+
+    @property
+    def is_overdue(self):
+        """Просрочен ли заказ (на основе due_date)"""
+        if self.due_date:
+            return datetime.now().date() > self.due_date
+        return False
+
+    # Оптимизированные методы для работы с items
+
+    def _get_filtered_items(self):
+        """Базовый запрос отфильтрованных items"""
+        return self.items.exclude(p_status__in=['changed'])
+
+    @cached_property
+    def filtered_items_cache(self):
+        """Кешированный queryset отфильтрованных items"""
+        return self._get_filtered_items()
+
+    def _get_items_aggregate(self, filters):
+        """Общий метод для агрегации items с использованием cached_property"""
+        return self.filtered_items_cache.filter(**filters).aggregate(
+            total=Sum('p_quantity')
+        )['total'] or 0
+
+    # Оптимизированные свойства с использованием кеша
 
     @property
     def doors_1_nk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='NK',
-            p_active_trim=None,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'door',
+            'p_construction': 'NK',
+            'p_active_trim': None,
+        })
 
     @property
     def doors_2_nk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='NK',
-            p_active_trim__isnull=False,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'door',
+            'p_construction': 'NK',
+            'p_active_trim__isnull': False,
+        })
 
     @property
     def hatch_nk(self):
-        return self.get_items_filtered().filter(
-            p_kind='hatch',
-            p_construction='NK',
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'hatch',
+            'p_construction': 'NK',
+        })
 
     @property
     def doors_1_sk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='SK',
-            p_active_trim=None,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'door',
+            'p_construction': 'SK',
+            'p_active_trim': None,
+        })
 
     @property
     def doors_2_sk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='SK',
-            p_active_trim__isnull=False,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'door',
+            'p_construction': 'SK',
+            'p_active_trim__isnull': False,
+        })
 
     @property
     def hatch_sk(self):
-        return self.get_items_filtered().filter(
-            p_kind='hatch',
-            p_construction='SK',
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'hatch',
+            'p_construction': 'SK',
+        })
 
     @property
     def transom(self):
-        return self.get_items_filtered().filter(
-            p_kind='transom',
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'transom',
+        })
 
     @property
     def gate(self):
-        return self.get_items_filtered().filter(
-            p_kind='gate',
-            p_width__lt=3000,
-            p_height__lt=3000,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({
+            'p_kind': 'gate',
+            'p_width__lt': 3000,
+            'p_height__lt': 3000,
+        })
 
     @property
     def gate_3000(self):
-        return self.get_items_filtered().filter(
-            Q(p_kind='gate') & (Q(p_width__gte=3000) | Q(p_height__gte=3000)),
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate(
+            Q(p_kind='gate') & (Q(p_width__gte=3000) | Q(p_height__gte=3000))
+        )
 
     @property
     def glass(self):
-        return self.get_items_filtered().filter(Q(p_glass__isnull=False) &
-                                                ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate(
+            Q(p_glass__isnull=False) & ~Q(p_glass={})
+        )
 
     @property
     def quantity(self):
-        return self.get_items_filtered().filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._get_items_aggregate({'p_quantity__gt': 0})
+
+    @cached_property
+    def status_calculations(self):
+        """Кешированный расчет всех статусов для одного запроса"""
+        items = self.filtered_items_cache
+        return {
+            'in_query': items.filter(p_status='in_query').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'product': items.filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'ready': items.filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'shipped': items.filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'stopped': items.filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'canceled': items.filter(p_status='canceled').aggregate(total=Sum('p_quantity'))['total'] or 0,
+        }
 
     @property
     def status(self):
-        in_query = self.get_items_filtered().filter(p_status='in_query').aggregate(total=Sum('p_quantity'))[
-                       'total'] or 0
-        product = self.get_items_filtered().filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
-        ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
-        shipped = self.get_items_filtered().filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0
-        stopped = self.get_items_filtered().filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0
-        canceled = self.get_items_filtered().filter(p_status='canceled').aggregate(total=Sum('p_quantity'))[
-                       'total'] or 0
+        """Оптимизированное вычисление статуса"""
+        s = self.status_calculations
 
-        if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
-            return f'в очереди'
-        elif in_query == 0 and product > 0 and ready == 0 and shipped == 0:
-            return f'запущен'
-        elif in_query == 0 and product == 0 and ready > 0 and shipped == 0:
-            return f'готов'
-        elif in_query == 0 and product == 0 and ready == 0 and shipped > 0:
-            return f'отгружен'
-        elif stopped > 0 and product == 0 and ready == 0 and shipped == 0:
-            return f'остановлен'
-        elif canceled > 0 and product == 0 and ready == 0 and shipped == 0:
-            return f'отменен'
+        if s['in_query'] > 0 and all(v == 0 for k, v in s.items() if k != 'in_query'):
+            return 'в очереди'
+        elif s['product'] > 0 and all(v == 0 for k, v in s.items() if k != 'product'):
+            return 'запущен'
+        elif s['ready'] > 0 and all(v == 0 for k, v in s.items() if k != 'ready'):
+            return 'готов'
+        elif s['shipped'] > 0 and all(v == 0 for k, v in s.items() if k != 'shipped'):
+            return 'отгружен'
+        elif s['stopped'] > 0 and all(v == 0 for k, v in s.items() if k != 'stopped'):
+            return 'остановлен'
+        elif s['canceled'] > 0 and all(v == 0 for k, v in s.items() if k != 'canceled'):
+            return 'отменен'
         else:
-            return f'частично не готов'
+            return 'частично не готов'
+
+    @cached_property
+    def workshop_calculations(self):
+        """Кешированный расчет цехов"""
+        items = self.filtered_items_cache
+        return {
+            'ws_1': items.filter(workshop='1').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'ws_3': items.filter(workshop='3').aggregate(total=Sum('p_quantity'))['total'] or 0,
+            'stopped': items.filter(workshop='2').aggregate(total=Sum('p_quantity'))['total'] or 0,
+        }
 
     @property
-    def workshop(self):
-        ws_1 = self.get_items_filtered().filter(workshop='1').aggregate(total=Sum('p_quantity'))['total'] or 0
-        ws_3 = self.get_items_filtered().filter(workshop='3').aggregate(total=Sum('p_quantity'))['total'] or 0
-        stopped = self.get_items_filtered().filter(workshop='2').aggregate(total=Sum('p_quantity'))['total'] or 0
-        icon_path = static('erp_main/images/icon_play.png')
-        if ws_1:
-            icon_path = static('erp_main/images/icon_play1.png')
-        if ws_3:
-            icon_path = static('erp_main/images/icon_play3.png')
-        if ws_1 and ws_3:
-            icon_path = static('erp_main/images/icon_play13.png')
-        if stopped:
-            icon_path = static('erp_main/images/pause.png')
+    def workshop_icon_path(self):
+        """Оптимизированное вычисление иконки цеха"""
+        from django.contrib.staticfiles.storage import staticfiles_storage
 
-        return icon_path
+        ws = self.workshop_calculations
 
+        if ws['stopped']:
+            return staticfiles_storage.url('erp_main/images/pause.png')
+        elif ws['ws_1'] and ws['ws_3']:
+            return staticfiles_storage.url('erp_main/images/icon_play13.png')
+        elif ws['ws_1']:
+            return staticfiles_storage.url('erp_main/images/icon_play1.png')
+        elif ws['ws_3']:
+            return staticfiles_storage.url('erp_main/images/icon_play3.png')
+        else:
+            return staticfiles_storage.url('erp_main/images/icon_play.png')
 
+    @classmethod
+    def get_next_number(cls, year=None):
+        """
+        Получение следующего номера заказа без создания объекта.
+        Полезно для форм и API.
+        """
+        if year is None:
+            year = datetime.now().year
+
+        with _order_lock:
+            with transaction.atomic():
+                max_number = cls.objects.select_for_update().filter(
+                    created_at__year=year
+                ).aggregate(Max('number'))['number__max']
+
+                if max_number is not None:
+                    return max_number + 1
+                return DEFAULT_NUMBER
+
+    @classmethod
+    def get_by_full_number(cls, full_number):
+        """
+        Поиск заказа по полному номеру (ГГГГ/НОМЕР)
+        """
+        try:
+            year_str, number_str = full_number.split('/')
+            return cls.objects.get(
+                created_at__year=int(year_str),
+                number=int(number_str)
+            )
+        except (ValueError, cls.DoesNotExist, cls.MultipleObjectsReturned):
+            return None
+
+    def get_items_summary(self):
+        """
+        Получение всех агрегированных данных о товарах заказа одним запросом.
+        Оптимизация для снижения количества запросов к БД.
+
+        Returns:
+            dict: Словарь с агрегированными данными
+        """
+        from django.db.models import Count, Case, When, Value, IntegerField, Q
+
+        items = self.filtered_items_cache
+
+        # Один сложный запрос вместо множества простых
+        summary = items.aggregate(
+            # Общее количество товаров
+            total_quantity=Sum('p_quantity'),
+
+            # Двери NK без активной отделки
+            doors_1_nk=Sum(
+                Case(
+                    When(
+                        p_kind='door',
+                        p_construction='NK',
+                        p_active_trim=None,
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Двери NK с активной отделкой
+            doors_2_nk=Sum(
+                Case(
+                    When(
+                        p_kind='door',
+                        p_construction='NK',
+                        p_active_trim__isnull=False,
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Люки NK
+            hatch_nk=Sum(
+                Case(
+                    When(
+                        p_kind='hatch',
+                        p_construction='NK',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Двери SK без активной отделки
+            doors_1_sk=Sum(
+                Case(
+                    When(
+                        p_kind='door',
+                        p_construction='SK',
+                        p_active_trim=None,
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Двери SK с активной отделкой
+            doors_2_sk=Sum(
+                Case(
+                    When(
+                        p_kind='door',
+                        p_construction='SK',
+                        p_active_trim__isnull=False,
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Люки SK
+            hatch_sk=Sum(
+                Case(
+                    When(
+                        p_kind='hatch',
+                        p_construction='SK',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Фрамуги
+            transom=Sum(
+                Case(
+                    When(
+                        p_kind='transom',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Ворота обычные (< 3000)
+            gate=Sum(
+                Case(
+                    When(
+                        p_kind='gate',
+                        p_width__lt=3000,
+                        p_height__lt=3000,
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Ворота большие (≥ 3000)
+            gate_3000=Sum(
+                Case(
+                    When(
+                        Q(p_kind='gate') & (Q(p_width__gte=3000) | Q(p_height__gte=3000)),
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Стеклянные элементы
+            glass=Sum(
+                Case(
+                    When(
+                        Q(p_glass__isnull=False) & ~Q(p_glass={}),
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Статусы товаров
+            in_query_qty=Sum(
+                Case(
+                    When(
+                        p_status='in_query',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            product_qty=Sum(
+                Case(
+                    When(
+                        p_status='product',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            ready_qty=Sum(
+                Case(
+                    When(
+                        p_status='ready',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            shipped_qty=Sum(
+                Case(
+                    When(
+                        p_status='shipped',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            stopped_qty=Sum(
+                Case(
+                    When(
+                        p_status='stopped',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            canceled_qty=Sum(
+                Case(
+                    When(
+                        p_status='canceled',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Распределение по цехам
+            ws_1_qty=Sum(
+                Case(
+                    When(
+                        workshop='1',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            ws_3_qty=Sum(
+                Case(
+                    When(
+                        workshop='3',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            stopped_ws_qty=Sum(
+                Case(
+                    When(
+                        workshop='2',
+                        then='p_quantity'
+                    ),
+                    default=Value(0),
+                    output_field=IntegerField()
+                )
+            ),
+
+            # Общая статистика
+            items_count=Count('id'),
+            unique_kinds=Count('p_kind', distinct=True),
+            unique_constructions=Count('p_construction', distinct=True),
+
+            # Максимальные размеры
+            max_width=Case(
+                When(p_width__isnull=False, then=Max('p_width')),
+                default=Value(None)
+            ),
+
+            max_height=Case(
+                When(p_height__isnull=False, then=Max('p_height')),
+                default=Value(None)
+            ),
+        )
+
+        # Вычисляем общую сумму всех дверей NK
+        summary['doors_nk_total'] = summary.get('doors_1_nk', 0) + summary.get('doors_2_nk', 0)
+
+        # Вычисляем общую сумму всех дверей SK
+        summary['doors_sk_total'] = summary.get('doors_1_sk', 0) + summary.get('doors_2_sk', 0)
+
+        # Вычисляем общую сумму всех дверей (NK + SK)
+        summary['doors_total'] = summary['doors_nk_total'] + summary['doors_sk_total']
+
+        # Вычисляем общую сумму всех люков
+        summary['hatches_total'] = summary.get('hatch_nk', 0) + summary.get('hatch_sk', 0)
+
+        # Вычисляем общую сумму всех ворот
+        summary['gates_total'] = summary.get('gate', 0) + summary.get('gate_3000', 0)
+
+        # Вычисляем процент стеклянных элементов
+        if summary['total_quantity'] and summary['total_quantity'] > 0:
+            summary['glass_percentage'] = round(
+                (summary.get('glass', 0) / summary['total_quantity']) * 100,
+                1
+            )
+        else:
+            summary['glass_percentage'] = 0.0
+
+        # Определяем общий статус заказа
+        status_qty = {
+            'in_query': summary.get('in_query_qty', 0),
+            'product': summary.get('product_qty', 0),
+            'ready': summary.get('ready_qty', 0),
+            'shipped': summary.get('shipped_qty', 0),
+            'stopped': summary.get('stopped_qty', 0),
+            'canceled': summary.get('canceled_qty', 0),
+        }
+
+        if status_qty['in_query'] > 0 and all(v == 0 for k, v in status_qty.items() if k != 'in_query'):
+            summary['status'] = 'в очереди'
+        elif status_qty['product'] > 0 and all(v == 0 for k, v in status_qty.items() if k != 'product'):
+            summary['status'] = 'запущен'
+        elif status_qty['ready'] > 0 and all(v == 0 for k, v in status_qty.items() if k != 'ready'):
+            summary['status'] = 'готов'
+        elif status_qty['shipped'] > 0 and all(v == 0 for k, v in status_qty.items() if k != 'shipped'):
+            summary['status'] = 'отгружен'
+        elif status_qty['stopped'] > 0 and all(v == 0 for k, v in status_qty.items() if k != 'stopped'):
+            summary['status'] = 'остановлен'
+        elif status_qty['canceled'] > 0 and all(v == 0 for k, v in status_qty.items() if k != 'canceled'):
+            summary['status'] = 'отменен'
+        else:
+            summary['status'] = 'частично не готов'
+
+        # Определяем иконку цеха
+        from django.contrib.staticfiles.storage import staticfiles_storage
+
+        ws_1 = summary.get('ws_1_qty', 0)
+        ws_3 = summary.get('ws_3_qty', 0)
+        stopped_ws = summary.get('stopped_ws_qty', 0)
+
+        if stopped_ws:
+            summary['workshop_icon'] = staticfiles_storage.url('erp_main/images/pause.png')
+            summary['workshop_name'] = 'остановлен'
+        elif ws_1 and ws_3:
+            summary['workshop_icon'] = staticfiles_storage.url('erp_main/images/icon_play13.png')
+            summary['workshop_name'] = 'цех 1 и 3'
+        elif ws_1:
+            summary['workshop_icon'] = staticfiles_storage.url('erp_main/images/icon_play1.png')
+            summary['workshop_name'] = 'цех 1'
+        elif ws_3:
+            summary['workshop_icon'] = staticfiles_storage.url('erp_main/images/icon_play3.png')
+            summary['workshop_name'] = 'цех 3'
+        else:
+            summary['workshop_icon'] = staticfiles_storage.url('erp_main/images/icon_play.png')
+            summary['workshop_name'] = 'не назначен'
+
+        # Определяем основной цех
+        if ws_1 > ws_3:
+            summary['main_workshop'] = '1'
+        elif ws_3 > ws_1:
+            summary['main_workshop'] = '3'
+        else:
+            summary['main_workshop'] = None
+
+        # Проверка на просроченные товары (если есть поле due_date в Item)
+        try:
+            from datetime import date
+            overdue_items = items.filter(
+                p_due_date__isnull=False,
+                p_due_date__lt=date.today(),
+                p_status__in=['in_query', 'product']
+            ).aggregate(
+                overdue_qty=Sum('p_quantity'),
+                overdue_count=Count('id')
+            )
+            summary['overdue_items'] = overdue_items.get('overdue_qty', 0)
+            summary['overdue_count'] = overdue_items.get('overdue_count', 0)
+        except (AttributeError, FieldError):
+            # Поле p_due_date может отсутствовать
+            summary['overdue_items'] = 0
+            summary['overdue_count'] = 0
+
+        # Добавляем флаг наличия товаров с нестандартными размерами
+        summary['has_oversized'] = summary.get('gate_3000', 0) > 0
+
+        # Добавляем флаг наличия товаров со стеклом
+        summary['has_glass'] = summary.get('glass', 0) > 0
+
+        # Форматируем числовые значения (заменяем None на 0)
+        for key, value in summary.items():
+            if isinstance(value, (int, float)) and key not in ['max_width', 'max_height']:
+                summary[key] = value or 0
+
+        return summary
 class OrderChangeHistory(models.Model):
     order = models.ForeignKey(Order, related_name='changes', on_delete=models.CASCADE)
     order_file = models.FileField(upload_to='uploads/', blank=True, null=True)
