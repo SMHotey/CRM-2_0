@@ -39,7 +39,13 @@ class InternalLegalEntityForm(forms.ModelForm):
             'type': forms.Select(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 40%', 'placeholder': 'Название'}),
             'inn': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 20%', 'placeholder': 'ИНН'}),
-            'ogrn': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 20%', 'placeholder': 'ОГРН'}),
+            'ogrn': forms.TextInput(attrs={
+                'class': 'form-control',
+                'style': 'width: 20%',
+                'placeholder': 'ОГРН',
+                'data-label-legal': 'ОГРН',
+                'data-label-individual': 'ОГРНИП'
+            }),
             'kpp': forms.TextInput(attrs={'class': 'form-control', 'style': 'width: 20%', 'placeholder': 'КПП'}),
             'legal_address': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -88,6 +94,22 @@ class InternalLegalEntityForm(forms.ModelForm):
                 'style': 'width: 20%',
                 'placeholder': 'Введите email'
             })
+        }
+        labels = {
+            'type': 'Тип',
+            'name': 'Название',
+            'inn': 'ИНН',
+            'ogrn': 'ОГРН',
+            'kpp': 'КПП',
+            'legal_address': 'Юридический адрес',
+            'postal_address': 'Почтовый адрес',
+            'ceo_title': 'Должность руководителя',
+            'ceo_name': 'ФИО руководителя',
+            'bank_name': 'Название банка',
+            'account_number': 'Расчетный счет',
+            'bik': 'БИК',
+            'correspondent_account': 'Корреспондентский счет',
+            'email': 'Email'
         }
 
 

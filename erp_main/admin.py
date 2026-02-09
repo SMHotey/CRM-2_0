@@ -95,12 +95,6 @@ class InternalLegalEntityAdmin(admin.ModelAdmin):
             )
 
     def save_model(self, request, obj, form, change):
-        """Кастомная логика сохранения модели"""
-        # Можно добавить дополнительную логику перед сохранением
-        if not change:  # Если это создание нового объекта
-            # Например, логирование кто создал
-            pass
-
         # Автоматическое заполнение некоторых полей при необходимости
         if obj.type == 'INDIVIDUAL' and not obj.name:
             obj.name = f"ИП {obj.ceo_name}"

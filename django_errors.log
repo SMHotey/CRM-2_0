@@ -4536,3 +4536,5 @@ Traceback (most recent call last):
     _mysql.connection.query(self, query)
 django.db.utils.OperationalError: (1366, "Incorrect integer value: 'равн' for column 'p_active_trim' at row 1")
 "POST /erp_main/orders/upload/ HTTP/1.1" 500 242204
+"GET /erp_main/ HTTP/1.1" 500 59
+"GET /favicon.ico HTTP/1.1" 500 59

@@ -243,9 +243,15 @@
                             <div class="input-wrapper">
                                 <select class="form-input" id="id_internal_legal_entity" name="internal_legal_entity" required>
                                     <option value="" disabled selected>Выберите юридическое лицо</option>
-                                    {% for entity in internal_legal_entities %}
-                                        <option value="{{ entity.id }}">{{ entity.name }}</option>
-                                    {% endfor %}
+                                        {% for entity in internal_legal_entities %}
+                                            <option value="{{ entity.id }}">
+                                                {% if entity.name is not none %}
+                                                    {{ entity.name }}
+                                                {% else %}
+                                                    Без счета
+                                                {% endif %}
+                                            </option>
+                                        {% endfor %}
                                 </select>
                             </div>
                         </div>

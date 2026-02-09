@@ -233,7 +233,7 @@
 
                     <div class="internal-legal-entity-card p-3 rounded-3"
                          style="background: rgba(255,255,255,0.5); border: 1px solid #dee2e6;">
-                        <h6 class="mb-2">{{ organization.internal_legal_entity.name }}</h6>
+                        <h6 class="mb-2 text-center">{{ organization.internal_legal_entity.name }}</h6>
                         <table class="table table-sm table-borderless mb-0">
                             {% if organization.internal_legal_entity.inn %}
                             <tr>
@@ -259,7 +259,7 @@
                                 <td>
                                     {{ organization.internal_legal_entity.ceo_name }}
                                     {% if organization.internal_legal_entity.ceo_title %}
-                                        ({{ organization.internal_legal_entity.ceo_title }})
+                                        ({{ organization.internal_legal_entity.get_ceo_title_display }})
                                     {% endif %}
                                 </td>
                             </tr>

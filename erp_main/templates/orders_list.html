@@ -56,7 +56,7 @@
                     {% for order in orders %}
                     {% with first_item=order.items.first %}
                     <tr class="order-row {% if order.status == 'готов' %}status-ready{% elif order.status == 'остановлен' %}status-stopped{% elif order.status == 'отменен' %}status-cancelled{% elif order.status == 'отгружен' %}status-shipped{% elif order.status == 'запущен' %}status-in-progress{% elif order.status == 'в очереди' %}status-queued{% endif %}"
-                        data-order-id="{{ order.id }}"
+                        data-order-id="{{ order.number }}"
                         data-status="{{ order.status }}"
                         data-workshop="{{ first_item.workshop|default:'' }}">
                         <!-- Order Number -->
@@ -74,8 +74,8 @@
                             <button type="button"
                                     class="workshop-btn"
                                     data-bs-toggle="modal"
-                                    data-bs-target="#workshopModal{{ order.id }}"
-                                    aria-label="Изменить статус заказа {{ order.id }}"
+                                    data-bs-target="#workshopModal{{ order.number }}"
+                                    aria-label="Изменить статус заказа {{ order.number }}"
                                     data-order-id="{{ order.id }}"
                                     data-status="{{ order.status }}"
                                     data-workshop="{{ first_item.workshop|default:'' }}">

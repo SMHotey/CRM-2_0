@@ -1,12 +1,17 @@
 import ast
+import threading
+import time
+
+from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Max
 from django.templatetags.static import static
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.db import transaction
 
 
 #from erp_main.views.product_options import ItemInfo
@@ -546,10 +551,10 @@ class Invoice(models.Model):
     def __str__(self):
         return f'Счет № {self.number}'
 
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(fields=['number', 'internal_legal_entity', 'year'], name='unique_field_combination')
-    #     ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['number', 'internal_legal_entity', 'year'], name='unique_field_combination')
+        ]
 
     @property
     def percent(self):
@@ -557,66 +562,179 @@ class Invoice(models.Model):
 
 
 class Order(models.Model):
+    number = models.IntegerField(unique=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
-    invoice = models.ForeignKey(Invoice, related_name='invoice', blank=True, null=True, on_delete=models.CASCADE)
+    invoice = models.ForeignKey('Invoice', related_name='invoice',
+                                blank=True, null=True, on_delete=models.CASCADE)
     due_date = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            # Индекс для быстрого поиска по номеру
+            models.Index(fields=['number']),
+            # Индекс для фильтрации по дате создания
+            models.Index(fields=['created_at']),
+            # Композитный индекс для часто используемых фильтров
+            models.Index(fields=['due_date', 'created_at']),
+            # Индекс для внешнего ключа
+            models.Index(fields=['invoice']),
+        ]
+        ordering = ['-created_at']  # Сортировка по умолчанию по дате создания
+
+    def __str__(self):
+        return f"Заказ №{self.number} от {self.created_at.strftime('%d.%m.%Y')}"
+
+    @property
+    def year(self):
+        """Возвращает год создания заказа"""
+        return self.created_at.year if self.created_at else timezone.now().year
+
+    def save(self, *args, **kwargs):
+        """
+        Переопределенный метод save для автоматической генерации номера заказа.
+        Номер генерируется как последний номер в текущем году + 1.
+        """
+        # Если объект уже существует (обновление), просто сохраняем
+        if self.pk is not None:
+            return super().save(*args, **kwargs)
+
+        current_year = timezone.now().year
+
+        # Создаем блокировку для текущего года
+        lock_key = f'order_number_lock_{current_year}'
+        if not hasattr(self.__class__, '_locks'):
+            self.__class__._locks = {}
+
+        if lock_key not in self.__class__._locks:
+            self.__class__._locks[lock_key] = threading.Lock()
+
+        max_retries = 5  # Максимальное количество попыток при конфликте
+        retry_count = 0
+
+        while retry_count < max_retries:
+            try:
+                # Используем блокировку и транзакцию для атомарности
+                with self.__class__._locks[lock_key], transaction.atomic():
+                    # Используем select_for_update() для блокировки строк
+                    # Блокируем записи за текущий год с сортировкой по номеру
+                    last_order = Order.objects.filter(
+                        created_at__year=current_year
+                    ).select_for_update(
+                        of=('self',)  # Блокируем только таблицу Order
+                    ).order_by('-number').first()
+
+                    if last_order and last_order.number:
+                        self.number = last_order.number + 1
+                    else:
+                        self.number = 1
+
+                    # Устанавливаем дату создания, если не установлена
+                    if not self.created_at:
+                        self.created_at = timezone.now()
+
+                    # Пробуем сохранить
+                    return super().save(*args, **kwargs)
+
+            except IntegrityError as e:
+                # Обрабатываем возможный конфликт уникальности
+                retry_count += 1
+                if retry_count >= max_retries:
+                    # Если превышено максимальное количество попыток, бросаем исключение
+                    raise IntegrityError(
+                        f"Не удалось сохранить заказ после {max_retries} попыток. "
+                        f"Последняя ошибка: {str(e)}"
+                    )
+
+                # Небольшая задержка перед повторной попыткой
+                time.sleep(0.1 * retry_count)  # Экспоненциальная задержка
+
+                # Пробуем получить актуальный максимальный номер альтернативным способом
+                try:
+                    with transaction.atomic():
+                        # Альтернативный подход: используем агрегацию
+                        max_number = Order.objects.filter(
+                            created_at__year=current_year
+                        ).aggregate(max_num=Max('number'))['max_num']
+
+                        self.number = (max_number or 0) + 1
+                        return super().save(*args, **kwargs)
+                except IntegrityError:
+                    # Продолжаем цикл повторных попыток
+                    continue
+
     def get_items_filtered(self):
+        """Возвращает отфильтрованные элементы заказа"""
+        # Используем related_name из модели Item, если он есть
+        # Предполагается, что в модели Item есть ForeignKey на Order с related_name='items'
         return self.items.exclude(p_status__in=['changed', ])
+
+    # Оптимизированные свойства с кешированием результатов запросов
+    def _get_items_cache(self):
+        """Кешируем результаты запроса items для использования в свойствах"""
+        if not hasattr(self, '_items_cache'):
+            self._items_cache = list(self.get_items_filtered().select_related())
+        return self._items_cache
+
+    # Оптимизированные методы агрегации
+    def _aggregate_quantity(self, filters):
+        """Универсальный метод для агрегации с фильтрацией"""
+        return self.get_items_filtered().filter(**filters).aggregate(
+            total=Sum('p_quantity')
+        )['total'] or 0
 
     @property
     def doors_1_nk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='NK',
-            p_active_trim=None,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'door',
+            'p_construction': 'NK',
+            'p_active_trim': None,
+        })
 
     @property
     def doors_2_nk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='NK',
-            p_active_trim__isnull=False,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'door',
+            'p_construction': 'NK',
+            'p_active_trim__isnull': False,
+        })
 
     @property
     def hatch_nk(self):
-        return self.get_items_filtered().filter(
-            p_kind='hatch',
-            p_construction='NK',
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'hatch',
+            'p_construction': 'NK',
+        })
 
     @property
     def doors_1_sk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='SK',
-            p_active_trim=None,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'door',
+            'p_construction': 'SK',
+            'p_active_trim': None,
+        })
 
     @property
     def doors_2_sk(self):
-        return self.get_items_filtered().filter(
-            p_kind='door',
-            p_construction='SK',
-            p_active_trim__isnull=False,
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'door',
+            'p_construction': 'SK',
+            'p_active_trim__isnull': False,
+        })
 
     @property
     def hatch_sk(self):
-        return self.get_items_filtered().filter(
-            p_kind='hatch',
-            p_construction='SK',
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'hatch',
+            'p_construction': 'SK',
+        })
 
     @property
     def transom(self):
-        return self.get_items_filtered().filter(
-            p_kind='transom',
-        ).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self._aggregate_quantity({
+            'p_kind': 'transom',
+        })
 
     @property
     def gate(self):
@@ -634,55 +752,94 @@ class Order(models.Model):
 
     @property
     def glass(self):
-        return self.get_items_filtered().filter(Q(p_glass__isnull=False) &
-                                                ~Q(p_glass={})).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self.get_items_filtered().filter(
+            Q(p_glass__isnull=False) & ~Q(p_glass={})
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
     @property
     def quantity(self):
-        return self.get_items_filtered().filter(p_quantity__gt=0).aggregate(total=Sum('p_quantity'))['total'] or 0
+        return self.get_items_filtered().filter(
+            p_quantity__gt=0
+        ).aggregate(total=Sum('p_quantity'))['total'] or 0
 
+    # Оптимизированное вычисление статуса
     @property
     def status(self):
-        in_query = self.get_items_filtered().filter(p_status='in_query').aggregate(total=Sum('p_quantity'))[
-                       'total'] or 0
-        product = self.get_items_filtered().filter(p_status='product').aggregate(total=Sum('p_quantity'))['total'] or 0
-        ready = self.get_items_filtered().filter(p_status='ready').aggregate(total=Sum('p_quantity'))['total'] or 0
-        shipped = self.get_items_filtered().filter(p_status='shipped').aggregate(total=Sum('p_quantity'))['total'] or 0
-        stopped = self.get_items_filtered().filter(p_status='stopped').aggregate(total=Sum('p_quantity'))['total'] or 0
-        canceled = self.get_items_filtered().filter(p_status='canceled').aggregate(total=Sum('p_quantity'))[
-                       'total'] or 0
+        """Возвращает статус заказа на основе статусов его элементов"""
+        # Используем один запрос для получения всех агрегаций
+        aggregates = self.get_items_filtered().aggregate(
+            in_query=Sum('p_quantity', filter=Q(p_status='in_query')),
+            product=Sum('p_quantity', filter=Q(p_status='product')),
+            ready=Sum('p_quantity', filter=Q(p_status='ready')),
+            shipped=Sum('p_quantity', filter=Q(p_status='shipped')),
+            stopped=Sum('p_quantity', filter=Q(p_status='stopped')),
+            canceled=Sum('p_quantity', filter=Q(p_status='canceled'))
+        )
 
+        in_query = aggregates['in_query'] or 0
+        product = aggregates['product'] or 0
+        ready = aggregates['ready'] or 0
+        shipped = aggregates['shipped'] or 0
+        stopped = aggregates['stopped'] or 0
+        canceled = aggregates['canceled'] or 0
+
+        # Определяем статус по приоритету
         if in_query > 0 and product == 0 and ready == 0 and shipped == 0:
-            return f'в очереди'
+            return 'в очереди'
         elif in_query == 0 and product > 0 and ready == 0 and shipped == 0:
-            return f'запущен'
+            return 'запущен'
         elif in_query == 0 and product == 0 and ready > 0 and shipped == 0:
-            return f'готов'
+            return 'готов'
         elif in_query == 0 and product == 0 and ready == 0 and shipped > 0:
-            return f'отгружен'
+            return 'отгружен'
         elif stopped > 0 and product == 0 and ready == 0 and shipped == 0:
-            return f'остановлен'
+            return 'остановлен'
         elif canceled > 0 and product == 0 and ready == 0 and shipped == 0:
-            return f'отменен'
+            return 'отменен'
         else:
-            return f'частично не готов'
+            return 'частично не готов'
 
+    # Оптимизированное вычисление цеха
     @property
     def workshop(self):
-        ws_1 = self.get_items_filtered().filter(workshop='1').aggregate(total=Sum('p_quantity'))['total'] or 0
-        ws_3 = self.get_items_filtered().filter(workshop='3').aggregate(total=Sum('p_quantity'))['total'] or 0
-        stopped = self.get_items_filtered().filter(workshop='2').aggregate(total=Sum('p_quantity'))['total'] or 0
-        icon_path = static('erp_main/images/icon_play.png')
-        if ws_1:
-            icon_path = static('erp_main/images/icon_play1.png')
-        if ws_3:
-            icon_path = static('erp_main/images/icon_play3.png')
-        if ws_1 and ws_3:
-            icon_path = static('erp_main/images/icon_play13.png')
-        if stopped:
-            icon_path = static('erp_main/images/pause.png')
+        """Возвращает путь к иконке цеха"""
+        # Используем один запрос для получения всех агрегаций по цехам
+        aggregates = self.get_items_filtered().aggregate(
+            ws_1=Sum('p_quantity', filter=Q(workshop='1')),
+            ws_3=Sum('p_quantity', filter=Q(workshop='3')),
+            stopped=Sum('p_quantity', filter=Q(workshop='2'))
+        )
 
-        return icon_path
+        ws_1 = aggregates['ws_1'] or 0
+        ws_3 = aggregates['ws_3'] or 0
+        stopped = aggregates['stopped'] or 0
+
+        # Определяем иконку
+        if stopped:
+            return static('erp_main/images/pause.png')
+        elif ws_1 and ws_3:
+            return static('erp_main/images/icon_play13.png')
+        elif ws_1:
+            return static('erp_main/images/icon_play1.png')
+        elif ws_3:
+            return static('erp_main/images/icon_play3.png')
+        else:
+            return static('erp_main/images/icon_play.png')
+
+    # Дополнительные методы для удобства
+    @classmethod
+    def get_next_number_for_year(cls, year):
+        """Получить следующий номер для указанного года"""
+        last_order = cls.objects.filter(
+            created_at__year=year
+        ).order_by('-number').first()
+
+        return (last_order.number + 1) if last_order else 1
+
+    @property
+    def formatted_number(self):
+        """Форматированный номер заказа с годом"""
+        return f"{self.number}/{self.year % 100:02d}"
 
 
 class OrderChangeHistory(models.Model):
