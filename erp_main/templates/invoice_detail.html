@@ -1,105 +1,973 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load static %}
+{% load my_filters %}
+
+{% block stats_dashboard %}
+<!-- Пустой блок - скрываем статистику -->
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Детальная информация по счету №{{ invoice.number }} от {{ invoice.date }}</h2>
+<style>
+    /* Стили из invoices_list.html */
+    .search-filters {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
 
-    <div class="mb-4">
-        <b>Юридическое лицо:</b> <i>{{ invoice.internal_legal_entity }}</i> <br>
-        <b>Организация:</b> <i>{{ invoice.organization }}</i> <br>
-        <b>Менеджер:</b> <i>{{ invoice.organization.user.first_name }} {{ invoice.organization.user.last_name }}</i> <br>
-        <b>Сумма счета:</b> <i>{{ invoice.amount|intcomma }} р.</i> <br>
-        <b>Оплачено:</b> <i>{{ invoice.payed_amount|intcomma }} р.</i> <br>
-        {% if invoice.shipping_amount > 0 %}
-           <b>Включено за доставку:</b> <i>{{ invoice.shipping_amount|intcomma }} р.</i> <br>
-        {% endif %}
-        {% if invoice.montage_amount > 0 %}
-           <b>Включено за монтаж:</b> <i>{{ invoice.montage_amount|intcomma }} р.</i> <br>
-        {% endif %}
-        {% if invoice.change_date %}
-        <b>Дата последнего изменения счета: </b><i>{{ invoice.change_date }}</i> <br>
-        {% endif %}
-        {% if invoice.invoice_file %}
-            <b>Загруженный файл:</b> <a href="{{ invoice.invoice_file.url }}" target="_blank">Скачать файл</a> <br>
-        {% else %}
-            <b>Загруженный файл:</b> <i>Файл не загружен.</i> <br>
-        {% endif %}
-            <b>Запущенные заявки:</b>
-        {% if orders %}
-            {% for order in orders %}
-            <a href="{% url 'order_detail' order.id %}"><i>{{ order.id }}, </i></a>
-            {% endfor %}
-        {% else %}    <i> Нет </i>
-        {% endif %}
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid rgba(79, 151, 199, 0.2);
+        transition: var(--transition-smooth);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4F97C7;
+        box-shadow: 0 0 0 0.2rem rgba(79, 151, 199, 0.25);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .invoice-detail-container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(55, 177, 222, 0.2);
+    }
+
+    .invoice-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .invoice-status {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .status-paid {
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+        border: 1px solid rgba(25, 135, 84, 0.2);
+    }
+
+    .status-unpaid {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.2);
+    }
+
+    .status-partial {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .invoice-details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .detail-card {
+        background: rgba(248, 249, 250, 0.8);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(79, 151, 199, 0.1);
+        transition: var(--transition-smooth);
+    }
+
+    .detail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 151, 199, 0.15);
+    }
+
+    .detail-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-subvalue {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .amount-positive {
+        color: #198754;
+        font-weight: 600;
+    }
+
+    .amount-zero {
+        color: #6c757d;
+    }
+
+    .amount-negative {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .progress-container {
+        margin-top: 1rem;
+    }
+
+    .progress-bar {
+        height: 10px;
+        border-radius: 5px;
+        background: rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4F97C7, #37B1DE);
+        border-radius: 5px;
+        transition: width 0.5s ease;
+    }
+
+    .progress-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .actions-container {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #FFC107, #FF9800);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+
+    .btn-add-payment {
+        background: linear-gradient(135deg, #198754, #28a745);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+    }
+
+    .btn-add-payment:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-add-payment:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .centered-cell {
+    text-align: center;
+    }
+
+    .orders-list {
+        margin-top: 1rem;
+    }
+
+    .order-badge {
+        display: inline-block;
+        background: rgba(79, 151, 199, 0.1);
+        color: #4F97C7;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition-smooth);
+        border: 1px solid rgba(79, 151, 199, 0.2);
+    }
+
+    .order-badge:hover {
+        background: rgba(79, 151, 199, 0.2);
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: #3a7bb0;
+    }
+
+    /* Модальное окно */
+    .modal-backdrop {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(79, 151, 199, 0.2);
+        padding: 1.5rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        border-top: 1px solid rgba(79, 151, 199, 0.2);
+        padding: 1.5rem;
+    }
+
+    .payment-info {
+        background: rgba(79, 151, 199, 0.05);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(79, 151, 199, 0.1);
+    }
+
+    .payment-info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .payment-info-label {
+        color: #6c757d;
+    }
+
+    .payment-info-value {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .remaining-amount {
+        color: #198754;
+        font-weight: 700;
+    }
+
+    /* Таблица платежей */
+    .payments-table {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 2rem;
+    }
+
+    .payments-table .table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .payments-table th {
+        background: rgba(55, 177, 222, 0.15);
+        border-bottom: 2px solid rgba(55, 177, 222, 0.3);
+        font-weight: 600;
+        color: #2d3748;
+        padding: 1rem;
+    }
+
+    .payments-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .payments-table tbody tr:hover {
+        background-color: rgba(55, 177, 222, 0.08);
+    }
+
+    @media (max-width: 768px) {
+        .invoice-detail-container {
+            padding: 1rem;
+        }
+
+        .invoice-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .invoice-details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions-container {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="container-fluid my-4">
+    <!-- Основная информация о счете -->
+    <div class="invoice-detail-container">
+        <div class="invoice-header">
+            <div>
+                <h1 class="invoice-title mb-2">Счет №{{ invoice.number|default:"-" }}</h1>
+                <p class="text-muted mb-0">От {{ invoice.date|date:"d.m.Y" }}</p>
+            </div>
+            <div class="invoice-status
+                {% if invoice.is_paid %}status-paid
+                {% elif invoice.payed_amount == 0 %}status-unpaid
+                {% else %}status-partial{% endif %}">
+                {% if invoice.is_paid %}
+                    Полностью оплачен
+                {% elif invoice.payed_amount == 0 %}
+                    Не оплачен
+                {% else %}
+                    Частично оплачен ({{ invoice.percent }}%)
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Прогресс оплаты -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ invoice.percent|default:0 }}%"></div>
+            </div>
+            <div class="progress-text">
+                <span>Оплачено: {{ invoice.payed_amount|intcomma }} ₽</span>
+                <span>Осталось: {{ invoice.amount|subtract:invoice.payed_amount|intcomma }} ₽</span>
+                <span>Всего: {{ invoice.amount|intcomma }} ₽</span>
+            </div>
+        </div>
+
+        <!-- Детали счета -->
+        <div class="invoice-details-grid">
+            <div class="detail-card">
+                <div class="detail-label">Юридическое лицо</div>
+                <div class="detail-value">{{ invoice.internal_legal_entity.name|default:"Без счета" }}</div>
+                <div class="detail-subvalue">
+                    {% if invoice.internal_legal_entity.inn %}
+                        ИНН: {{ invoice.internal_legal_entity.inn }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Организация</div>
+                <div class="detail-value">
+                    <a href="{% url 'organization_detail' invoice.organization.id %}"
+                       class="text-decoration-none text-dark">
+                        {{ invoice.organization.display_name }}
+                    </a>
+                </div>
+                <div class="detail-subvalue">
+                    {% if invoice.organization.inn %}
+                        ИНН: {{ invoice.organization.inn }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Менеджер</div>
+                <div class="detail-value">{{ invoice.organization.user.get_full_name }}</div>
+                <div class="detail-subvalue">{{ invoice.organization.user.email }}</div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Суммы</div>
+                <div class="detail-value">
+                    <div>Счет: <span class="amount-positive">{{ invoice.amount|intcomma }} ₽</span></div>
+                    <div>Оплачено:
+                        <span class="{% if invoice.payed_amount > 0 %}amount-positive{% else %}amount-zero{% endif %}">
+                            {{ invoice.payed_amount|intcomma }} ₽
+                        </span>
+                    </div>
+                    {% if invoice.shipping_amount > 0 %}
+                    <div>Доставка: <span class="amount-zero">{{ invoice.shipping_amount|intcomma }} ₽</span></div>
+                    {% endif %}
+                    {% if invoice.montage_amount > 0 %}
+                    <div>Монтаж: <span class="amount-zero">{{ invoice.montage_amount|intcomma }} ₽</span></div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Файлы</div>
+                <div class="detail-value">
+                    {% if invoice.invoice_file %}
+                        <a href="{{ invoice.invoice_file.url }}" target="_blank"
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-download"></i> Скачать счет
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Файл не загружен</span>
+                    {% endif %}
+                </div>
+                {% if invoice.closing_document %}
+                <div class="detail-subvalue mt-2">
+                    <a href="{{ invoice.closing_document.url }}" target="_blank"
+                       class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-earmark-text"></i> Закрывающий документ
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="detail-card">
+                <div class="detail-label">Запущенные заявки</div>
+                <div class="orders-list">
+                    {% if orders %}
+                        {% for order in orders %}
+                            <a href="{% url 'order_detail' order.id %}" class="order-badge">
+                                Заявка #{{ order.id }}
+                            </a>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">Нет связанных заявок</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="actions-container">
+            <button id="editButton" class="btn btn-edit">
+                <i class="bi bi-pencil me-2"></i>Редактировать счет
+            </button>
+
+            {% if not invoice.is_paid %}
+            <button id="addPaymentButton" class="btn btn-add-payment"
+                    data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                <i class="bi bi-cash-coin me-2"></i>Добавить платеж
+            </button>
+            {% else %}
+            <button class="btn btn-add-payment" disabled>
+                <i class="bi bi-check-circle me-2"></i>Счет полностью оплачен
+            </button>
+            {% endif %}
+        </div>
     </div>
 
-    <button id="editButton" class="btn btn-warning mb-3">Редактировать</button>
+    <!-- Таблица платежей (если есть) -->
+    {% if payments %}
+    <div class="payments-table">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Дата платежа</th>
+                        <th>Сумма</th>
+                        <th>Тип платежа</th>
+                        <th>Комментарий</th>
+                        <th>Добавлен</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.payment_date|date:"d.m.Y" }}</td>
+                        <td class="amount-positive">{{ payment.amount|intcomma }} ₽</td>
+                        <td>{{ payment.get_payment_type_display }}</td>
+                        <td>{{ payment.comment|default:"-" }}</td>
+                        <td>{{ payment.created_at|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
 
-    <form id="editForm" method="POST" enctype="multipart/form-data" style="display: none;">
-        {% csrf_token %}
+    <!-- Форма редактирования -->
+    <div class="invoice-detail-container" id="editForm" style="display: none;">
+        <h3 class="mb-4">Редактирование счета</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_internal_legal_entity" class="form-label fw-semibold">Юридическое лицо</label>
+                    <select name="internal_legal_entity" id="id_internal_legal_entity" class="form-select" required>
+                        {% for entity in form.internal_legal_entity.field.queryset %}
+                            <option value="{{ entity.id }}" {% if entity.id == invoice.internal_legal_entity.id %}selected{% endif %}>{{ entity }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_organization" class="form-label fw-semibold">Организация</label>
+                    <select name="organization" id="id_organization" class="form-select" required>
+                        {% for org in form.organization.field.queryset %}
+                            <option value="{{ org.id }}" {% if org.id == invoice.organization.id %}selected{% endif %}>{{ org }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label for="id_internal_legal_entity" class="form-label">Юридическое лицо</label>
-            <select name="internal_legal_entity" id="id_internal_legal_entity" class="form-control" required>
-                {% for entity in form.internal_legal_entity.field.queryset %}
-                    <option value="{{ entity.id }}" {% if entity.id == invoice.internal_legal_entity.id %}selected{% endif %}>{{ entity }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="id_organization" class="form-label">Организация</label>
-            <select name="organization" id="id_organization" class="form-control" required>
-                {% for org in form.organization.field.queryset %}
-                    <option value="{{ org.id }}" {% if org.id == invoice.organization.id %}selected{% endif %}>{{ org }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="id_number" class="form-label">Номер счета</label>
-            <input type="text" name="number" id="id_number" class="form-control" value="{{ invoice.number }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="id_date" class="form-label">Дата выставления</label>
-            <input type="date" name="date" id="id_date" class="form-control" value="{{ invoice.date }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="id_amount" class="form-label">Сумма счета</label>
-            <input type="number" name="amount" id="id_amount" class="form-control" value="{{ invoice.amount }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="id_payed_amount" class="form-label">Оплачено</label>
-            <input type="number" name="payed_amount" id="id_payed_amount" class="form-control" value="{{ invoice.payed_amount }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="id_shipping_amount" class="form-label">Стоимость доставки</label>
-            <input type="number" name="shipping_amount" id="id_shipping_amount" class="form-control" value="{{ invoice.shipping_amount }}">
-        </div>
-        <div class="mb-3">
-            <label for="id_montage_amount" class="form-label">Стоимость монтажа</label>
-            <input type="number" name="montage_amount" id="id_montage_amount" class="form-control" value="{{ invoice.montage_amount }}">
-        </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_number" class="form-label fw-semibold">Номер счета</label>
+                    <input type="text" name="number" id="id_number" class="form-control"
+                           value="{{ invoice.number }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_date" class="form-label fw-semibold">Дата выставления</label>
+                    <input type="date" name="date" id="id_date" class="form-control"
+                           value="{{ invoice.date|date:'Y-m-d' }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_amount" class="form-label fw-semibold">Сумма счета</label>
+                    <input type="number" name="amount" id="id_amount" class="form-control"
+                           value="{{ invoice.amount }}" required>
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label for="id_invoice_file" class="form-label">Заменить файл счета (если необходимо)</label>
-            <input type="file" name="invoice_file" id="id_invoice_file" class="form-control">
-            <div class="form-text">Файл не обязателен. Максимальный размер: 10MB.</div>
-        </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_payed_amount" class="form-label fw-semibold">Оплачено</label>
+                    <input type="number" name="payed_amount" id="id_payed_amount" class="form-control"
+                           value="{{ invoice.payed_amount }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_shipping_amount" class="form-label fw-semibold">Стоимость доставки</label>
+                    <input type="number" name="shipping_amount" id="id_shipping_amount" class="form-control"
+                           value="{{ invoice.shipping_amount }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_montage_amount" class="form-label fw-semibold">Стоимость монтажа</label>
+                    <input type="number" name="montage_amount" id="id_montage_amount" class="form-control"
+                           value="{{ invoice.montage_amount }}">
+                </div>
+            </div>
 
-        <button type="submit" class="btn btn-success">Сохранить изменения</button>
-        <button type="button" id="cancelButton" class="btn btn-secondary">Отменить</button>
-    </form>
+            <div class="mb-3">
+                <label for="id_invoice_file" class="form-label fw-semibold">
+                    Заменить файл счета (если необходимо)
+                </label>
+                <input type="file" name="invoice_file" id="id_invoice_file" class="form-control">
+                <div class="form-text">Оставьте пустым, чтобы сохранить текущий файл. Максимальный размер: 10MB.</div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle me-2"></i>Сохранить изменения
+                </button>
+                <button type="button" id="cancelButton" class="btn btn-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Отменить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Таблицы платежей -->
+<div class="row mt-4">
+    <!-- Планируемые платежи -->
+    <div class="col-md-6">
+        <div class="payments-table">
+            <h5 class="mb-3 centered-cell" style="background-color: #f5f0ff; padding: 15px; border-radius: 5px;">Планируемые платежи</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in planned_payments %}
+                        <tr>
+                            <td>{{ payment.payment_date|date:"d.m.Y" }}</td>
+                            <td class="amount-positive">{{ payment.amount|intcomma }} ₽</td>
+                            <td>{{ payment.get_payment_type_display }}</td>
+                            <td>
+                                <span class="badge bg-warning">Планируется</span>
+                            </td>
+                            <td>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="openEditPaymentModal({{ payment.id }})">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="confirmDeletePayment({{ payment.id }})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                        <button class="btn btn-sm btn-outline-success"
+                                                onclick="updatePaymentStatus({{ payment.id }}, 'completed')"
+                                                title="Отметить как исполненный">
+                                            <i class="bi bi-check-circle"></i>
+                                        </button>
+
+
+                                {% if payment.status == 'completed' and request.user.is_superuser %}
+                                    <button class="btn btn-sm btn-outline-warning"
+                                            onclick="updatePaymentStatus({{ payment.id }}, 'planned')"
+                                            title="Вернуть в планируемые">
+                                        <i class="bi bi-clock"></i>
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Нет планируемых платежей</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Исполненные платежи -->
+    <div class="col-md-6">
+        <div class="payments-table">
+            <h5 class="mb-3 centered-cell" style="background-color: #e8f5e9; padding: 15px; border-radius: 5px;">Исполненные платежи</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Добавлен</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in completed_payments %}
+                        <tr>
+                            <td>{{ payment.payment_date|date:"d.m.Y" }}</td>
+                            <td class="amount-positive">{{ payment.amount|intcomma }} ₽</td>
+                            <td>{{ payment.get_payment_type_display }}</td>
+                            <td>
+                                <span class="badge bg-success">Исполнен</span>
+                            </td>
+                            <td>{{ payment.created_at|date:"d.m.Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Нет исполненных платежей</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Модальное окно добавления платежа -->
+<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-labelledby="addPaymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPaymentModalLabel">Добавить платеж к счету №{{ invoice.number }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'add_payment' invoice.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <!-- Информация о счете -->
+                    <div class="payment-info">
+                        <div class="payment-info-item">
+                            <span class="payment-info-label">Общая сумма счета:</span>
+                            <span class="payment-info-value">{{ invoice.amount|intcomma }} ₽</span>
+                        </div>
+                        <div class="payment-info-item">
+                            <span class="payment-info-label">Уже оплачено:</span>
+                            <span class="payment-info-value">{{ invoice.payed_amount|intcomma }} ₽</span>
+                        </div>
+                        <div class="payment-info-item">
+                            <span class="payment-info-label">Осталось оплатить:</span>
+                            <span class="payment-info-value remaining-amount">
+                                {{ invoice.amount|subtract:invoice.payed_amount|intcomma }} ₽
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Поля формы -->
+                    <div class="mb-3">
+                        <label for="payment_amount" class="form-label fw-semibold">Сумма платежа</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control"
+                                   id="payment_amount"
+                                   name="amount"
+                                   required
+                                   min="1"
+                                   max="{{ invoice.amount|subtract:invoice.payed_amount }}"
+                                   step="1">
+                            <span class="input-group-text">₽</span>
+                        </div>
+                        <div class="form-text">
+                            Максимально доступная сумма: {{ invoice.amount|subtract:invoice.payed_amount|intcomma }} ₽
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="payment_date" class="form-label fw-semibold">Дата платежа</label>
+                        <input type="date"
+                               class="form-control"
+                               id="payment_date"
+                               name="payment_date"
+                               value="{% now 'Y-m-d' %}"
+                               required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="payment_type" class="form-label fw-semibold">Тип платежа</label>
+                        <select class="form-select" id="payment_type" name="payment_type">
+                            <option value="cash">Наличные</option>
+                            <option value="bank_transfer" selected>Банковский перевод</option>
+                            <option value="card">Карта</option>
+                            <option value="online">Онлайн-платеж</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="payment_status" class="form-label fw-semibold">Статус платежа</label>
+                        <select class="form-select" id="payment_status" name="status">
+                            <option value="planned" selected>Планируется</option>
+                            <option value="completed">Исполнен</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="payment_comment" class="form-label fw-semibold">Комментарий (необязательно)</label>
+                        <textarea class="form-control"
+                                  id="payment_comment"
+                                  name="comment"
+                                  rows="3"
+                                  placeholder="Например: Аванс по договору, окончательный расчет и т.д."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-2"></i>Добавить платеж
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
+// Показать/скрыть форму редактирования
 document.getElementById('editButton').addEventListener('click', function() {
     document.getElementById('editForm').style.display = 'block';
-    document.getElementById('editButton').style.display = 'none';
+    this.style.display = 'none';
+    document.getElementById('addPaymentButton').style.display = 'none';
 });
 
 document.getElementById('cancelButton').addEventListener('click', function() {
     document.getElementById('editForm').style.display = 'none';
     document.getElementById('editButton').style.display = 'block';
+    document.getElementById('addPaymentButton').style.display = 'block';
 });
+
+// Валидация суммы платежа
+document.getElementById('payment_amount').addEventListener('input', function() {
+    const maxAmount = {{ invoice.amount|subtract:invoice.payed_amount }};
+    const currentValue = parseInt(this.value) || 0;
+
+    if (currentValue > maxAmount) {
+        this.value = maxAmount;
+    }
+
+    if (currentValue < 1) {
+        this.value = 1;
+    }
+});
+
+// Обработка отправки формы платежа
+document.querySelector('#addPaymentModal form').addEventListener('submit', function(e) {
+    const amountInput = document.getElementById('payment_amount');
+    const maxAmount = {{ invoice.amount|subtract:invoice.payed_amount }};
+    const amount = parseInt(amountInput.value) || 0;
+
+    if (amount > maxAmount) {
+        e.preventDefault();
+        alert('Сумма платежа не может превышать остаток по счету!');
+        amountInput.focus();
+        return false;
+    }
+
+    if (amount <= 0) {
+        e.preventDefault();
+        alert('Введите корректную сумму платежа!');
+        amountInput.focus();
+        return false;
+    }
+
+    // Показать индикатор загрузки
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Обработка...';
+    submitBtn.disabled = true;
+});
+
+// Инициализация календаря (используем нативный input type="date")
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('payment_date');
+
+    if (dateInput.value === '') {
+        dateInput.value = today;
+    }
+
+    });
+function openEditPaymentModal(paymentId) {
+    // Создаем уникальный ID для модального окна
+    const modalId = `editPaymentModal${paymentId}`;
+
+    // Проверяем, есть ли уже такое модальное окно
+    let modalElement = document.getElementById(modalId);
+
+    if (modalElement) {
+        // Если окно уже существует, показываем его
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        return;
+    }
+
+    // Загружаем форму редактирования
+    fetch(`/erp_main/invoices/{{ invoice.pk }}/payments/${paymentId}/edit/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
+        .then(html => {
+            // Создаем модальное окно
+            modalElement = document.createElement('div');
+            modalElement.className = 'modal fade';
+            modalElement.id = modalId;
+            modalElement.innerHTML = html;
+
+            // Добавляем на страницу
+            document.body.appendChild(modalElement);
+
+            // Инициализируем и показываем
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+
+            // Обработчик закрытия (удаляем элемент из DOM)
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                setTimeout(() => {
+                    if (modalElement && modalElement.parentNode) {
+                        modalElement.parentNode.removeChild(modalElement);
+                    }
+                }, 300);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading payment form:', error);
+            alert('Ошибка загрузки формы редактирования');
+        });
+}
+
+// Функция для удаления платежа
+function confirmDeletePayment(paymentId) {
+    if (confirm('Вы уверены, что хотите удалить этот платеж?')) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`/erp_main/invoices/{{ invoice.pk }}/payments/${paymentId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `confirm=true`
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Ошибка при удалении платежа');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting payment:', error);
+            alert('Ошибка при удалении платежа');
+        });
+    }
+}
+
+// Функция для обновления статуса платежа
+function updatePaymentStatus(paymentId, status) {
+    if (confirm(`Изменить статус платежа на "${status === 'completed' ? 'Исполнен' : 'Планируется'}"?`)) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`/erp_main/invoices/{{ invoice.pk }}/payments/${paymentId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `status=${status}`
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Ошибка при обновлении статуса');
+            }
+        })
+        .catch(error => {
+            console.error('Error updating payment status:', error);
+            alert('Ошибка при обновлении статуса');
+        });
+    }
+}
 </script>
+
 {% endblock %}

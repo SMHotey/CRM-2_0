@@ -35,7 +35,7 @@ class OrderUploadView(UserAccessMixin, FormView):
     processor = OrderProcessor()
 
     # Определяем требуемые роли для доступа к загрузке заказов
-    required_roles = ['admin', 'director', 'manager', 'production']
+    required_roles = ['admin', 'director', 'user', 'production']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -126,7 +126,7 @@ class OrderUploadView(UserAccessMixin, FormView):
             return True
 
         # Менеджеры и производство могут редактировать только свои заказы
-        if user_role in ['manager', 'production']:
+        if user_role in ['user', 'production']:
             return order.invoice.organization.user == self.request.user
 
         return False
@@ -322,7 +322,7 @@ def orders_list(request):
     if request.user.is_staff or user_role in ['admin', 'director', 'production', 'logistic']:
         orders = Order.objects.all().order_by('-id')
     elif Order.objects.filter(invoice__organization__user=request.user):
-        orders = Order.objects.all().order_by('-id')
+         orders = Order.objects.all().order_by('-id')
     else:
         # Для пользователей без специальных прав показываем только их заказы
         orders = Order.objects.filter(invoice__organization__user=request.user).order_by('-id')

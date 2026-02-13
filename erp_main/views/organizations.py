@@ -144,7 +144,13 @@ class OrganizationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         # Базовый запрос с предзагрузкой всех связанных данных
-        queryset = Organization.objects.all()
+
+        if self.request.user.is_superuser:
+            # Суперпользователь видит все организации
+            queryset = Organization.objects.all()
+        else:
+            # Обычный пользователь видит только свои организации
+            queryset = Organization.objects.filter(user=self.request.user)
 
         # Предзагрузка всех связанных данных
         queryset = queryset.select_related('user', 'internal_legal_entity')

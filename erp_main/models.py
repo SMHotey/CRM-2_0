@@ -14,14 +14,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.db import transaction
 
 
-#from erp_main.views.product_options import ItemInfo
-
-
-# def validate_numeric_only(value):
-#     if not re.match(r'^\d{6,}$', value) and value is not None:
-#         raise ValidationError('Поле должно содержать только цифры и минимум 6 символов.')
-
-
 class DocumentType(models.Model):
     """Типы документов для разных моделей"""
     name = models.CharField(max_length=100, verbose_name="Название типа")
@@ -172,7 +164,6 @@ class InternalLegalEntity(models.Model):
 
 
 class Organization(models.Model):
-    """Базовая модель контрагента - теперь НЕ абстрактная"""
     TYPES = [
         ('LEGAL', 'Юридическое лицо'),
         ('INDIVIDUAL', 'Индивидуальный предприниматель'),
@@ -241,9 +232,9 @@ class Organization(models.Model):
     def display_name(self):
         """Возвращает отображаемое имя в зависимости от типа"""
         if self.type == 'LEGAL' and hasattr(self, 'legalentity'):
-            return self.legalentity.name
+            return f'{self.legalentity.name}'
         elif self.type == 'INDIVIDUAL' and hasattr(self, 'individualentrepreneur'):
-            return self.individualentrepreneur.full_name
+            return f'ИП {self.individualentrepreneur.full_name}'
         elif self.type == 'PERSON' and hasattr(self, 'physicalperson'):
             return self.physicalperson.full_name
         return f"Контрагент {self.id}"
@@ -352,7 +343,10 @@ class Organization(models.Model):
         self.save()
 
     def __str__(self):
-        return self.display_name
+        if self.display_name:
+            return self.display_name
+        else:
+            return f'Без счета'
 
 
 class LegalEntity(Organization):
@@ -507,14 +501,10 @@ class ContractTemplate(models.Model):
     contract_type = models.CharField(max_length=30, choices=CONTRACT_TYPE_CHOICES, default='legal_entity', null=True,
                                      blank=True)
     internal_legal_entity = models.ForeignKey(InternalLegalEntity, on_delete=models.CASCADE, null=True, blank=True)
-    organization_type = models.CharField(max_length=100, choices=(
-        ('ooo', 'ООО'),
-        ('ao', 'АО'),
-        ('zao', 'ЗАО'),
-    ), null=True, blank=True)
+
     footing_type = models.CharField(max_length=10, choices=(
-        ('ustav', 'устава'),
-        ('attorney', 'доверенности')
+        ('ustav', 'устав'),
+        ('attorney', 'доверенность')
     ), null=True, blank=True)
     attorney_number = models.CharField(max_length=50, blank=True, null=True)
     attorney_date = models.DateField(blank=True, null=True)
@@ -524,6 +514,8 @@ class ContractTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+
 
 
 class Invoice(models.Model):
@@ -562,7 +554,7 @@ class Invoice(models.Model):
 
 
 class Order(models.Model):
-    number = models.IntegerField(unique=True, default=None)
+    number = models.IntegerField(unique=True, default=None, verbose_name='Номер заказа')
     created_at = models.DateTimeField(auto_now_add=True)
     order_file = models.FileField(upload_to='uploads/')
     invoice = models.ForeignKey('Invoice', related_name='invoice',
@@ -1079,6 +1071,110 @@ class Shipment(models.Model):
     def can_edit(self, user):
         return user.is_superuser or self.user == user
 
+
+class Payment(models.Model):
+    PAYMENT_TYPES = [
+        ('cash', 'Наличные'),
+        ('bank_transfer', 'Банковский перевод'),
+        ('card', 'Карта'),
+        ('online', 'Онлайн-платеж'),
+    ]
+
+    PAYMENT_STATUSES = [
+        ('planned', 'Планируется'),
+        ('completed', 'Исполнен'),
+    ]
+
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='payments')
+    amount = models.IntegerField(verbose_name="Сумма платежа")
+    payment_date = models.DateField(verbose_name="Дата платежа")
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='bank_transfer')
+    status = models.CharField(max_length=20, choices=PAYMENT_STATUSES, default='planned', verbose_name="Статус")
+    comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_payments')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_payments')
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_status = None
+        old_amount = None
+
+        if not is_new:
+            try:
+                old_payment = Payment.objects.get(pk=self.pk)
+                old_status = old_payment.status
+                old_amount = old_payment.amount
+            except Payment.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+        # Обновляем счет при любых изменениях статуса или суммы
+        if is_new and self.status == 'completed':
+            self.update_invoice_amount()
+        elif not is_new and (old_status != self.status or old_amount != self.amount):
+            self.update_invoice_amount()
+
+        # Создаем запись в истории платежа
+        if not is_new:  # Только для существующих платежей
+            try:
+                PaymentHistory.objects.create(
+                    payment=self,
+                    field='status',
+                    old_value=old_status,
+                    new_value=self.status,
+                    changed_by=self.updated_by or self.created_by
+                )
+            except Exception as e:
+                # Логируем ошибку, но не прерываем сохранение
+                print(f"Error creating payment history: {e}")
+    def update_invoice_amount(self):
+        """Обновляет оплаченную сумму счета на основе исполненных платежей"""
+        if self.status == 'completed':
+            invoice = self.invoice
+            # Сумма только исполненных платежей
+            total_completed = invoice.payments.filter(status='completed').aggregate(
+                total=models.Sum('amount'))['total'] or 0
+            invoice.payed_amount = total_completed
+            invoice.save()
+
+    def can_edit(self, user):
+        """Может ли пользователь редактировать платеж"""
+        if user.is_superuser:
+            return True
+        return self.status == 'planned'
+
+    def can_delete(self, user):
+        """Может ли пользователь удалить платеж"""
+        return self.can_edit(user)
+
+    def __str__(self):
+        status_display = "✓" if self.status == 'completed' else "⏰"
+        return f"{status_display} Платеж {self.amount} руб. от {self.payment_date}"
+
+    class Meta:
+        verbose_name = 'Платеж'
+        verbose_name_plural = 'Платежи'
+        ordering = ['payment_date']
+
+
+class PaymentHistory(models.Model):
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name='history')
+    field = models.CharField(max_length=100, verbose_name="Измененное поле")
+    old_value = models.TextField(null=True, blank=True, verbose_name="Старое значение")
+    new_value = models.TextField(null=True, blank=True, verbose_name="Новое значение")
+    changed_at = models.DateTimeField(auto_now_add=True)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"Изменение {self.field} в платеже {self.payment.id}"
+
+    class Meta:
+        verbose_name = 'История платежа'
+        verbose_name_plural = 'История платежей'
+        ordering = ['-changed_at']
 # class StockOperation(models.Model):
 #     """Операция со складом (приход/резерв/списание)"""
 #     OPERATION_TYPES = [

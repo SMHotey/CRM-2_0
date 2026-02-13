@@ -1,0 +1,219 @@
+<!-- templates/edit_payment_form.html -->
+{% load humanize %}
+
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Редактирование платежа</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        {% if form %}
+        <form id="editPaymentForm{{ payment.id }}" class="edit-payment-form">
+            {% csrf_token %}
+
+            <div class="modal-body">
+                {% if error %}
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <!-- Поле суммы -->
+                <div class="mb-3">
+                    <label for="id_amount" class="form-label fw-semibold">Сумма платежа</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.amount.errors|striptags }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text">
+                        Максимально доступная сумма: {{ invoice.amount|intcomma }} ₽
+                    </div>
+                </div>
+
+                <!-- Поле даты -->
+                <div class="mb-3">
+                    <label for="id_payment_date" class="form-label fw-semibold">Дата платежа</label>
+                    {{ form.payment_date }}
+                    {% if form.payment_date.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.payment_date.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле типа платежа -->
+                <div class="mb-3">
+                    <label for="id_payment_type" class="form-label fw-semibold">Тип платежа</label>
+                    {{ form.payment_type }}
+                    {% if form.payment_type.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.payment_type.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле статуса -->
+                <div class="mb-3">
+                    <label for="id_status" class="form-label fw-semibold">Статус платежа</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.status.errors|striptags }}
+                    </div>
+                    {% endif %}
+                    {% if form.status.help_text %}
+                    <div class="form-text text-warning">
+                        {{ form.status.help_text }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле комментария -->
+                <div class="mb-3">
+                    <label for="id_comment" class="form-label fw-semibold">Комментарий</label>
+                    {{ form.comment }}
+                    {% if form.comment.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.comment.errors|striptags }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div> <!-- Конец modal-body -->
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" class="btn btn-success btn-save-payment">Сохранить изменения</button>
+            </div>
+        </form>
+        {% else %}
+        <div class="modal-body">
+            {% if error %}
+            <div class="alert alert-danger">
+                {{ error }}
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                Форма не доступна
+            </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Эта функция выполнится после загрузки HTML в модальное окно
+(function() {
+    const form = document.getElementById('editPaymentForm{{ payment.id }}');
+    if (!form) {
+        console.error('Form not found: editPaymentForm{{ payment.id }}');
+        return;
+    }
+
+    console.log('Edit payment form loaded for payment {{ payment.id }}');
+
+    // Обработчик отправки формы
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        console.log('Edit payment form submitted for payment {{ payment.id }}');
+
+        // Получаем CSRF токен
+        const csrfInput = form.querySelector('[name=csrfmiddlewaretoken]');
+        const csrfToken = csrfInput ? csrfInput.value : null;
+
+        if (!csrfToken) {
+            console.error('CSRF token not found');
+            alert('Ошибка безопасности. Перезагрузите страницу.');
+            return;
+        }
+
+        // Собираем данные формы
+        const formData = new FormData(form);
+
+        console.log('Form data collected:', Object.fromEntries(formData));
+
+        // Показываем индикатор загрузки
+        const submitBtn = form.querySelector('.btn-save-payment');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Сохранение...';
+        submitBtn.disabled = true;
+
+        // Отправляем запрос
+        fetch('{% url "edit_payment" invoice.pk payment.id %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status, response.statusText);
+            return response.json().then(data => ({status: response.status, data}));
+        })
+        .then(({status, data}) => {
+            console.log('Response data:', data);
+            if (status === 200 && data.success) {
+                // Закрываем модальное окно
+                const modalElement = document.getElementById('editPaymentModal{{ payment.id }}');
+                if (modalElement) {
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+                // Обновляем страницу
+                setTimeout(() => {
+                    location.reload();
+                }, 300);
+            } else {
+                let errorMessage = 'Ошибка сохранения';
+                if (data.error) {
+                    errorMessage = data.error;
+                } else if (data.errors) {
+                    try {
+                        const errors = JSON.parse(data.errors);
+                        errorMessage = Object.values(errors).flat().join(', ');
+                    } catch (e) {
+                        errorMessage = data.errors;
+                    }
+                }
+                alert(errorMessage);
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            alert('Ошибка сохранения: ' + error.message);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Разрешаем будущие даты
+    const dateInput = document.getElementById('id_payment_date');
+    if (dateInput) {
+        dateInput.removeAttribute('min');
+        dateInput.removeAttribute('max');
+    }
+
+    // Добавляем обработчик закрытия модального окна
+    const modalElement = document.getElementById('editPaymentModal{{ payment.id }}');
+    if (modalElement) {
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            console.log('Modal closed, removing from DOM');
+            setTimeout(() => {
+                if (modalElement && modalElement.parentNode) {
+                    modalElement.parentNode.removeChild(modalElement);
+                }
+            }, 300);
+        });
+    }
+})();
+</script>

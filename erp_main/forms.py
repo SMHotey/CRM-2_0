@@ -1,7 +1,11 @@
+from django.utils import timezone
+
 from django import forms
 from django.contrib.auth.models import User
+
+from . import models
 from .models import (Organization, Invoice, Order, InternalLegalEntity, OrderItem, Shipment, Certificate,
-                     ContractTemplate, LegalEntity, IndividualEntrepreneur, PhysicalPerson)
+                     ContractTemplate, LegalEntity, IndividualEntrepreneur, PhysicalPerson, Payment)
 from django.core.exceptions import ValidationError
 
 
@@ -250,6 +254,121 @@ class InvoiceForm(forms.ModelForm):
     def __str__(self):
         return self.number if self.number else "Без номера"
 
+
+class PaymentForm(forms.ModelForm):
+    payment_date = forms.DateField(
+        widget=forms.DateInput(
+            attrs={'type': 'date', 'class': 'form-control'},
+            format='%Y-%m-%d'
+        ),
+        input_formats=['%Y-%m-%d', '%d.%m.%Y', '%d/%m/%Y']
+    )
+
+    class Meta:
+        model = Payment
+        fields = ['amount', 'payment_date', 'payment_type', 'status', 'comment']
+        widgets = {
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'payment_type': forms.Select(attrs={'class': 'form-select'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': '3'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.invoice = kwargs.pop('invoice', None)
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+
+        # Преобразуем дату в формат yyyy-MM-dd для HTML input type="date"
+        if self.instance and self.instance.payment_date:
+            # Преобразуем дату в строку в формате YYYY-MM-DD
+            self.initial['payment_date'] = self.instance.payment_date.strftime('%Y-%m-%d')
+
+        # Если платеж уже исполнен и пользователь не суперпользователь, блокируем статус
+        if self.instance and self.instance.pk and self.instance.status == 'completed' and self.request and not self.request.user.is_superuser:
+            self.fields['status'].disabled = True
+            self.fields['status'].help_text = 'Только администратор может изменять статус исполненного платежа'
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount <= 0:
+            raise forms.ValidationError('Сумма должна быть больше 0')
+
+        # Проверяем, чтобы сумма всех платежей не превышала сумму счета
+        if self.instance and self.invoice:
+            # Сумма всех платежей кроме текущего
+            other_payments_total = self.invoice.payments.exclude(id=self.instance.id).aggregate(
+                total=models.Sum('amount'))['total'] or 0
+            if other_payments_total + amount > self.invoice.amount:
+                raise forms.ValidationError(
+                    f'Сумма всех платежей ({other_payments_total + amount} руб.) превышает сумму счета ({self.invoice.amount} руб.)'
+                )
+        return amount
+
+
+class PaymentReportForm(forms.Form):
+    REPORT_TYPES = [
+        ('completed', 'Исполненные платежи'),
+        ('planned', 'Планируемые платежи'),
+    ]
+
+    report_type = forms.ChoiceField(
+        choices=REPORT_TYPES,
+        label='Тип отчета',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    start_date = forms.DateField(
+        label='Дата начала периода',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+
+    end_date = forms.DateField(
+        label='Дата окончания периода',
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+
+    organization = forms.ModelChoiceField(
+        queryset=Organization.objects.all(),
+        required=False,
+        label='Организация',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    invoice_number = forms.CharField(
+        required=False,
+        label='Номер счета',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+
+    internal_legal_entity = forms.ModelChoiceField(
+        queryset=InternalLegalEntity.objects.all(),
+        required=False,
+        label='Внутреннее юридическое лицо',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    manager = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=False,
+        label='Менеджер',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        report_type = cleaned_data.get('report_type')
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+
+        if start_date and end_date and start_date > end_date:
+            raise forms.ValidationError("Дата начала не может быть позже даты окончания")
+
+        if report_type == 'planned' and start_date:
+            if start_date < timezone.now().date():
+                raise forms.ValidationError("Для планируемых платежей дата начала не может быть раньше текущей")
+
+        return cleaned_data
 
 class OrderFileForm(forms.Form):
     order_file = forms.FileField()

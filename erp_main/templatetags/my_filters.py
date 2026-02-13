@@ -31,3 +31,12 @@ def format_date(year_month, day):
 @register.filter
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter
+def subtract(value, arg):
+    """Вычитает arg из value"""
+    try:
+        return int(value) - int(arg)
+    except (ValueError, TypeError):
+        return value

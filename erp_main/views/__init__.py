@@ -10,7 +10,9 @@ from .orders import update_workshop
 from .orders import OrderUploadView, orders_list, order_detail, update_order_item_status
 
 # Invoice views
-from .invoices import invoice_add, invoice_detail, invoices_list
+from .invoices import invoice_add, invoice_detail, invoices_list, add_payment, payment_report
+
+
 
 # Organization views
 from .organizations import (

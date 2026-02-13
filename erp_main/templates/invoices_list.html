@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
+{% block stats_dashboard %}
+<!-- Пустой блок - скрываем статистику -->
+{% endblock %}
+
 {% block content %}
 <style>
     .search-filters {
@@ -64,7 +68,7 @@
 
     .table tbody tr:hover {
         background-color: rgba(55, 177, 222, 0.08);
-        transform: translateX(4px);
+
     }
 
     .sortable-header {
@@ -102,6 +106,10 @@
     .amount-zero {
         color: #6c757d;
     }
+
+    .centered-cell {
+    text-align: center;
+}
 
     .file-download {
         color: #4F97C7;
@@ -225,7 +233,7 @@
         <div class="col-12">
             <h1 class="page-title mb-3">Выставленные счета</h1>
 
-            <!-- Statistics Summary -->
+            <!-- Statistics Summary - Simplified -->
             <div class="stats-summary">
                 <div class="stat-item">
                     <div class="stat-value text-primary">{{ invoices.paginator.count|intcomma }}</div>
@@ -263,20 +271,34 @@
                            name="search"
                            class="form-control"
                            placeholder="Введите номер счета или название организации..."
-                           value="{{ request.GET.search }}">
+                           value="{{ request.GET.search|default:'' }}">
                 </div>
 
                 <div class="col-md-4">
                     <label class="form-label fw-semibold">Юридическое лицо</label>
-                    <select name="legal_entity" class="form-select">
+                    <select name="internal_legal_entity" class="form-select" id="legalEntitySelect">
                         <option value="">Все юридические лица</option>
                         {% for l_e in internal_legal_entity %}
                             <option value="{{ l_e.id }}"
-                                    {% if l_e.id == selected_legal_entity_id %}selected{% endif %}>
-                                {{ l_e.name }}
+                                    {% if request.GET.internal_legal_entity == l_e.id|stringformat:'i' %}selected{% endif %}>
+                                {{ l_e.name|default:"Без счета" }}
                             </option>
                         {% endfor %}
                     </select>
+                </div>
+
+                <div class="col-md-3">
+                    {% if request.GET.hide_paid == 'true' %}
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.internal_legal_entity %}internal_legal_entity={{ request.GET.internal_legal_entity }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.direction %}direction={{ request.GET.direction }}{% endif %}"
+                           class="btn btn-outline-primary w-100">
+                            <i class="bi bi-eye me-1"></i>Показать все счета
+                        </a>
+                    {% else %}
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.internal_legal_entity %}internal_legal_entity={{ request.GET.internal_legal_entity }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.direction %}direction={{ request.GET.direction }}&{% endif %}hide_paid=true"
+                           class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-eye-slash me-1"></i>Скрыть оплаченные
+                        </a>
+                    {% endif %}
                 </div>
 
                 <div class="col-md-4">
@@ -287,8 +309,14 @@
             </div>
 
             <!-- Hidden fields for sorting -->
-            <input type="hidden" name="sort" id="sortField" value="{{ request.GET.sort }}">
-            <input type="hidden" name="direction" id="sortDirection" value="{{ request.GET.direction }}">
+            <input type="hidden" name="sort" id="sortField" value="{{ request.GET.sort|default:'id' }}">
+            <input type="hidden" name="direction" id="sortDirection" value="{{ request.GET.direction|default:'desc' }}">
+            {% if request.GET.page %}
+                <input type="hidden" name="page" value="{{ request.GET.page }}">
+            {% endif %}
+            {% if request.GET.hide_paid %}
+                <input type="hidden" name="hide_paid" value="{{ request.GET.hide_paid }}">
+            {% endif %}
         </form>
     </div>
 
@@ -344,7 +372,7 @@
                         <th>Оплачено</th>
                         <th>Доставка</th>
                         <th>Монтаж</th>
-                        <th>Менеджер</th>
+                        <th class="centered-cell">Менеджер</th>
                         <th>Юридическое лицо</th>
                         <th>Файл</th>
                     </tr>
@@ -352,16 +380,16 @@
                 <tbody>
                     {% for invoice in invoices %}
                     <tr>
-                        <td>
+                        <td class="centered-cell">
                             <a href="{% url 'invoice_detail' invoice.id %}"
                                class="invoice-number text-decoration-none">
-                                {{ invoice.number }}
+                                {{ invoice.number|default:"-" }}
                             </a>
                         </td>
                         <td>
                             <a href="{% url 'organization_detail' invoice.organization.id %}"
                                class="text-decoration-none">
-                                {{ invoice.organization.name }}
+                                {{ invoice.organization.display_name }}
                             </a>
                         </td>
                         <td class="text-nowrap">{{ invoice.date|date:"d.m.Y" }}</td>
@@ -379,8 +407,14 @@
                                 {{ invoice.organization.user.get_full_name }}
                             </div>
                         </td>
-                        <td>
-                            <span class="badge bg-light text-dark">{{ invoice.legal_entity }}</span>
+                        <td class="centered-cell">
+                            <span class="badge bg-light text-dark">
+                                {% if invoice.internal_legal_entity and invoice.internal_legal_entity.name %}
+                                    {{ invoice.internal_legal_entity.name }}
+                                {% else %}
+                                    Без счета
+                                {% endif %}
+                            </span>
                         </td>
                         <td class="text-center">
                             {% if invoice.invoice_file %}
@@ -402,7 +436,7 @@
                                 <i class="bi bi-file-earmark-x"></i>
                                 <h5>Счетов не найдено</h5>
                                 <p class="text-muted">
-                                    {% if request.GET.search or request.GET.legal_entity %}
+                                    {% if request.GET.search or request.GET.internal_legal_entity %}
                                         Попробуйте изменить параметры поиска
                                     {% else %}
                                         Нет доступных счетов для отображения
@@ -422,11 +456,11 @@
     <div class="pagination-container">
         <div class="d-flex justify-content-center align-items-center flex-wrap">
             {% if invoices.has_previous %}
-                <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.legal_entity %}&legal_entity={{ request.GET.legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
+                <a href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.internal_legal_entity %}&internal_legal_entity={{ request.GET.internal_legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
                    class="page-btn">
                     <i class="bi bi-chevron-double-left"></i> Первая
                 </a>
-                <a href="?page={{ invoices.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.legal_entity %}&legal_entity={{ request.GET.legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
+                <a href="?page={{ invoices.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.internal_legal_entity %}&internal_legal_entity={{ request.GET.internal_legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
                    class="page-btn">
                     <i class="bi bi-chevron-left"></i> Предыдущая
                 </a>
@@ -436,17 +470,17 @@
                 {% if invoices.number == i %}
                     <span class="page-btn active">{{ i }}</span>
                 {% elif i > invoices.number|add:'-3' and i < invoices.number|add:'3' %}
-                    <a href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.legal_entity %}&legal_entity={{ request.GET.legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
+                    <a href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.internal_legal_entity %}&internal_legal_entity={{ request.GET.internal_legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
                        class="page-btn">{{ i }}</a>
                 {% endif %}
             {% endfor %}
 
             {% if invoices.has_next %}
-                <a href="?page={{ invoices.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.legal_entity %}&legal_entity={{ request.GET.legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
+                <a href="?page={{ invoices.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.internal_legal_entity %}&internal_legal_entity={{ request.GET.internal_legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
                    class="page-btn">
                     Следующая <i class="bi bi-chevron-right"></i>
                 </a>
-                <a href="?page={{ invoices.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.legal_entity %}&legal_entity={{ request.GET.legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
+                <a href="?page={{ invoices.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.internal_legal_entity %}&internal_legal_entity={{ request.GET.internal_legal_entity }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.direction %}&direction={{ request.GET.direction }}{% endif %}"
                    class="page-btn">
                     Последняя <i class="bi bi-chevron-double-right"></i>
                 </a>
@@ -458,6 +492,139 @@
         </div>
     </div>
     {% endif %}
+<!-- Добавить в конец контейнера, перед закрывающим тегом </div> -->
+<!-- Кнопка для открытия модального окна -->
+{% if request.user.is_superuser %}
+<div class="text-end mt-3">
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#reportModal">
+        <i class="bi bi-file-earmark-text me-2"></i>Формирование отчетов
+    </button>
+</div>
+{% endif %}
+
+<!-- Модальное окно -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-file-earmark-text me-2"></i>Формирование отчета по платежам
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="GET" action="{% url 'payment_report' %}" id="reportForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Тип отчета *</label>
+                            <select name="report_type" class="form-select" required>
+                                <option value="">Выберите тип</option>
+                                <option value="completed">Исполненные платежи</option>
+                                <option value="planned">Планируемые платежи</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Дата начала *</label>
+                            <input type="date" name="start_date" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Дата окончания *</label>
+                            <input type="date" name="end_date" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Организация</label>
+                            <select name="organization" class="form-select">
+                                <option value="">Все организации</option>
+                                {% for org in organizations %}
+                                <option value="{{ org.id }}">{{ org.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Номер счета</label>
+                            <input type="text" name="invoice_number" class="form-control" placeholder="Введите номер счета">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Юридическое лицо</label>
+                            <select name="internal_legal_entity" class="form-select">
+                                <option value="">Все юридические лица</option>
+                                {% for le in internal_legal_entity %}
+                                <option value="{{ le.id }}">{{ le.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {% if request.user.is_superuser %}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Менеджер</label>
+                            <select name="manager" class="form-select">
+                                <option value="">Все менеджеры</option>
+                                {% for user in managers %}
+                                <option value="{{ user.id }}">{{ user.get_full_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="reportForm" class="btn btn-primary">
+                    <i class="bi bi-file-earmark-text me-2"></i>Сформировать отчет
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Установка максимальной даты (сегодня) для поля окончания периода
+document.addEventListener('DOMContentLoaded', function() {
+    const endDateInput = document.querySelector('input[name="end_date"]');
+    const startDateInput = document.querySelector('input[name="start_date"]');
+    const reportTypeSelect = document.querySelector('select[name="report_type"]');
+    const today = new Date().toISOString().split('T')[0];
+
+    // Функция для обновления ограничений дат
+    function updateDateConstraints() {
+        const isPlanned = reportTypeSelect && reportTypeSelect.value === 'planned';
+
+        // Для поля окончания периода
+        if (endDateInput) {
+            if (isPlanned) {
+                // Для планируемых платежей снимаем ограничение максимальной даты
+                endDateInput.removeAttribute('max');
+            } else {
+                // Для остальных случаев ставим ограничение на сегодня
+                endDateInput.max = today;
+            }
+        }
+
+        // Для поля начала периода (остается как было)
+        if (startDateInput) {
+            if (isPlanned) {
+                startDateInput.min = today;
+            } else {
+                startDateInput.removeAttribute('min');
+            }
+        }
+    }
+
+    // Инициализация при загрузке
+    updateDateConstraints();
+
+    // Обновление при изменении типа отчета
+    if (reportTypeSelect) {
+        reportTypeSelect.addEventListener('change', updateDateConstraints);
+    }
+});
+</script>
 </div>
 
 <script>
@@ -477,12 +644,13 @@ class InvoicesListManager {
 
     setupFilters() {
         const form = document.getElementById('searchForm');
-        const inputs = form.querySelectorAll('input, select');
+        const legalEntitySelect = document.getElementById('legalEntitySelect');
 
         // Auto-submit on select change
-        const legalEntitySelect = form.querySelector('select[name="legal_entity"]');
         if (legalEntitySelect) {
             legalEntitySelect.addEventListener('change', () => {
+                // Remove page parameter when changing filters
+                this.removePageParam();
                 form.submit();
             });
         }
@@ -494,9 +662,23 @@ class InvoicesListManager {
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => {
+                    this.removePageParam();
                     form.submit();
-                }, 500);
+                }, 800);
             });
+        }
+    }
+
+    removePageParam() {
+        // Remove page parameter when filtering to start from page 1
+        const url = new URL(window.location);
+        url.searchParams.delete('page');
+        window.history.replaceState({}, '', url);
+
+        // Also remove page input from form if exists
+        const pageInput = document.querySelector('input[name="page"]');
+        if (pageInput) {
+            pageInput.remove();
         }
     }
 }
@@ -506,26 +688,34 @@ function sortTable(field) {
     const sortField = document.getElementById('sortField');
     const sortDirection = document.getElementById('sortDirection');
 
+    // Get current sort values
+    const currentSort = sortField.value;
+    const currentDirection = sortDirection.value;
+
     // If already sorting by this field, toggle direction
-    if (sortField.value === field) {
-        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    if (currentSort === field) {
+        sortDirection.value = currentDirection === 'asc' ? 'desc' : 'asc';
     } else {
         // New field, default to ascending
         sortField.value = field;
         sortDirection.value = 'asc';
     }
 
-    form.submit();
-}
+    // Keep search and filter parameters
+    const searchInput = form.querySelector('input[name="search"]');
+    const legalEntitySelect = form.querySelector('select[name="internal_legal_entity"]');
 
-function updateQueryString(key, value) {
-    const url = new URL(window.location);
-    if (value) {
-        url.searchParams.set(key, value);
-    } else {
-        url.searchParams.delete(key);
+    if (!searchInput.value.trim()) {
+        const searchParam = document.querySelector('input[name="search"]');
+        if (searchParam) searchParam.remove();
     }
-    return url.toString();
+
+    if (!legalEntitySelect.value) {
+        const legalEntityParam = document.querySelector('select[name="internal_legal_entity"]');
+        if (legalEntityParam) legalEntityParam.disabled = true;
+    }
+
+    form.submit();
 }
 
 // Initialize when DOM is loaded
@@ -542,6 +732,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = true;
             }
         });
+    }
+
+    // Restore form values from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchValue = urlParams.get('search');
+    const legalEntityValue = urlParams.get('internal_legal_entity');
+
+    if (searchValue) {
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput) searchInput.value = searchValue;
+    }
+
+    if (legalEntityValue) {
+        const legalEntitySelect = document.querySelector('select[name="internal_legal_entity"]');
+        if (legalEntitySelect) {
+            legalEntitySelect.value = legalEntityValue;
+        }
     }
 });
 </script>

@@ -12,7 +12,7 @@ def get_user_role_from_request(request):
         return 'admin'
 
     group_names = user.groups.values_list('name', flat=True)
-    role_priority = ['admin', 'director', 'production', 'logistic', 'manager']
+    role_priority = ['admin', 'director', 'production', 'logistic', 'manager', 'supply', 'lawyer', 'accountant']
 
     for role in role_priority:
         if role in group_names:
@@ -101,7 +101,7 @@ def can_edit_order_detail(user, user_role, order):
 
 
 def can_add_invoice(user, user_role):
-    if user_role in ['admin', 'director', 'manager']:
+    if user_role in ['admin', 'director', 'user']:
         return True
     else:
         return False

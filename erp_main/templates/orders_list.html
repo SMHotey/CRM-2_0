@@ -105,9 +105,13 @@
 
                         <!-- Organization -->
                         <td class="organization-cell">
-                            <a href="{% url 'organization_detail' order.invoice.organization.id %}" class="organization-link">
-                                {{ order.invoice.organization }}
-                            </a>
+                            {% if user.is_superuser or order.invoice.organization.user == user %}
+                                <a href="{% url 'organization_detail' order.invoice.organization.id %}" class="organization-link">
+                                    {{ order.invoice.organization }}
+                                </a>
+                            {% else %}
+                                ---
+                            {% endif %}
                         </td>
 
                         <!-- Invoice -->

@@ -4,9 +4,11 @@ from .views import (
     OrderUploadView, orders_list, order_detail, update_order_item_status,
     invoice_add, invoice_detail, invoices_list,
 
-    save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport, create_contract
+    save_shipment, shipment_detail, delete_shipment, calendar_view, debug_users, passport, create_contract,
+    add_payment
 )
 from .views.auth import get_csrf_token_view, refresh_csrf
+from .views.invoices import edit_payment, delete_payment, update_payment_status, payment_report
 from .views.organizations import OrganizationCreateView, OrganizationUpdateView, OrganizationListView, \
     TakeOverOrganizationView, OrganizationTypeSelectView, OrganizationDetailView, OrganizationDeleteView
 from .views import certificates
@@ -35,6 +37,12 @@ urlpatterns = [
     path('invoices/add/', invoice_add, name='invoice_add'),
     path('invoices/<int:pk>/', invoice_detail, name='invoice_detail'),
     path('invoices/', invoices_list, name='invoices_list'),
+    #Payments
+    path('invoices/<int:pk>/add-payment/', add_payment, name='add_payment'),
+    path('invoices/<int:pk>/payments/<int:payment_id>/edit/', edit_payment, name='edit_payment'),
+    path('invoices/<int:pk>/payments/<int:payment_id>/delete/', delete_payment, name='delete_payment'),
+    path('invoices/<int:pk>/payments/<int:payment_id>/update-status/', update_payment_status, name='update_payment_status'),
+    path('reports/payments/', payment_report, name='payment_report'),
 
     # Organizations
     path('organizations/', OrganizationListView.as_view(), name='organization_list'),

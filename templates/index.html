@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% load static %}
 
 {% block content %}
@@ -140,7 +141,7 @@
                 </div>
                 <div class="metric-info">
                     <h3 class="metric-title">Общая сумма</h3>
-                    <div class="metric-value">{{ total_invoices_amount }} ₽</div>
+                    <div class="metric-value">{{ total_invoices_amount|default:0|intcomma }} ₽</div>
                 </div>
             </div>
             <div class="metric-trend">
@@ -157,7 +158,7 @@
                 Текущие счета
             </h2>
             <div class="section-badge">
-                <span class="badge total-amount">Общая сумма: {{ total_invoices_amount }} руб.</span>
+                <span class="badge total-amount">Общая сумма: {{ total_invoices_amount|default:0|intcomma }} руб.</span>
             </div>
         </div>
 
@@ -188,7 +189,7 @@
                                 </a>
                             </td>
                             <td>{{ invoice.date|date:"d.m.Y" }}</td>
-                            <td class="amount-cell">{{ invoice.amount }} ₽</td>
+                            <td class="amount-cell">{{ invoice.amount|default:0|intcomma }} ₽</td>
                             <td>
                                 <div class="progress-container">
                                     <div class="progress-bar">
